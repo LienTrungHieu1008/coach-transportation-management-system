@@ -1,0 +1,13 @@
+# Đổi USERNAME thành tài khoản GitHub thật, có write access.
+# Sao chép thành .github/CODEOWNERS sau khi thay placeholder.
+# Không áp dụng một mình Hiếu cho tất cả file: PR của Hiếu cần reviewer khác.
+/AGENTS.md @USERNAME
+/CLAUDE.md @USERNAME
+/CONTRIBUTING.md @USERNAME
+/SETUP_CI.md @USERNAME
+/compose*.yaml @USERNAME
+/.gitattributes @USERNAME
+/.gitignore @USERNAME
+/.github/ @USERNAME
+/docs/contracts/ @USERNAME
+/src/backend/src/main/resources/db/migration/ @USERNAME

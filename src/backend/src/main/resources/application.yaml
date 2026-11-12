@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: coach-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/team11_coach}
+    username: ${SPRING_DATASOURCE_USERNAME:team11_local}
+    password: ${SPRING_DATASOURCE_PASSWORD:local_development_only}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  session:
+    timeout: 30m
+    jdbc:
+      initialize-schema: never
+  jackson:
+    time-zone: UTC
+
+server:
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:false}
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+
+management:
+  endpoints:
+    web:
+      base-path: /api
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      show-components: never

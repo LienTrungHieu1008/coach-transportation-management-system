@@ -1,0 +1,26 @@
+[
+  {
+    "file": "docs/analysis and design/PA3_Group11_SAD_v1.3_final.pdf",
+    "sha256": "2991af81172d78629dd3fb85d9466e386afb31c9b427d45eb3e3cf9171607868",
+    "pages": 34,
+    "textExtract": "docs/analysis and design/PA3_Group11_SAD_v1.3_final.extracted.md"
+  },
+  {
+    "file": "docs/requirements/Team 11 - rup_ucspec-v2_final.pdf",
+    "sha256": "01bdf50b362446b3790e43de9429647ef6dec24c431723ccdabf13428d395a43",
+    "pages": 63,
+    "textExtract": "docs/requirements/Team 11 - rup_ucspec-v2_final.extracted.md"
+  },
+  {
+    "file": "docs/management/Weekly_Report_PA3_final.pdf",
+    "sha256": "28e5f066d7b0376d037f2349678519d129ac16f8e4bb6de7b7b03b574592e93d",
+    "pages": 2,
+    "textExtract": "docs/management/Weekly_Report_PA3_final.extracted.md"
+  },
+  {
+    "file": "pa/PA4/PA4.pdf",
+    "sha256": "9f030468c6f24a2ad62bbb69707d98b9292cfdbb118e8da7d33327cb826ccde2",
+    "pages": 2,
+    "textExtract": "pa/PA4/PA4.extracted.md"
+  }
+]
