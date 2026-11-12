@@ -1,6 +1,6 @@
 # API PA4 — bản đề xuất để chốt cùng leader
 
-Ngày 12/11/2026. **Draft, chưa là contract đã duyệt và chưa có implementation.** Phạm vi P04/P05/P07 đã chốt; bản này làm rõ giao tiếp trước khi các thành viên code riêng. Sau khi duyệt, chuyển thành `openapi.yaml` với schemas/examples đầy đủ rồi các chủ module review. Không đổi security hoặc tạo endpoint trong bước đề xuất.
+Ngày 12/11/2026. **Người giao việc đã đồng ý cấu trúc bốn GET công khai.** Bản đề xuất này được giữ làm bối cảnh; chi tiết hiện tại nằm trong [OpenAPI 0.1](openapi.yaml), [quyết định và trạng thái review](pa4-api-decisions.md), [TripQueryPort](trip-query-port.md). DTO và các lựa chọn bổ sung là review candidate, chưa có implementation hoặc approval của từng chủ module. Không đổi security hoặc tạo endpoint trong bước contract.
 
 Nguồn: [UC 1.8](../requirements/Team%2011%20-%20rup_ucspec-v2_final.pdf), P04 trang 10–12, P05 trang 12–13, P07 trang 15–16; [SAD 1.3](../analysis%20and%20design/PA3_Group11_SAD_v1.3_final.pdf), phần API/DTO, ownership và contract Segment. Các lựa chọn HTTP/DTO bổ sung dưới đây là đề xuất hiện thực, không phải mọi chi tiết đã được PA3 duyệt.
 
@@ -70,7 +70,7 @@ SAD mapping UI dùng 422 cho input nghiệp vụ không hợp lệ; vì vậy đ
 
 ## Cần chốt trước khi giao code
 
-1. Leader duyệt hướng bốn GET riêng và cách tách 400/422/409/503; xác nhận cutoff đúng mốc 30 phút.
-2. Phương/Huy chốt schema seat layout, port Trip và kiểu dữ liệu thiếu; Phương xác nhận cách xử lý Trip thiếu cấu hình trong search. Migration được phân số chung, không sửa V1 session.
-3. Leader/QA duyệt polling/expiry cleanup và test boundary: cutoff, qua đêm, đoạn kề nhau, blocker hết hạn trong lúc xem, refresh lỗi phải UNKNOWN.
-4. Sau duyệt: viết OpenAPI có ví dụ request/response/error/schema và port contract; review bởi các chủ module. Sau đó mới giao các nhánh FE/BE dựa trên contract đó. Bản draft này chưa tự cấp quyền đổi schema/security hoặc triển khai nghiệp vụ.
+1. Đã đồng ý cấu trúc bốn GET riêng; không suy ra tất cả DTO/status/chi tiết đều đã được duyệt.
+2. Đã cụ thể hóa OpenAPI/schema/layout/port và cách xử lý dữ liệu thiếu để review, xem bảng lựa chọn trong `pa4-api-decisions.md`.
+3. Phương/Huy/Hoàng và QA review các lựa chọn, leader chốt phiên bản contract trước khi code; migration được phân số chung, không sửa V1 session.
+4. Task contract không tự cấp quyền đổi schema DB/security hoặc triển khai nghiệp vụ.

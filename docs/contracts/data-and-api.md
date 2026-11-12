@@ -20,15 +20,15 @@ Nguồn: bộ guardrails/handoff và tài liệu gốc trong `docs/references.md
 - Đối chiếu UC gốc cho mọi cutoff/trạng thái/nhánh lỗi; danh sách này không thay thế đặc tả.
 
 ## API mới: thống nhất trước khi hai phía code
-Đặt đặc tả API nghiệp vụ tại `docs/contracts/openapi.yaml` trước khi hai phía triển khai. Người giao việc đã chốt UC-P04/P05/P07 ngày 12/11/2026, xem `pa/PA4/SCOPE.md`. Hiện chỉ có `GET /api/health` và `GET /api/session/csrf` phục vụ bộ khung (xem `docs/development.md`), chưa có endpoint/schema nghiệp vụ; không dùng file API giả làm baseline.
+Người giao việc đã chốt UC-P04/P05/P07 và cấu trúc bốn GET công khai ngày 12/11/2026, xem `pa/PA4/SCOPE.md`. Đã có [OpenAPI 0.1](openapi.yaml), [trạng thái/lựa chọn cần review](pa4-api-decisions.md) và [TripQueryPort](trip-query-port.md) trước khi hai phía triển khai. Chi tiết DTO là review candidate, chưa phải approval đầy đủ của các chủ module. Runtime hiện chỉ có `GET /api/health` và `GET /api/session/csrf` (xem `docs/development.md`); chưa hiện thực API nghiệp vụ.
 
 Mỗi endpoint phải có: UC/BR nguồn, method/path, role/ownership, request và validation, response ví dụ, status/lỗi, side effect, tính lặp an toàn/concurrency khi cần. Quy định rõ missing/null, enum, paging, thời gian và tiền.
 
-Đề xuất JSON lỗi chung, cần chốt trước endpoint đầu tiên:
-`{"code":"SEAT_UNAVAILABLE","message":"Ghế vừa được giữ bởi người khác","fieldErrors":[],"traceId":"..."}`
-Message phục vụ hiển thị; FE xử lý theo code/status. Không trả stack trace, SQL hoặc secret.
+JSON lỗi chung cho API public trong bản OpenAPI 0.1:
+`{"code":"INVALID_SEGMENT","message":"Điểm lên phải đứng trước điểm xuống","fieldErrors":[{"field":"toStopId","message":"Chọn điểm xuống hợp lệ"}]}`
+Message phục vụ hiển thị; FE xử lý theo code/status. Chưa bắt buộc traceId vì chưa có tracing; không đổi error body security trong task này. Không trả stack trace, SQL hoặc secret.
 
-Status đề xuất: 400 input sai; 401 chưa đăng nhập; 403 thiếu quyền; 404 không tồn tại/không được tiết lộ; 409 xung đột trạng thái/ghế; 500 lỗi nội bộ. Chốt nhất quán trong OpenAPI.
+Trong OpenAPI public: 400 cấu trúc/format; 422 nghiệp vụ; 404 Trip không tồn tại; 409 P07 không thể tiếp tục; 503 không xác minh được dữ liệu; 500 lỗi nội bộ. Ba UC public không yêu cầu login; 401/403 tiếp tục áp dụng cho route bảo vệ. API ghi Booking/Payment tương lai phải có contract riêng, không dùng danh sách lỗi public này thay thế.
 
 ## Thay đổi contract
 PR ghi rõ contract cũ/mới, bên bị ảnh hưởng, migration và cập nhật FE/BE/test tương ứng. Maintainer và người phụ trách phần phụ thuộc review trước merge. Không tự đổi tên trường, enum hoặc port trong PR chức năng mà không báo.

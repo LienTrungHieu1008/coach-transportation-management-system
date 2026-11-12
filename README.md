@@ -32,4 +32,4 @@ Repo đã có bộ khung React/TypeScript/Vite/Tailwind, backend Java 21/Spring 
 - [Tài liệu gốc và Markdown trích theo trang](docs/references.md); [phạm vi PA4 theo đề](pa/PA4/SCOPE.md).
 - [Chạy local và kiểm thử](docs/development.md). Từ gốc repo: `docker compose up --build -d --wait`, mở `http://localhost:8088`.
 - Baseline đã push ở nhánh `chore/repo-guardrails`, đang review tại [PR #1](https://github.com/LienTrungHieu1008/coach-transportation-management-system/pull/1). Xem [kết quả CI và bàn giao](docs/management/baseline-publication.md); chưa merge hoặc cấu hình branch protection.
-- Trước khi code riêng, review [đề xuất API P04/P05/P07](docs/contracts/pa4-api-proposal.md); đây là draft, chưa phải OpenAPI đã duyệt.
+- Cấu trúc bốn GET đã được người giao việc đồng ý. Trước khi code riêng, review [OpenAPI 0.1](docs/contracts/openapi.yaml), [lựa chọn DTO/cần xác nhận](docs/contracts/pa4-api-decisions.md) và [port Trip](docs/contracts/trip-query-port.md); chưa có API nghiệp vụ runtime.

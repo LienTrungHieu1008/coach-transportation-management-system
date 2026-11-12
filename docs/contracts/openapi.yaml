@@ -1,0 +1,694 @@
+openapi: 3.1.0
+info:
+  title: Team 11 PA4 public journey API
+  version: 0.1.0
+  description: |
+    Four public GET endpoints for UC-P04/P05/P07. Endpoint structure approved by
+    the task owner on 2026-11-12. DTOs and implementation choices are a concrete
+    review candidate, not a claim of team review or implemented endpoints.
+    See pa4-api-proposal.md and pa4-api-decisions.md for status and source rules.
+    No Booking or hold is created by these requests. Server time is authoritative.
+    Internal ports and technical health/CSRF endpoints are outside this document.
+servers:
+  - url: /api/v1
+    description: Same-origin API; local Compose uses http://127.0.0.1:8088.
+security: []
+tags:
+  - name: Trip
+    description: Trip & Operations; owner Minh Phuong.
+  - name: Availability
+    description: Booking & Payment; owner Nhat Huy; Trip facts via published port.
+paths:
+  /stops:
+    get:
+      operationId: listStops
+      tags: [Trip]
+      summary: List served boarding/alighting Stops
+      x-use-cases: [UC-P04]
+      description: |
+        Public, no session or CSRF required. All served Stops, sorted by name
+        ascending then id ascending; no pagination in this version. An empty
+        catalogue is 200 with items empty. Do not infer Route compatibility
+        from presence of two Stops; search validates their ordered pair.
+      responses:
+        '200':
+          description: Served Stop catalogue, including an empty catalogue.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/NoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StopList'
+              examples:
+                served:
+                  externalValue: examples/stops.json
+        '503':
+          $ref: '#/components/responses/TripDataUnavailable'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /trips:
+    get:
+      operationId: searchTrips
+      tags: [Trip]
+      summary: Search Scheduled Trips for a selected Segment and boarding date
+      x-use-cases: [UC-P04]
+      x-business-rules: [BR-P04-01, BR-P04-02, BR-P04-03, BR-P04-04, BR-P04-05]
+      description: |
+        Required Stop pair must be served, distinct and ordered on at least one
+        Route. A valid pair with no matching sellable Trip returns an empty 200.
+        boardingDate is the selected boarding Stop's calendar date in
+        Asia/Ho_Chi_Minh, NOT the first Stop's date or UTC date.
+        Reject past boarding dates using authoritative server time.
+        Return only Scheduled Trips with serverTime < bookingClosesAt.
+        bookingClosesAt is first-Stop planned departure minus 30 minutes for all
+        Segments; equality is closed. Sort boardingTime ascending, tripId ascending.
+        Fare is the integer VND sum of consecutive leg fares on the Segment.
+        Never invent times, vehicle type or fare. Review-candidate decision:
+        incomplete candidate data makes the search fail 503 instead of silently
+        suppressing a matching Scheduled Trip or returning partial results.
+        No availability guarantee or seat allocation is implied.
+      parameters:
+        - $ref: '#/components/parameters/FromStopRequired'
+        - $ref: '#/components/parameters/ToStopRequired'
+        - name: boardingDate
+          in: query
+          required: true
+          description: Calendar date at selected boarding Stop in Asia/Ho_Chi_Minh.
+          schema:
+            type: string
+            format: date
+          example: '2026-11-20'
+        - name: page
+          in: query
+          description: Zero-based page index.
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 2147483647
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: Matching Trips; items may be empty, including an out-of-range page.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/NoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripSearchPage'
+              examples:
+                matching:
+                  externalValue: examples/search.json
+                empty:
+                  externalValue: examples/search-empty.json
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '422':
+          $ref: '#/components/responses/InvalidCriteria'
+        '503':
+          $ref: '#/components/responses/TripDataUnavailable'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /trips/{tripId}:
+    get:
+      operationId: getTripDetails
+      tags: [Trip]
+      summary: View current Trip details and booking eligibility
+      x-use-cases: [UC-P05]
+      x-business-rules: [BR-P05-01, BR-P05-02, BR-P05-03]
+      description: |
+        Public. fromStopId and toStopId must either both be present or both absent.
+        With neither, selectedSegment is null; the client must select a valid
+        Segment before requesting availability. No default Segment fare is invented.
+        A valid supplied pair produces selectedSegment; an invalid pair is 422.
+        A Trip not Scheduled, at/after cutoff or missing essential configured data
+        still returns verified details with bookingEligibility.allowed=false.
+        Missing optional description alone does not disable booking.
+        Essential data includes ordered Stops, planned Stop times, assigned
+        vehicle/seat layout and configured consecutive leg fares. For partial
+        configured data, return null/empty collections as specified, never guessed
+        values. An actual retrieval failure returns 503, not a partial success.
+        An invalid supplied Segment is 422 when it can be established as invalid;
+        if missing essential data prevents verification, return selectedSegment
+        null and ESSENTIAL_DATA_INCOMPLETE, rather than asserting validity.
+        All known eligibility reasons are returned in schema enum order.
+      parameters:
+        - $ref: '#/components/parameters/TripId'
+        - name: fromStopId
+          in: query
+          description: Optional only together with toStopId.
+          schema:
+            $ref: '#/components/schemas/Uuid'
+        - name: toStopId
+          in: query
+          description: Optional only together with fromStopId.
+          schema:
+            $ref: '#/components/schemas/Uuid'
+      responses:
+        '200':
+          description: Verified details, including closed or incomplete Trips.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/NoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripDetails'
+              examples:
+                selectedSegment:
+                  externalValue: examples/details.json
+                incomplete:
+                  externalValue: examples/details-incomplete.json
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '422':
+          $ref: '#/components/responses/InvalidCriteria'
+        '404':
+          $ref: '#/components/responses/TripNotFound'
+        '503':
+          $ref: '#/components/responses/TripDataUnavailable'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /trips/{tripId}/seat-availability:
+    get:
+      operationId: getSeatAvailability
+      tags: [Availability]
+      summary: Read current physical-seat availability for a selected Segment
+      x-use-cases: [UC-P07]
+      x-business-rules: [BR-P07-01, BR-P07-02, BR-P07-03, BR-P07-04]
+      description: |
+        Public, no reservation is created. Validate Trip, ordered Segment, assigned
+        layout and sales eligibility on every request. Use Trip-owned facts via
+        a published internal port, never its entities/repositories.
+        Confirmed allocations block only for Confirmed Bookings and unreleased
+        Confirmed allocations. Holds block only for Pending Bookings, unreleased
+        Hold allocations and serverTime < expiresAt. Other allocations do not block.
+        Half-open Segments [a,b) and [b,c) do not overlap; compare indices on the
+        same Trip and physical seat using from < otherTo AND otherFrom < to.
+        Return every layout seat exactly once, linked by physicalSeatId; every
+        layout ID and availability ID must match one-to-one. No FREE seats is
+        a normal 200. Missing required layout/configuration is 409; inability to
+        retrieve/verify records is 503. Never interpret unknown as FREE.
+        UNKNOWN is reserved in the enum for clients; version 0.1 returns 503 for
+        any unverified server availability rather than a mixed partial map.
+        A nullable expiresAt is a refresh hint, not a promise a seat becomes FREE.
+        When only holds block, use the earliest expiry of overlapping blockers.
+        When a Confirmed blocker exists, expiresAt is null. FREE has null expiry.
+        Client refreshes on expiry/cutoff, on foreground, and every 15 seconds
+        while visible; it must not locally change UNKNOWN/UNAVAILABLE to FREE.
+        Booking-owned expiry cleanup marks Pending Bookings Expired independently
+        of GET; queries ignore expired holds even if cleanup is delayed (SAD D6).
+        Cleanup cadence is an implementation proposal detailed in the decisions doc.
+      parameters:
+        - $ref: '#/components/parameters/TripId'
+        - $ref: '#/components/parameters/FromStopRequired'
+        - $ref: '#/components/parameters/ToStopRequired'
+      responses:
+        '200':
+          description: Verified Segment availability; never a reservation guarantee.
+          headers:
+            Cache-Control:
+              $ref: '#/components/headers/NoStore'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SeatAvailability'
+              examples:
+                mixed:
+                  externalValue: examples/availability.json
+                full:
+                  externalValue: examples/availability-full.json
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '422':
+          $ref: '#/components/responses/InvalidCriteria'
+        '404':
+          $ref: '#/components/responses/TripNotFound'
+        '409':
+          $ref: '#/components/responses/TripNotBookable'
+        '503':
+          $ref: '#/components/responses/AvailabilityUnavailable'
+        '500':
+          $ref: '#/components/responses/InternalError'
+components:
+  headers:
+    NoStore:
+      description: Do not reuse results as current journey/availability facts.
+      required: true
+      schema:
+        type: string
+        const: no-store
+  parameters:
+    TripId:
+      name: tripId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/Uuid'
+      example: '11111111-1111-4111-8111-111111111111'
+    FromStopRequired:
+      name: fromStopId
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/Uuid'
+      example: '22222222-2222-4222-8222-222222222222'
+    ToStopRequired:
+      name: toStopId
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/Uuid'
+      example: '33333333-3333-4333-8333-333333333333'
+  responses:
+    InvalidRequest:
+      description: Missing/duplicate scalar input, malformed UUID/date, invalid paging or unpaired Stops.
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/NoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            code: INVALID_REQUEST
+            message: Request parameters are invalid.
+            fieldErrors:
+              - field: fromStopId
+                message: A UUID is required.
+    InvalidCriteria:
+      description: 'Business validation: PAST_BOARDING_DATE, INVALID_SEGMENT or STOP_NOT_SERVED. Equal/reversed Stops are INVALID_SEGMENT; unknown/unserved Stops are STOP_NOT_SERVED.'
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/NoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            code: INVALID_SEGMENT
+            message: Boarding Stop must precede alighting Stop on a served Route.
+            fieldErrors:
+              - field: toStopId
+                message: Select a valid later Stop.
+    TripNotFound:
+      description: No Trip resolves for the supplied tripId.
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/NoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            code: TRIP_NOT_FOUND
+            message: Trip is unavailable.
+            fieldErrors: []
+    TripNotBookable:
+      description: 'P07 cannot proceed: TRIP_NOT_BOOKABLE (status/cutoff) or ESSENTIAL_DATA_INCOMPLETE (known missing/invalid required configuration).'
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/NoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            code: TRIP_NOT_BOOKABLE
+            message: Trip is no longer open for booking.
+            fieldErrors: []
+    TripDataUnavailable:
+      description: Cannot retrieve or verify required Trip/catalogue facts; no fabricated results.
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/NoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            code: TRIP_DATA_UNAVAILABLE
+            message: Trip information could not be verified. Please retry.
+            fieldErrors: []
+    AvailabilityUnavailable:
+      description: Allocation/layout facts cannot be retrieved or verified; availability is unknown.
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/NoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            code: AVAILABILITY_UNAVAILABLE
+            message: Seat availability is unknown. Please retry.
+            fieldErrors: []
+    InternalError:
+      description: Unexpected internal failure; no stack trace or SQL in response.
+      headers:
+        Cache-Control:
+          $ref: '#/components/headers/NoStore'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            code: INTERNAL_ERROR
+            message: The request could not be completed.
+            fieldErrors: []
+  schemas:
+    Uuid:
+      type: string
+      format: uuid
+    Instant:
+      type: string
+      format: date-time
+      pattern: 'Z$'
+      description: RFC3339 UTC timestamp ending in Z; authoritative server/DB time.
+    NullableInstant:
+      oneOf:
+        - $ref: '#/components/schemas/Instant'
+        - type: 'null'
+    MoneyVnd:
+      type: integer
+      format: int64
+      minimum: 0
+      maximum: 9007199254740991
+      description: Whole VND, bounded to JSON/JavaScript safe integers; no floating-point money.
+    NamedReference:
+      type: object
+      additionalProperties: false
+      required: [id, name]
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        name:
+          type: string
+          minLength: 1
+    StopList:
+      type: object
+      additionalProperties: false
+      required: [items, serverTime]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NamedReference'
+        serverTime:
+          $ref: '#/components/schemas/Instant'
+    TripSearchItem:
+      type: object
+      additionalProperties: false
+      required: [tripId, route, fromStop, toStop, boardingTime, alightingTime, vehicleType, fareAmountVnd, bookingClosesAt]
+      properties:
+        tripId:
+          $ref: '#/components/schemas/Uuid'
+        route:
+          $ref: '#/components/schemas/NamedReference'
+        fromStop:
+          $ref: '#/components/schemas/NamedReference'
+        toStop:
+          $ref: '#/components/schemas/NamedReference'
+        boardingTime:
+          $ref: '#/components/schemas/Instant'
+        alightingTime:
+          $ref: '#/components/schemas/Instant'
+        vehicleType:
+          type: string
+          minLength: 1
+          description: Operator-managed display label; not a new enum of price classes.
+        fareAmountVnd:
+          $ref: '#/components/schemas/MoneyVnd'
+        bookingClosesAt:
+          $ref: '#/components/schemas/Instant'
+    TripSearchPage:
+      type: object
+      additionalProperties: false
+      required: [items, page, size, totalElements, totalPages, serverTime]
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/TripSearchItem'
+        page:
+          type: integer
+          minimum: 0
+          maximum: 2147483647
+        size:
+          type: integer
+          minimum: 1
+          maximum: 100
+        totalElements:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        totalPages:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        serverTime:
+          $ref: '#/components/schemas/Instant'
+    TripStop:
+      type: object
+      additionalProperties: false
+      required: [stop, index, plannedArrivalTime, plannedDepartureTime]
+      properties:
+        stop:
+          $ref: '#/components/schemas/NamedReference'
+        index:
+          type: integer
+          minimum: 0
+          description: Zero-based Trip order, independent of clock date.
+        plannedArrivalTime:
+          $ref: '#/components/schemas/NullableInstant'
+        plannedDepartureTime:
+          $ref: '#/components/schemas/NullableInstant'
+    LegFare:
+      type: object
+      additionalProperties: false
+      required: [fromStopId, toStopId, fareAmountVnd]
+      properties:
+        fromStopId:
+          $ref: '#/components/schemas/Uuid'
+        toStopId:
+          $ref: '#/components/schemas/Uuid'
+        fareAmountVnd:
+          $ref: '#/components/schemas/MoneyVnd'
+    Vehicle:
+      type: object
+      additionalProperties: false
+      required: [id, vehicleType, seatLayoutId]
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        vehicleType:
+          type: string
+          minLength: 1
+        seatLayoutId:
+          oneOf:
+            - $ref: '#/components/schemas/Uuid'
+            - type: 'null'
+    SelectedSegment:
+      type: object
+      additionalProperties: false
+      required: [fromStopId, toStopId, boardingTime, alightingTime, fareAmountVnd]
+      properties:
+        fromStopId:
+          $ref: '#/components/schemas/Uuid'
+        toStopId:
+          $ref: '#/components/schemas/Uuid'
+        boardingTime:
+          $ref: '#/components/schemas/NullableInstant'
+        alightingTime:
+          $ref: '#/components/schemas/NullableInstant'
+        fareAmountVnd:
+          oneOf:
+            - $ref: '#/components/schemas/MoneyVnd'
+            - type: 'null'
+    BookingEligibility:
+      type: object
+      additionalProperties: false
+      required: [allowed, reasons]
+      description: |
+        allowed=true iff Trip is Scheduled, before cutoff and essential data is
+        complete. It does not prove a Segment was selected, a seat is free or a
+        reservation exists. Missing optional descriptions alone do not disable it.
+      properties:
+        allowed:
+          type: boolean
+        reasons:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            enum: [TRIP_NOT_SCHEDULED, BOOKING_CLOSED, ESSENTIAL_DATA_INCOMPLETE]
+      allOf:
+        - if:
+            properties:
+              allowed:
+                const: true
+          then:
+            properties:
+              reasons:
+                maxItems: 0
+          else:
+            properties:
+              reasons:
+                minItems: 1
+    TripDetails:
+      type: object
+      additionalProperties: false
+      required: [tripId, status, route, vehicle, stops, legFares, description, selectedSegment, bookingClosesAt, bookingEligibility, serverTime]
+      description: |
+        Configured missing fares are absent from legFares, not zero-valued rows.
+        Missing Stop records may yield a partial/empty stops list; incompleteness
+        always disables eligibility. Failure to retrieve data is instead 503.
+      properties:
+        tripId:
+          $ref: '#/components/schemas/Uuid'
+        status:
+          type: string
+          enum: [Scheduled, Departed, Completed, Cancelled]
+        route:
+          oneOf:
+            - $ref: '#/components/schemas/NamedReference'
+            - type: 'null'
+        vehicle:
+          oneOf:
+            - $ref: '#/components/schemas/Vehicle'
+            - type: 'null'
+        stops:
+          type: array
+          description: Increasing index; no guessed records or times.
+          items:
+            $ref: '#/components/schemas/TripStop'
+        legFares:
+          type: array
+          description: Consecutive configured legs, in increasing Stop order.
+          items:
+            $ref: '#/components/schemas/LegFare'
+        description:
+          type: [string, 'null']
+        selectedSegment:
+          oneOf:
+            - $ref: '#/components/schemas/SelectedSegment'
+            - type: 'null'
+        bookingClosesAt:
+          $ref: '#/components/schemas/NullableInstant'
+        bookingEligibility:
+          $ref: '#/components/schemas/BookingEligibility'
+        serverTime:
+          $ref: '#/components/schemas/Instant'
+    LayoutSeat:
+      type: object
+      additionalProperties: false
+      required: [physicalSeatId, label, deck, row, column]
+      properties:
+        physicalSeatId:
+          $ref: '#/components/schemas/Uuid'
+        label:
+          type: string
+          minLength: 1
+        deck:
+          type: integer
+          minimum: 0
+          description: Proposed zero-based deck index; lowest deck is 0.
+        row:
+          type: integer
+          minimum: 0
+          description: Zero-based row; increasing from vehicle front to rear.
+        column:
+          type: integer
+          minimum: 0
+          description: Zero-based column; left to right looking toward vehicle front; gaps represent aisles.
+    SeatLayout:
+      type: object
+      additionalProperties: false
+      required: [id, seats]
+      properties:
+        id:
+          $ref: '#/components/schemas/Uuid'
+        seats:
+          type: array
+          minItems: 1
+          description: Stable order by deck,row,column,physicalSeatId; unique positions and IDs.
+          items:
+            $ref: '#/components/schemas/LayoutSeat'
+    SeatState:
+      type: object
+      additionalProperties: false
+      required: [physicalSeatId, status, expiresAt]
+      properties:
+        physicalSeatId:
+          $ref: '#/components/schemas/Uuid'
+        status:
+          type: string
+          enum: [FREE, UNAVAILABLE, UNKNOWN]
+        expiresAt:
+          $ref: '#/components/schemas/NullableInstant'
+      allOf:
+        - if:
+            properties:
+              status:
+                enum: [FREE, UNKNOWN]
+          then:
+            properties:
+              expiresAt:
+                type: 'null'
+    SeatAvailability:
+      type: object
+      additionalProperties: false
+      required: [tripId, fromStopId, toStopId, serverTime, bookingClosesAt, layout, seats]
+      properties:
+        tripId:
+          $ref: '#/components/schemas/Uuid'
+        fromStopId:
+          $ref: '#/components/schemas/Uuid'
+        toStopId:
+          $ref: '#/components/schemas/Uuid'
+        serverTime:
+          $ref: '#/components/schemas/Instant'
+        bookingClosesAt:
+          $ref: '#/components/schemas/Instant'
+        layout:
+          $ref: '#/components/schemas/SeatLayout'
+        seats:
+          type: array
+          minItems: 1
+          description: One-to-one with layout.seats in the same order; no Booking/customer data.
+          items:
+            $ref: '#/components/schemas/SeatState'
+    ApiError:
+      type: object
+      additionalProperties: false
+      required: [code, message, fieldErrors]
+      properties:
+        code:
+          type: string
+          enum: [INVALID_REQUEST, PAST_BOARDING_DATE, INVALID_SEGMENT, STOP_NOT_SERVED, TRIP_NOT_FOUND, TRIP_NOT_BOOKABLE, ESSENTIAL_DATA_INCOMPLETE, TRIP_DATA_UNAVAILABLE, AVAILABILITY_UNAVAILABLE, INTERNAL_ERROR]
+        message:
+          type: string
+          minLength: 1
+          description: Human-readable; FE uses code/status for branching. No SQL/secrets/stack trace.
+        fieldErrors:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [field, message]
+            properties:
+              field:
+                type: string
+                minLength: 1
+              message:
+                type: string
+                minLength: 1

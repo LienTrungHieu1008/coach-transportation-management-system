@@ -10,4 +10,4 @@ Người dùng đã giao hoàn thiện baseline sau khi xác nhận bước comm
 
 Chưa merge, deploy, đổi repository settings, bật CODEOWNERS hoặc branch protection; chưa có approval độc lập của thành viên. Cần một thành viên khác review và leader xử lý merge trước khi nhóm tạo branch từ main mới. Nhánh baseline đã có thể fetch để đọc/chạy thử.
 
-Bản [đề xuất API](../contracts/pa4-api-proposal.md) đang chờ trao đổi/chốt cùng người dùng; không xem là contract đã duyệt hay API đã triển khai. Commit tài liệu sau baseline không thay source/build/CI, nhưng CI của mỗi commit mới vẫn cần được kiểm tra riêng.
+Cấu trúc bốn GET trong [đề xuất API](../contracts/pa4-api-proposal.md) đã được người dùng đồng ý; đã cụ thể hóa thành [OpenAPI 0.1](../contracts/openapi.yaml) để review trường dữ liệu/port, chưa có implementation. Commit tài liệu sau baseline không thay source/build/CI, nhưng CI của mỗi commit mới vẫn cần được kiểm tra riêng.
