@@ -4,7 +4,7 @@
 
 Bộ 10 file `PA4_Repo_Guardrails` đã được tích hợp; sau đó đã thêm bộ khung FE/BE, test nền tảng, Maven Wrapper, npm lockfile và Compose theo yêu cầu người dùng. [Báo cáo đối chiếu ban đầu](docs/management/pa4-guardrails-audit.md) giữ trạng thái repo rỗng trước khi dựng; xem [hướng dẫn hiện tại](docs/development.md) và báo cáo kiểm chứng bộ khung để biết kết quả thực tế.
 
-Workflow `.github/workflows/ci.yml` là file cấu hình **local**, chưa push lên GitHub và chưa có Actions run/required gate/branch protection được xác minh. Khi workflow hiện diện trên GitHub và Actions được cho phép, các trigger mới có thể khởi chạy; branch protection là settings riêng, không tự được bật bởi file YAML. Không xem lint workflow/YAML thành công là build/test ứng dụng thành công. Không dùng scripts giả, `--if-present`, `continue-on-error`, path filters hay điều kiện bỏ job khi thiếu source để đổi kết quả thành xanh.
+Workflow `.github/workflows/ci.yml` đã push cùng baseline tại PR #1; frontend/backend/gate đã thành công trên GitHub cho commit `efa1d0f`. Xem [bằng chứng và trạng thái bàn giao](docs/management/baseline-publication.md). Branch protection/required check là settings riêng, chưa cấu hình trong phiên. Không xem lint workflow/YAML thành công là build/test ứng dụng thành công. Không dùng scripts giả, `--if-present`, `continue-on-error`, path filters hay điều kiện bỏ job khi thiếu source để đổi kết quả thành xanh.
 
 Source nằm tại `src/frontend/` và `src/backend/`, giữ bố cục `src/` của repo. Nếu đổi vị trí, đồng bộ workflow, AGENTS, contract kiến trúc và CODEOWNERS.example trong cùng PR.
 
@@ -54,11 +54,11 @@ Set-Location src/backend
 .\mvnw.cmd -B -ntp verify -DfailIfNoTests=true
 ```
 
-Backend cần PostgreSQL test riêng và cấu hình tương ứng như workflow (`SPRING_DATASOURCE_*`), không trỏ vào DB thật. `ci_only_password` chỉ dùng cho service tạm do workflow tạo. Linux/macOS dùng `npm` và `./mvnw`; kiểm tra Node theo `.nvmrc`, Java 21 và PostgreSQL 16. Nếu host chưa có JDK/DB, dùng `docker compose -f compose.test.yaml run --rm backend-test` như [hướng dẫn phát triển](docs/development.md). Kết quả local và phần chưa kiểm chứng phải báo riêng; chưa có kết quả GitHub Actions.
+Backend cần PostgreSQL test riêng và cấu hình tương ứng như workflow (`SPRING_DATASOURCE_*`), không trỏ vào DB thật. `ci_only_password` chỉ dùng cho service tạm do workflow tạo. Linux/macOS dùng `npm` và `./mvnw`; kiểm tra Node theo `.nvmrc`, Java 21 và PostgreSQL 16. Nếu host chưa có JDK/DB, dùng `docker compose -f compose.test.yaml run --rm backend-test` như [hướng dẫn phát triển](docs/development.md). Kết quả local và GitHub phải gắn đúng commit/run, không suy ra kết quả của commit mới từ run cũ.
 
 ## Bật bảo vệ main sau khi được giao thao tác remote
 
-Chưa push, mở PR, đổi settings hoặc xác minh quyền/gói GitHub trong lần tích hợp này. Khi được giao:
+Đã push và mở draft PR #1; chưa merge, đổi settings hoặc xác minh tính năng bảo vệ theo gói GitHub. Các bước settings bên dưới chỉ làm khi được giao:
 
 1. Push nhánh và mở PR vào `main`; kiểm tra log từng job. Hoàn thiện source/build/test thật để quality jobs thành công, không nới gate để merge bộ khung rỗng.
 2. Cấu hình branch protection/ruleset cho `main`: bắt PR, ít nhất một người khác approval, giải quyết conversations, loại approval cũ khi đổi code và yêu cầu nhánh cập nhật. Đặt required check đúng tên `team11-ci-gate`; kiểm tra tính năng thực sự được enforce theo quyền/gói repo. Xem [GitHub protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches).

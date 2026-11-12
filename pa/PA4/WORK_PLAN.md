@@ -32,7 +32,7 @@ Mỗi chủ UC cung cấp nhánh chính/nhánh lỗi và ca kiểm thử cho ph�
 - P07 chỉ đọc, không tạo Booking/hold; xem ghế trống không bảo đảm giữ được ghế. Chưa có UC ghi: tạo fixture test/demo rõ ràng, không giả là đã thực hiện đặt/thanh toán.
 - Migration nghiệp vụ thêm sau V1 session hiện có; không sửa V1 đã áp dụng. Dữ liệu demo/test tách dữ liệu thật, có cách khởi tạo lại.
 - Mỗi task/PR ghi UC, file/module, contract/migration ảnh hưởng, tiêu chí nghiệm thu và lệnh kiểm tra. Tác giả sửa lỗi phần mình; reviewer là người khác.
-- Bộ khung hiện còn local chưa commit/push. Leader cần đưa baseline đã review lên nhánh chia sẻ trước khi mọi người tách branch; việc này chưa được thực hiện trong phiên. Khi được phép push, kiểm chứng GitHub Actions riêng.
+- Baseline đã commit/push lên `chore/repo-guardrails`, draft PR #1 có CI thành công cho commit `efa1d0f`; xem [bàn giao](../../docs/management/baseline-publication.md). Chưa merge main hoặc có approval độc lập. Nhóm review baseline và chốt API trước khi tách nhánh nghiệp vụ; sau merge lấy main mới nhất làm gốc.
 
 ## Hoàn thành một task khi nào?
 

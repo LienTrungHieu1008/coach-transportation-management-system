@@ -2,7 +2,7 @@
 
 ## Phạm vi
 
-Thêm tài liệu tham khảo gốc và dựng nền tảng ứng dụng theo SAD, giữ thay đổi guardrails trước đó. Chưa hiện thực UC nghiệp vụ, chưa hoàn thành PA4 và chưa push/merge. Kế hoạch/phạm vi: [foundation plan](../superpowers/plans/2026-11-12-foundation.md), [PA4](../../pa/PA4/SCOPE.md).
+Thêm tài liệu tham khảo gốc và dựng nền tảng ứng dụng theo SAD, giữ thay đổi guardrails trước đó. Chưa hiện thực UC nghiệp vụ, chưa hoàn thành PA4. Baseline đã push theo yêu cầu tiếp theo của người dùng, chưa merge; xem [bàn giao GitHub](../management/baseline-publication.md). Kế hoạch/phạm vi: [foundation plan](../superpowers/plans/2026-11-12-foundation.md), [PA4](../../pa/PA4/SCOPE.md).
 
 ## Môi trường và nguồn
 
@@ -32,7 +32,7 @@ Thêm tài liệu tham khảo gốc và dựng nền tảng ứng dụng theo SA
 | Docker image và HTTP toàn stack | `docker compose up --build -d --wait --wait-timeout 180` hoàn tất; DB/backend healthy, web phục vụ tại `http://127.0.0.1:8088`. HTTP smoke qua Nginx: HTML/JS 200, health đúng `{"status":"UP"}`, CSRF bootstrap có cookie HttpOnly/SameSite=Lax và no-store; GET bảo vệ 401, POST thiếu/sai CSRF 403, POST có cookie/token hợp lệ nhưng chưa đăng nhập vẫn 401. |
 | Chrome toàn stack | Desktop 1440 px và mobile 390×844 đều hiển thị “Kết nối sẵn sàng”; innerWidth/scrollWidth tương ứng 1440/1440 và 390/390. Đã xem ảnh mobile; ảnh/log kiểm tra nằm trong `tmp/foundation/` bị gitignore. |
 | Dọn môi trường test | `docker compose -f compose.test.yaml down` exit 0; dừng/xóa container và network test, giữ cache Maven. Stack local cổng 8088 vẫn chạy để xem thử. |
-| GitHub Actions/required gate/protection | Chưa chạy hoặc cấu hình trên GitHub; chỉ có workflow local. |
+| GitHub Actions/required gate/protection | Baseline `efa1d0f`: frontend-quality/backend-quality/team11-ci-gate đều success trên [run 43254959247](https://github.com/LienTrungHieu1008/coach-transportation-management-system/actions/runs/43254959247). Chưa cấu hình required checks/branch protection hoặc thử chặn merge. |
 
 ## Lỗi phát hiện và xử lý
 
