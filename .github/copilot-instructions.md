@@ -1,0 +1,1 @@
+Read and follow the repository root AGENTS.md, CONTRIBUTING.md, and docs/contracts/ before changing code. Keep changes within the assigned task. Report actual validation results. Do not duplicate or override the shared contracts here.

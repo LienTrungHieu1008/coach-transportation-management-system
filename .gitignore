@@ -1,0 +1,22 @@
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.log
+
+# Build output and dependencies
+**/node_modules/
+**/dist/
+**/target/
+**/coverage/
+**/*.tsbuildinfo
+**/test-results/
+**/playwright-report/
+
+# Editor/OS and temporary output
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+tmp/

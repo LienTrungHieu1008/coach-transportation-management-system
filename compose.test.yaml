@@ -1,0 +1,37 @@
+# Separate project and tmpfs database; no dependency on the development volume.
+name: team11-coach-test
+
+services:
+  db-test:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: team11_test
+      POSTGRES_USER: team11_test
+      POSTGRES_PASSWORD: ci_only_password
+      TZ: UTC
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: [CMD, pg_isready, -U, team11_test, -d, team11_test]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+
+  backend-test:
+    image: maven:3.9-eclipse-temurin-21
+    working_dir: /workspace
+    volumes:
+      - ./src/backend:/workspace
+      - maven-test-cache:/root/.m2
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-test:5432/team11_test
+      SPRING_DATASOURCE_USERNAME: team11_test
+      SPRING_DATASOURCE_PASSWORD: ci_only_password
+      TZ: UTC
+    depends_on:
+      db-test:
+        condition: service_healthy
+    command: [sh, ./mvnw, -B, -ntp, clean, verify, '-DfailIfNoTests=true']
+
+volumes:
+  maven-test-cache:

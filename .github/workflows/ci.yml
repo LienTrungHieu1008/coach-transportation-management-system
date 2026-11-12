@@ -1,0 +1,119 @@
+name: Team11 CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: team11-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: frontend-quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: src/frontend
+    steps:
+      # Full commit SHAs resolved from the official actions' v6 tags.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Require real frontend build inputs
+        working-directory: .
+        run: |
+          missing=0
+          for file in src/frontend/package.json src/frontend/package-lock.json src/frontend/.nvmrc; do
+            if [[ ! -s "$file" ]]; then
+              printf '::error file=%s::Required input is missing or empty. See SETUP_CI.md\n' "$file"
+              missing=1
+            fi
+          done
+          exit "$missing"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: src/frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: src/frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  backend:
+    name: backend-quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: src/backend
+    services:
+      postgres:
+        # Same PostgreSQL major version as compose.yaml and compose.test.yaml.
+        image: postgres:16
+        env:
+          POSTGRES_DB: team11_test
+          POSTGRES_USER: team11_test
+          POSTGRES_PASSWORD: ci_only_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U team11_test -d team11_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/team11_test
+      SPRING_DATASOURCE_USERNAME: team11_test
+      SPRING_DATASOURCE_PASSWORD: ci_only_password
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Require real backend build inputs
+        working-directory: .
+        run: |
+          missing=0
+          for file in src/backend/pom.xml src/backend/mvnw src/backend/mvnw.cmd src/backend/.mvn/wrapper/maven-wrapper.properties; do
+            if [[ ! -s "$file" ]]; then
+              printf '::error file=%s::Required input is missing or empty. See SETUP_CI.md\n' "$file"
+              missing=1
+            fi
+          done
+          exit "$missing"
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: src/backend/pom.xml
+      - run: chmod +x mvnw
+      - run: ./mvnw -B -ntp verify -DfailIfNoTests=true
+
+  gate:
+    name: team11-ci-gate
+    if: always()
+    needs: [frontend, backend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require both jobs to succeed
+        env:
+          FE_RESULT: ${{ needs.frontend.result }}
+          BE_RESULT: ${{ needs.backend.result }}
+        run: |
+          test "$FE_RESULT" = success
+          test "$BE_RESULT" = success
