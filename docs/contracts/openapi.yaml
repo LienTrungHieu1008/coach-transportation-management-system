@@ -4,8 +4,9 @@ info:
   version: 0.1.0
   description: |
     Four public GET endpoints for UC-P04/P05/P07. Endpoint structure approved by
-    the task owner on 2026-11-12. DTOs and implementation choices are a concrete
-    review candidate, not a claim of team review or implemented endpoints.
+    the task owner on 2026-11-12; contract 0.1 and implementation choices approved
+    by team lead Trung Hieu in C1 on 2026-11-14. This does not claim individual
+    member approval, implemented endpoints or completed runtime verification.
     See pa4-api-proposal.md and pa4-api-decisions.md for status and source rules.
     No Booking or hold is created by these requests. Server time is authoritative.
     Internal ports and technical health/CSRF endpoints are outside this document.
@@ -64,7 +65,7 @@ paths:
         bookingClosesAt is first-Stop planned departure minus 30 minutes for all
         Segments; equality is closed. Sort boardingTime ascending, tripId ascending.
         Fare is the integer VND sum of consecutive leg fares on the Segment.
-        Never invent times, vehicle type or fare. Review-candidate decision:
+        Never invent times, vehicle type or fare. C1 decision:
         incomplete candidate data makes the search fail 503 instead of silently
         suppressing a matching Scheduled Trip or returning partial results.
         No availability guarantee or seat allocation is implied.
@@ -601,7 +602,7 @@ components:
         deck:
           type: integer
           minimum: 0
-          description: Proposed zero-based deck index; lowest deck is 0.
+          description: Zero-based deck index agreed in C1; lowest deck is 0.
         row:
           type: integer
           minimum: 0

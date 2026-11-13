@@ -20,7 +20,7 @@ Nguồn: bộ guardrails/handoff và tài liệu gốc trong `docs/references.md
 - Đối chiếu UC gốc cho mọi cutoff/trạng thái/nhánh lỗi; danh sách này không thay thế đặc tả.
 
 ## API mới: thống nhất trước khi hai phía code
-Người giao việc đã chốt UC-P04/P05/P07 và cấu trúc bốn GET công khai ngày 12/11/2026, xem `pa/PA4/SCOPE.md`. Đã có [OpenAPI 0.1](openapi.yaml), [trạng thái/lựa chọn cần review](pa4-api-decisions.md) và [TripQueryPort](trip-query-port.md) trước khi hai phía triển khai. Chi tiết DTO là review candidate, chưa phải approval đầy đủ của các chủ module. Runtime hiện chỉ có `GET /api/health` và `GET /api/session/csrf` (xem `docs/development.md`); chưa hiện thực API nghiệp vụ.
+Người giao việc đã chốt UC-P04/P05/P07 và cấu trúc bốn GET công khai ngày 12/11/2026; ngày 14/11 leader duyệt toàn bộ [C1](../../pa/PA4/C1_DECISIONS.md) để giao việc. Dùng [OpenAPI 0.1](openapi.yaml), [quyết định API](pa4-api-decisions.md) và [TripQueryPort](trip-query-port.md) làm contract triển khai, không tự đổi DTO giữa các nhánh. Chưa ghi approval của các chủ module khi chưa có phản hồi. Runtime hiện chỉ có `GET /api/health` và `GET /api/session/csrf` (xem `docs/development.md`); chưa hiện thực API nghiệp vụ.
 
 Mỗi endpoint phải có: UC/BR nguồn, method/path, role/ownership, request và validation, response ví dụ, status/lỗi, side effect, tính lặp an toàn/concurrency khi cần. Quy định rõ missing/null, enum, paging, thời gian và tiền.
 
