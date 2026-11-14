@@ -21,7 +21,7 @@ Cập nhật 14/11/2026. Đọc phần 1–3 để bắt đầu; dùng các ph�
 
 Task chưa nhận hoặc chưa làm xong phải ghi đúng trạng thái; đừng dùng tỷ lệ hoàn thành tài liệu PA3 để báo code PA4 đã chạy.
 
-Mục **Phối hợp làm việc** trong TASKS quy định owner file, dữ liệu bàn giao và lúc nào cần chờ nhau. Review không có nghĩa cùng viết một file; khi có bug trả về tác giả module. `V1/V2/V3/V4` là version migration SQL của database, khác mã task I1/P1/H1 và mã UC; TASKS giải thích cụ thể từng file. C2 ghép security/error chung theo từng PR endpoint, không đợi tới ngày tích hợp cuối.
+Mục **Phối hợp làm việc** trong TASKS quy định owner file, dữ liệu bàn giao và lúc nào cần chờ nhau. Xem thêm [hướng dẫn phối hợp thực hành](team-coordination.md) để biết mình bắt đầu từ đâu, liên hệ ai khi vướng và dùng mẫu tin nhắn bàn giao. Review không có nghĩa cùng viết một file; khi có bug trả về tác giả module. `V1/V2/V3/V4` là version migration SQL của database, khác mã task I1/P1/H1 và mã UC; TASKS giải thích cụ thể từng file. C2 ghép security/error chung theo từng PR endpoint, không đợi tới ngày tích hợp cuối.
 
 ## 2. Hiểu nhanh Git và PR
 

@@ -4,6 +4,8 @@
 
 Leader đã duyệt [C1](../../pa/PA4/C1_DECISIONS.md). [TASKS](../../pa/PA4/TASKS.md) có owner, reviewer, phối hợp và dependency; [handbook](../team-handbook.md) có quy trình nhận việc/Git/PR/review. Chưa ghi thành viên đã nhận việc khi chưa có phản hồi. Việc công bố tài liệu qua nhánh/PR không thay approval implementation hoặc xác nhận TA.
 
+[Hướng dẫn phối hợp thực hành](../team-coordination.md) có bảng từng người cần làm/liên hệ/bàn giao, mẫu báo bị chặn và tin nhắn leader có thể gửi nhóm. Leader tự cập nhật trạng thái/mốc rồi gửi; agent chưa gửi nội dung cho thành viên.
+
 ## I1 Account
 
 Phương án: schema `identity_account`, PK `account_id UUID`; email unique không phân biệt casing; role theo SAD; ACTIVE/DISABLED; không default role/account/credential. SQL V2, fixture test riêng, test PostgreSQL và [contract bàn giao](../contracts/identity-account.md). Kết quả xác minh cuối ở [báo cáo I1](../test/i1-account-verification.md); chỉ đánh dấu nghiệm thu sau khi có review của Hoàng và merge.

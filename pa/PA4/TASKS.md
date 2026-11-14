@@ -29,6 +29,17 @@ Mọi người có thể bắt đầu task theo C1. P1/H1 có thể chuẩn bị
 
 ## Phối hợp làm việc — ai bàn giao cho ai?
 
+**Đọc trước khi bắt đầu:** [hướng dẫn phối hợp thực hành](../../docs/team-coordination.md) có việc bắt đầu của từng người, thứ tự ghép, tìm ai khi vướng và mẫu tin nhắn nhận việc/bàn giao/bị chặn. Phần dưới là bảng ownership và đầu ra chi tiết để đối chiếu.
+
+Mỗi người thực hiện cùng một nhịp:
+
+1. **Nhận task:** báo Hiếu ID task, nhánh, mốc dự kiến và dependency đang thiếu.
+2. **Làm đúng phần mình:** trao đổi trực tiếp với người cung cấp/nhận dữ liệu; chuẩn bị phần độc lập khi đang chờ, không sửa file của họ để né dependency.
+3. **Bàn giao có thể thử lại:** PR/commit + cách chạy/seed + input/expected + tests và phần còn thiếu. Người nhận thử và phản hồi, không chỉ nhắn “đã thấy”.
+4. **Review và tích hợp:** tác giả sửa góp ý, reviewer rà lại, Hiếu merge theo dependency khi checks đạt; QA thực thi/retest trên build được ghi rõ.
+
+Hiếu nhận thông tin điều phối, còn **lỗi module trả đúng tác giả**. Không đẩy mọi câu hỏi/lỗi cho leader hoặc QA; bảng tìm người xử lý ở hướng dẫn phối hợp giúp các bên làm trực tiếp.
+
 ### Một phần có một người sở hữu
 
 Reviewer đọc, góp ý và kiểm tra; **review không có nghĩa hai người cùng code một phần**. Không sửa file/nhánh của người khác nếu chưa thống nhất. Nếu cần sửa gấp, ghi rõ ai làm file nào trước khi bắt đầu.
@@ -141,4 +152,4 @@ Phạm vi: `docs/test/`, bản SAD PA4 riêng trong `docs/analysis and design/`,
 - PR ghi ID task, UC/BR, cách chạy, dữ liệu demo, nhánh lỗi và kết quả kiểm tra. Backend dùng verify + PostgreSQL test riêng; FE lint/typecheck/test/build theo [AGENTS](../../AGENTS.md). Chưa chạy ghi rõ chưa chạy.
 - Có review của người khác, kiểm tra đạt và đáp ứng đầu ra mới đánh dấu xong. Agent review không thay approval của thành viên. Task code phải kèm tests/tài liệu phần mình; QA không nhận trách nhiệm sửa mọi module.
 
-**Nhận việc ngay:** Trung Hiếu làm I1; Phương làm P1 và ưu tiên bàn giao P3; Huy bắt đầu logic/tests H1, chờ V2/V3 để ghép schema; Hoàng làm F1/F2 và review I1; Đức Hiếu làm Q1. Mỗi người gửi lại ID task nhận, nhánh dự kiến và vướng mắc nếu có. Không cần chờ QA/SAD hoàn tất mới làm code.
+**Nhận việc ngay:** Trung Hiếu theo dõi review I1 đã có code/test và chuẩn bị C2 theo từng endpoint; Phương làm P1 và ưu tiên bàn giao P3; Huy bắt đầu logic/tests H1, chờ V2/V3 trên main để ghép schema; Hoàng review I1 và làm F1/F2; Đức Hiếu làm Q1. Kiểm tra trạng thái PR I1 hiện tại trước khi báo còn chờ hay đã merge; không giao lại phần đã làm. Mỗi người gửi ID task nhận, nhánh dự kiến và vướng mắc. Không cần chờ QA/SAD hoàn tất mới làm code.
