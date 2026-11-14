@@ -27,6 +27,10 @@ Quyết định giao việc: [C1_DECISIONS.md](C1_DECISIONS.md). Dùng [OpenAPI 
 
 Mọi người có thể bắt đầu task theo C1. P1/H1 có thể chuẩn bị song song nhưng migration được merge/áp dụng theo dependency bên dưới. Mock/JSON examples phục vụ phát triển phải được phân biệt với API/dữ liệu demo thật. Nếu có mâu thuẫn SAD/UC hoặc vướng dependency, báo leader trước khi đổi contract.
 
+## Deadline nội bộ
+
+Theo [lịch đã chốt](../../docs/team-coordination.md#6-deadline-nội-bộ-đã-chốt): **16/11** bàn giao schema/port, logic ghế/tests, prototype và bản đầu test cases; **18/11** backend/API sẵn sàng; **19/11** flow FE–BE chạy xuyên suốt; **20/11 trước 12h** có kết quả test và hồ sơ, **trước 20h** chốt sửa lỗi/retest/demo/gói bài; **21/11** tôi (Liên Trung Hiếu) kiểm tra và nộp theo giờ Moodle. Tất cả mốc thuộc năm 2026, giờ Việt Nam. Không giao lại mốc 15/11 đã được leader chốt riêng.
+
 ## Phối hợp làm việc — ai bàn giao cho ai?
 
 **Đọc trước khi bắt đầu:** [hướng dẫn phối hợp thực hành](../../docs/team-coordination.md) có việc bắt đầu của từng người, thứ tự ghép, tìm ai khi vướng và mẫu tin nhắn nhận việc/bàn giao/bị chặn. Phần dưới là bảng ownership và đầu ra chi tiết để đối chiếu.
@@ -84,10 +88,10 @@ Phạm vi code: `src/backend/src/{main,test}/java/vn/edu/team11/coach/trip/`, mi
 
 | ID | Task / mốc mục tiêu | Phụ thuộc | Đầu ra để nghiệm thu |
 |---|---|---|---|
-| P1 | Schema V3 và dữ liệu Trip — 14–15/11 | C1; merge/apply sau I1/V2 | `V3__trip_read_model.sql` theo SAD; giữ manifest UUID cho cả nhóm, Route A–B–C, sáu ghế, leg fare 100k/150k, chuyến ngày/qua đêm theo C1. Seed/reset tách schema và chỉ dùng local/test. PostgreSQL mới chạy V1→V2→V3 được. |
-| P3 | Cung cấp TripQueryPort — ưu tiên 15/11 | P1; DTO/interface có thể bàn giao sớm | Facts về Trip, Stop indices, cutoff và layout theo contract; test invalid Segment, đúng cutoff, thiếu dữ liệu và lỗi port. Bàn giao interface/DTO sớm cho Huy, không đợi xong UI. |
-| P2 | API danh mục + tìm chuyến — 15–16/11 | P1 | `/stops` và `/trips` đúng OpenAPI; test ngày lên tại Stop giữa tuyến, cutoff, giá cộng leg, input sai, rỗng và lỗi truy xuất. Có request/response thật để Hoàng nối. |
-| P4 | API chi tiết chuyến — 16/11 | P1 | `/trips/{tripId}` có thứ tự Stop, giá đoạn và eligibility; test Trip mất/đóng bán/thiếu essential/missing optional. Không tự điền giá hoặc giờ thiếu. Cập nhật SAD phần Trip. |
+| P1 | Schema V3 và dữ liệu Trip — 16/11 | C1; merge/apply sau I1/V2 | `V3__trip_read_model.sql` theo SAD; giữ manifest UUID cho cả nhóm, Route A–B–C, sáu ghế, leg fare 100k/150k, chuyến ngày/qua đêm theo C1. Seed/reset tách schema và chỉ dùng local/test. PostgreSQL mới chạy V1→V2→V3 được. |
+| P3 | Cung cấp TripQueryPort — ưu tiên 16/11 | P1; DTO/interface có thể bàn giao sớm | Facts về Trip, Stop indices, cutoff và layout theo contract; test invalid Segment, đúng cutoff, thiếu dữ liệu và lỗi port. Bàn giao interface/DTO sớm cho Huy, không đợi xong UI. |
+| P2 | API danh mục + tìm chuyến — 18/11 | P1 | `/stops` và `/trips` đúng OpenAPI; test ngày lên tại Stop giữa tuyến, cutoff, giá cộng leg, input sai, rỗng và lỗi truy xuất. Có request/response thật để Hoàng nối. |
+| P4 | API chi tiết chuyến — 18/11 | P1 | `/trips/{tripId}` có thứ tự Stop, giá đoạn và eligibility; test Trip mất/đóng bán/thiếu essential/missing optional. Không tự điền giá hoặc giờ thiếu. Cập nhật SAD phần Trip. |
 
 P2/P3/P4 dùng chung P1 nhưng không cần chờ nhau về nghiệp vụ. Phương có thể gộp thay đổi nhỏ dùng chung vào PR đầu rồi chia PR theo endpoint/port, tránh một PR chứa toàn bộ Trip.
 
@@ -97,9 +101,9 @@ Phạm vi code: `src/backend/src/{main,test}/java/vn/edu/team11/coach/booking/`,
 
 | ID | Task / mốc mục tiêu | Phụ thuộc | Đầu ra để nghiệm thu |
 |---|---|---|---|
-| H1 | Schema V4 và logic ghế — 14–16/11 | C1; merge/apply sau I1/V2 + P1/V3 | Booking/BookingSeat/SeatAllocation và FK theo SAD; dùng manifest UUID của Phương, account fixture từ I1. Có fixture Confirmed, hold hiệu lực/hết hạn, cancelled/released. Test đoạn kề/giao nhau và đúng expiry. Không triển khai P08/P09. |
-| H2 | API ghế trống — 16–17/11 | H1 + P3 | `/seat-availability` lấy facts qua port, map đủ ghế đúng ID; test hết ghế vẫn 200, lỗi dữ liệu không giả FREE, lỗi Segment/Trip đúng status; integration test PostgreSQL thật. |
-| H3 | Cleanup hold hết hạn — 16/11 | H1 | Job Booking idempotent chuyển Pending hết hạn sang Expired, không cần người dùng mở trang; không đổi Confirmed/Cancelled. Test clock kiểm soát; gọi job hai lần không gây sai dữ liệu. Test H2 vẫn loại hold hết hạn khi cleanup trễ. Cập nhật SAD phần Booking. |
+| H1 | Schema V4 và logic ghế — 16/11 | C1; merge/apply sau I1/V2 + P1/V3 | Booking/BookingSeat/SeatAllocation và FK theo SAD; dùng manifest UUID của Phương, account fixture từ I1. Có fixture Confirmed, hold hiệu lực/hết hạn, cancelled/released. Test đoạn kề/giao nhau và đúng expiry. Không triển khai P08/P09. |
+| H2 | API ghế trống — 18/11 | H1 + P3 | `/seat-availability` lấy facts qua port, map đủ ghế đúng ID; test hết ghế vẫn 200, lỗi dữ liệu không giả FREE, lỗi Segment/Trip đúng status; integration test PostgreSQL thật. |
+| H3 | Cleanup hold hết hạn — 18/11 | H1 | Job Booking idempotent chuyển Pending hết hạn sang Expired, không cần người dùng mở trang; không đổi Confirmed/Cancelled. Test clock kiểm soát; gọi job hai lần không gây sai dữ liệu. Test H2 vẫn loại hold hết hạn khi cleanup trễ. Cập nhật SAD phần Booking. |
 
 H1 unit tests có thể bắt đầu với DTO/contract đã chốt, không cần đợi P3 implementation. Chỉ dùng fixture để minh họa trạng thái Booking; không báo là đã có chức năng tạo Booking/thanh toán.
 
@@ -109,10 +113,10 @@ Phạm vi: `src/frontend/src/features/` theo feature; API client ở `src/fronte
 
 | ID | Task / mốc mục tiêu | Phụ thuộc | Đầu ra để nghiệm thu |
 |---|---|---|---|
-| F1 | Prototype bốn màn — 14–15/11 | Đọc UC và C1 đã chốt | Home, kết quả, chi tiết, sơ đồ ghế; mỗi màn có mục đích/thông tin/cách dùng và đường đi giữa màn. Leader review flow trước khi làm kỹ giao diện. |
-| F2 | Home + kết quả tìm — 15–16/11 | C1 + F1; nối thật cần P2 | Chọn Stop từ API, nhập ngày, render kết quả/giá/giờ; loading, rỗng, validation và retry có tests. Chuyển đúng tripId/fromStopId/toStopId sang chi tiết. |
-| F3 | Chi tiết chuyến — 16/11 | F1; nối thật cần P4 | Hiện Stops/giá/eligibility; Trip đóng/thiếu essential không cho tiếp tục đặt. Thiếu mô tả optional vẫn xem được; giữ Segment khi đi tới ghế/quay lại. |
-| F4 | Sơ đồ ghế và refresh — 16–17/11 | F1; nối thật cần H2 | Ghế theo layout, FREE/UNAVAILABLE/UNKNOWN rõ; refresh expiry/foreground/polling đúng contract. Lỗi refresh không coi ghế cũ là FREE mới; response cũ không ghi đè response mới. FE tests và kiểm tra mobile. |
+| F1 | Prototype bốn màn — 16/11 | Đọc UC và C1 đã chốt | Home, kết quả, chi tiết, sơ đồ ghế; mỗi màn có mục đích/thông tin/cách dùng và đường đi giữa màn. Leader review flow trước khi làm kỹ giao diện. |
+| F2 | Home + kết quả tìm — 19/11 | C1 + F1; nối thật cần P2 | Chọn Stop từ API, nhập ngày, render kết quả/giá/giờ; loading, rỗng, validation và retry có tests. Chuyển đúng tripId/fromStopId/toStopId sang chi tiết. |
+| F3 | Chi tiết chuyến — 19/11 | F1; nối thật cần P4 | Hiện Stops/giá/eligibility; Trip đóng/thiếu essential không cho tiếp tục đặt. Thiếu mô tả optional vẫn xem được; giữ Segment khi đi tới ghế/quay lại. |
+| F4 | Sơ đồ ghế và refresh — 19/11 | F1; nối thật cần H2 | Ghế theo layout, FREE/UNAVAILABLE/UNKNOWN rõ; refresh expiry/foreground/polling đúng contract. Lỗi refresh không coi ghế cũ là FREE mới; response cũ không ghi đè response mới. FE tests và kiểm tra mobile. |
 
 Hoàng có thể dựng F2/F3/F4 bằng examples trong lúc chờ BE, nhưng chỉ nghiệm thu tích hợp sau khi nối API thật. Không thêm nút đặt/thanh toán hoạt động giả ngoài ba UC.
 
@@ -122,9 +126,9 @@ Phạm vi: `docs/test/`, bản SAD PA4 riêng trong `docs/analysis and design/`,
 
 | ID | Task / mốc mục tiêu | Phụ thuộc | Đầu ra để nghiệm thu |
 |---|---|---|---|
-| Q1 | Test plan + ma trận ca — 14–15/11 | Đọc UC/C1; leader cung cấp mẫu Moodle | Ít nhất 5 ca/UC, tối thiểu 15; mỗi ca có precondition, dữ liệu, bước, expected và nguồn UC/BR. Soạn nội dung trước nếu chưa có mẫu, chuyển đúng mẫu khi nhận. Chủ UC rà expected; chưa chạy không đánh dấu pass. |
-| Q2 | SAD revision PA4 — nháp 16/11, chốt 19/11 | Feedback PA3; hiện thực từng module | Tích hợp sửa mục 1–4 từ nội dung mỗi người; deployment UML/mô tả node mục 5 và cấu trúc source mục 6 khớp implementation cuối. Không ghi đè PDF PA3 gốc. |
-| Q3 | Thực thi và retest — 18–19/11 | Flow tích hợp C2 + Q1 | Chạy đủ ca ít nhất một lần; ghi build/commit, môi trường, dữ liệu, actual/result và bằng chứng. Giao bug về tác giả, retest bản sửa; không thay bằng kết quả health/unit tests. |
+| Q1 | Test plan + ma trận ca — 16/11 | Đọc UC/C1; leader cung cấp mẫu Moodle | Ít nhất 5 ca/UC, tối thiểu 15; mỗi ca có precondition, dữ liệu, bước, expected và nguồn UC/BR. Soạn nội dung trước nếu chưa có mẫu, chuyển đúng mẫu khi nhận. Chủ UC rà expected; chưa chạy không đánh dấu pass. |
+| Q2 | SAD revision PA4 — nháp 16/11, chốt 20/11 12h | Feedback PA3; hiện thực từng module | Tích hợp sửa mục 1–4 từ nội dung mỗi người; deployment UML/mô tả node mục 5 và cấu trúc source mục 6 khớp implementation cuối. Không ghi đè PDF PA3 gốc. |
+| Q3 | Thực thi và retest — 19–20/11 12h | Flow tích hợp C2 + Q1 | Chạy đủ ca ít nhất một lần; ghi build/commit, môi trường, dữ liệu, actual/result và bằng chứng. Giao bug về tác giả, retest bản sửa; không thay bằng kết quả health/unit tests. |
 
 ## Trung Hiếu — điều phối và phần tích hợp chung
 
@@ -133,7 +137,7 @@ Phạm vi: `docs/test/`, bản SAD PA4 riêng trong `docs/analysis and design/`,
 | ID | Task / mốc mục tiêu | Phụ thuộc | Đầu ra để nghiệm thu / reviewer |
 |---|---|---|---|
 | I1 | Schema Account V2 — đã hiện thực/test 14/11, chờ review/merge | C1 | `identity_account(account_id UUID)` và constraints theo [contract I1](../../docs/contracts/identity-account.md); 35 Account IT +8 tests nền tảng pass trên PostgreSQL mới, có upgrade V1 giữ session. Fixture DISABLED tách schema, không login mặc định/P01/P02. **Hoàng review**, Đức Hiếu hỗ trợ kiểm tra. |
-| C2 | Ghép từng API từ 14–17/11; chốt flow 17/11 | Từng phần theo PR endpoint sẵn sàng; flow cuối cần I1 + P2/P3/P4 + H2/H3 + F2/F3/F4 | Điều phối merge đã review; sở hữu security/error mapping chung. Ghép cùng owner endpoint ngay khi API cần route public, không chờ đủ tất cả endpoint mới bắt đầu. Chỉ mở GET đúng contract khi endpoint tồn tại; route khác vẫn bảo vệ, writes không bị mở. Chạy tests từng phần và demo xuyên suốt bằng Compose/DB thật. **Đức Hiếu review**, tác giả sửa lỗi module mình. |
+| C2 | Ghép từng API từ 14–19/11; chốt flow 19/11 | Từng phần theo PR endpoint sẵn sàng; flow cuối cần I1 + P2/P3/P4 + H2/H3 + F2/F3/F4 | Điều phối merge đã review; sở hữu security/error mapping chung. Ghép cùng owner endpoint ngay khi API cần route public, không chờ đủ tất cả endpoint mới bắt đầu. Chỉ mở GET đúng contract khi endpoint tồn tại; route khác vẫn bảo vệ, writes không bị mở. Chạy tests từng phần và demo xuyên suốt bằng Compose/DB thật. **Đức Hiếu review**, tác giả sửa lỗi module mình. |
 | C3 | Weekly, demo và gói nộp — 20/11 | Q2/Q3 + mô tả prototype | Mỗi người gửi việc thực tế/bằng chứng; tổng hợp weekly từ 07/11, chạy thử demo, kiểm tra gói PA4-Group11. Đức Hiếu đóng gói hỗ trợ, Trung Hiếu duyệt/nộp ngày 21/11 và lưu bằng chứng. Không tự ghi đã nộp khi chưa có kết quả. |
 
 ### Checklist riêng cho Trung Hiếu

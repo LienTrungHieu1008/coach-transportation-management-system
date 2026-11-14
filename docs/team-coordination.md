@@ -6,10 +6,10 @@
 
 | Người | Bắt đầu ngay | Cần phối hợp với ai? | Khi có đầu ra phải báo |
 |---|---|---|---|
-| **Trung Hiếu** | Theo dõi review I1, điều phối V2→V3→V4; nhận yêu cầu ghép security/lỗi chung từng API. I1 đã có code/test, không giao làm lại. | Hoàng review I1; chủ API gửi path/lỗi cần ghép; Đức Hiếu review tích hợp. | Sau khi I1 merge, báo Phương/Huy cập nhật main; sau mỗi API ghép xong báo Hoàng/QA cách thử. |
+| **Trung Hiếu** | Theo dõi review I1, điều phối V2→V3→V4; nhận yêu cầu ghép security/lỗi chung từng API. I1 đã có code/test, không giao làm lại. | Chủ API gửi path/lỗi cần ghép; Đức Hiếu review tích hợp. | Sau khi I1 merge, báo Phương/Huy cập nhật main; sau mỗi API ghép xong báo Hoàng/QA cách thử. |
 | **Minh Phương** | P1 schema Trip/dữ liệu chung, ưu tiên P3 port cho Huy; sau đó P2/P4 API tìm/chi tiết. | Nhận PK Account từ Hiếu; thống nhất interface TripQueryPort và dữ liệu mẫu với Huy sớm. | Gửi Huy port + UUID/layout; gửi Hoàng API/request/JSON thật; gửi Hiếu phần route chung cần mở. |
 | **Nhật Huy** | H1 logic/tests Segment và allocations; chuẩn bị V4 theo contract, chưa chờ đủ API/UI mới viết test. | Dùng Account từ Hiếu, Trip/layout/Stop order từ Phương; không tự dựng lại các phần đó. | Gửi Hoàng API ghế/kịch bản expiry; gửi Hiếu phần route/lỗi chung cần ghép; gửi Phương PR để review. |
-| **Khánh Hoàng** | Review I1, làm F1 prototype và UI F2–F4 theo examples; nối thật từng API khi được bàn giao. | Phương cho API Trip; Huy cho API ghế; Hiếu xử lý phối hợp phần security chung. | Gửi Đức Hiếu flow/cách thử; báo đúng chủ API khi có lỗi, kèm request/response thực tế. |
+| **Khánh Hoàng** | Làm F1 prototype và UI F2–F4 theo examples; nối thật từng API khi được bàn giao. | Phương cho API Trip; Huy cho API ghế; Hiếu xử lý phối hợp phần security chung. | Gửi Đức Hiếu flow/cách thử; báo đúng chủ API khi có lỗi, kèm request/response thực tế. |
 | **Đức Hiếu** | Q1 test plan/cases ngay từ UC/contract; nhận nội dung SAD từng người để tổng hợp Q2. | Chủ UC rà expected; Hiếu cung cấp mẫu Moodle/feedback khi có. | Giao bug cho tác giả module; báo kết quả test/retest và hồ sơ còn thiếu cho Hiếu. |
 
 **Owner code, reviewer kiểm tra.** Phương/Huy không cùng viết một migration; reviewer không tự sửa nhánh tác giả nếu chưa thống nhất. QA ghi lỗi và retest, không nhận sửa mọi module. Leader điều phối, không code lại toàn bộ sản phẩm.
@@ -63,8 +63,20 @@ Trong lúc chờ mình làm tiếp ...; nếu không có trước ... thì ảnh
 - Cuối buổi báo task, PR/commit, kiểm tra đã chạy, đang chờ ai và bước tiếp theo. Những mục không có bằng chứng phải để “chưa chạy/chưa xong”.
 - Hiếu merge sau review/checks đạt; mỗi người cập nhật main trước task kế tiếp. Không tự merge hộ hoặc force push lên nhánh của người khác.
 
-## 6. Tin nhắn leader có thể gửi nhóm
+## 6. Deadline nội bộ đã chốt
 
-> Mọi người đọc TASKS và xác nhận task nhận, mốc dự kiến, điểm đang vướng nhé. Phương bắt đầu P1 và ưu tiên P3 để Huy ghép; Huy làm H1/tests trước, V4 ghép sau V2/V3; Hoàng review I1 rồi dựng UI theo contract, nối API sẵn phần nào làm phần đó; Đức Hiếu viết test cases và nhận phần SAD của từng người. Hiếu theo dõi I1 và ghép security/lỗi chung khi từng API sẵn sàng. Mỗi lần bàn giao gửi PR/commit + cách chạy + dữ liệu + expected/tests; bị chặn báo đúng người và báo Hiếu nếu ảnh hưởng mốc. Tác giả sửa phần mình, reviewer rà lại, QA test/retest. Không tự đổi API/migration/file người khác. Cách phối hợp chi tiết ở docs/team-coordination.md, việc cụ thể ở pa/PA4/TASKS.md, quy trình Git/PR ở docs/team-handbook.md.
+Leader chốt lịch dưới đây ngày 14/11/2026. “Tôi” là Liên Trung Hiếu. Các ngày đều thuộc tháng 11/2026, giờ Việt Nam. Không đưa mốc 15/11 vào lịch này; việc chốt trước đó không giao lại.
 
-Đây là nội dung soạn sẵn, chưa được agent gửi cho thành viên. Cập nhật trạng thái PR/task và mốc thực tế trước khi leader gửi; không nhắn lại rằng I1 “chưa merge” nếu PR đã được merge sau bản tài liệu này.
+| Hạn bàn giao | Người phụ trách | Đầu ra cần có |
+|---|---|---|
+| **16/11** | Phương | P1 schema V3 + dữ liệu mẫu/manifest ID và P3 TripQueryPort cho Huy ghép; review/merge schema theo dependency. |
+| **16/11** | Huy | Logic ghế theo đoạn + unit tests H1; chuẩn bị V4 để ghép sau V2/V3. |
+| **16/11** | Hoàng | F1 prototype bốn màn và khung UI để nối API từng phần. |
+| **16/11** | Đức Hiếu | Bản đầu Q1: ít nhất 5 test cases/UC, tối thiểu 15 ca; chủ UC rà expected. |
+| **18/11** | Phương + Huy | P2/P4 và H2/H3: API tìm chuyến, chi tiết, ghế và cleanup expiry chạy được; có tests, dữ liệu và cách thử để FE/QA nhận. |
+| **19/11** | Hoàng + tôi | F2–F4/C2: nối FE–BE, security/error chung; chạy được luồng tìm → chi tiết → ghế trên cùng Segment bằng dữ liệu thật trong môi trường thử. |
+| **20/11 trước 12h** | Đức Hiếu + cả nhóm | Q2/Q3: chạy đủ cases, ghi actual/bằng chứng và bug; hoàn thiện SAD, phần weekly report và bằng chứng của từng người để tôi tổng hợp. |
+| **20/11 trước 20h** | Cả nhóm; tôi chốt | Sửa bug, retest, chạy demo; hoàn tất C3 và chốt gói nộp. Lỗi chưa giải quyết phải ghi rõ, không bỏ kiểm tra để kịp mốc. |
+| **21/11** | Tôi | Kiểm tra gói bài và nộp trước giờ chính thức trên Moodle, lưu bằng chứng nộp. Giờ nộp cụ thể cần đối chiếu Moodle. |
+
+**Hết 19/11 phải chạy được luồng xuyên suốt.** Ngày 20 dành cho kiểm thử, sửa lỗi và hồ sơ. Đây là hạn bàn giao, không phải đợi đến hạn mới mở PR: gửi từng phần nhỏ để review và tích hợp sớm. Nếu có nguy cơ trễ, báo tôi ngay cùng phần còn thiếu, người đang chờ và phương án điều chỉnh; không tự lùi deadline.
