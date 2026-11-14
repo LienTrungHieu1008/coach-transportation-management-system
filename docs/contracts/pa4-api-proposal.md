@@ -1,6 +1,6 @@
 # API PA4 — bản đề xuất để chốt cùng leader
 
-Ngày 12/11/2026. **Người giao việc đã đồng ý cấu trúc bốn GET công khai.** Bản đề xuất này được giữ làm bối cảnh; chi tiết hiện tại nằm trong [OpenAPI 0.1](openapi.yaml), [quyết định và trạng thái review](pa4-api-decisions.md), [TripQueryPort](trip-query-port.md). DTO và các lựa chọn bổ sung là review candidate, chưa có implementation hoặc approval của từng chủ module. Không đổi security hoặc tạo endpoint trong bước contract.
+Ngày lập 12/11/2026, cập nhật trạng thái 14/11. **Leader đã duyệt cấu trúc và chi tiết contract 0.1 tại [C1](../../pa/PA4/C1_DECISIONS.md).** Bản đề xuất này giữ lại để giải thích cách suy ra API; những chữ “đề xuất/cần chốt” bên dưới phản ánh lúc lập bản. Khi triển khai dùng [OpenAPI 0.1](openapi.yaml), [quyết định API hiện tại](pa4-api-decisions.md), [TripQueryPort](trip-query-port.md). Chưa có implementation hoặc approval của từng chủ module; không đổi security hoặc tạo endpoint trong task tài liệu.
 
 Nguồn: [UC 1.8](../requirements/Team%2011%20-%20rup_ucspec-v2_final.pdf), P04 trang 10–12, P05 trang 12–13, P07 trang 15–16; [SAD 1.3](../analysis%20and%20design/PA3_Group11_SAD_v1.3_final.pdf), phần API/DTO, ownership và contract Segment. Các lựa chọn HTTP/DTO bổ sung dưới đây là đề xuất hiện thực, không phải mọi chi tiết đã được PA3 duyệt.
 
@@ -68,9 +68,8 @@ Response đề xuất: `tripId`, `fromStopId`, `toStopId`, `serverTime`, `bookin
 
 SAD mapping UI dùng 422 cho input nghiệp vụ không hợp lệ; vì vậy đề xuất phân biệt 400 cấu trúc với 422 nghiệp vụ thay vì đổi tất cả về 400. 401/403 của baseline vẫn áp dụng cho route bảo vệ, không phải yêu cầu login cho ba UC công khai này.
 
-## Cần chốt trước khi giao code
+## Trạng thái sau C1 ngày 14/11
 
-1. Đã đồng ý cấu trúc bốn GET riêng; không suy ra tất cả DTO/status/chi tiết đều đã được duyệt.
-2. Đã cụ thể hóa OpenAPI/schema/layout/port và cách xử lý dữ liệu thiếu để review, xem bảng lựa chọn trong `pa4-api-decisions.md`.
-3. Phương/Huy/Hoàng và QA review các lựa chọn, leader chốt phiên bản contract trước khi code; migration được phân số chung, không sửa V1 session.
-4. Task contract không tự cấp quyền đổi schema DB/security hoặc triển khai nghiệp vụ.
+1. Leader đã duyệt cả cấu trúc bốn GET và các lựa chọn chi tiết OpenAPI/schema/layout/port tại C1; không ghi thay approval của các thành viên.
+2. Dùng `pa4-api-decisions.md` và C1 cho quyết định hiện tại; nội dung đề xuất ban đầu bên trên không tạo thêm một vòng chốt đang chặn task.
+3. Giao việc theo TASKS; migration V2/V3/V4 có owner và thứ tự chung, không sửa V1 session. Implementation vẫn cần tests/review và được giao trong task riêng.

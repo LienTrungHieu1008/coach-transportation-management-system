@@ -26,7 +26,7 @@ Người giao việc đã xác nhận chọn ba UC dưới đây trong phiên ng
 
 Đối chiếu [UC edition 1.8](../../docs/requirements/Team%2011%20-%20rup_ucspec-v2_final.pdf), đặc biệt P04 trang 10–12, P05 trang 12–13 và P07 trang 15–16 trước khi hiện thực. Quyết định này xác nhận phạm vi làm việc, không phải bằng chứng TA đã duyệt cách chấm “UC chính”. Leader xác nhận điểm này với TA; nếu bắt buộc luồng đặt vé, cần đánh giá lại phụ thuộc P01/P02/P08/P09.
 
-Phân công và mốc bàn giao đề xuất: [kế hoạch nhóm](WORK_PLAN.md). Tên người phụ trách dựa trên vai trò PA3; phân công chưa được từng thành viên xác nhận.
+Leader đã duyệt [C1](C1_DECISIONS.md) và giao phân công tại [TASKS](TASKS.md) ngày 14/11; vai trò tổng thể ở [kế hoạch nhóm](WORK_PLAN.md). Thành viên cần phản hồi nhận việc/lịch thực tế; chưa ghi họ đã xác nhận khi chưa có phản hồi.
 
 Prototype tương ứng có thể gồm Trang chủ, Kết quả tìm chuyến, Chi tiết chuyến và Sơ đồ ghế. Cần thực hiện đủ flow/nhánh test theo UC đã chọn; không dùng màn hình mẫu hoặc dữ liệu hardcode để báo là phần mềm hoàn chỉnh.
 

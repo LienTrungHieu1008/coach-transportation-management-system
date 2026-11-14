@@ -75,6 +75,8 @@ Không trỏ kiểm thử vào DB thật. Dockerfile backend chạy `package` g�
 
 ## Session, CSRF và giới hạn hiện tại
 
+I1 đã thêm Flyway V2 cho Account prerequisite: xem [contract PK/constraints/fixture](contracts/identity-account.md) và [kiểm chứng I1](test/i1-account-verification.md). Migration không tạo account mặc định; fixture hai Passenger DISABLED chỉ nạp riêng cho local/test. Schema Account không có nghĩa đã có API đăng ký/đăng nhập. V1 session được giữ nguyên; V3/V4 thuộc task thành viên khác.
+
 - `GET /api/health`: chỉ trạng thái tổng quát; không công bố chi tiết DB, credentials hoặc stack trace.
 - `GET /api/session/csrf`: cấp token để SPA gửi lại qua header `X-CSRF-TOKEN`; browser giữ cookie session HttpOnly, SameSite=Lax. Token không phải thông tin đăng nhập.
 - Mặc định các API khác yêu cầu authentication. Không có form login, HTTP Basic hoặc tài khoản demo mặc định; UC đăng ký/đăng nhập chưa được hiện thực.

@@ -1,5 +1,7 @@
 # Quy trình đóng góp
 
+Thành viên mới xem [handbook từng bước: branch → push → PR → review](docs/team-handbook.md). Việc được giao và reviewer tại [TASKS PA4](pa/PA4/TASKS.md), contract leader đã duyệt tại [C1](pa/PA4/C1_DECISIONS.md).
+
 1. Một issue/task nêu UC, phạm vi và tiêu chí nghiệm thu. Chia nhỏ theo hành vi có thể kiểm tra, tránh PR gom nhiều việc.
 2. Tạo branch `feat/<task>-<mo-ta>`, `fix/<task>-<mo-ta>` hoặc `chore/<mo-ta>` từ main cập nhật.
 3. Đọc AGENTS và contract. Thành viên chịu trách nhiệm code do agent tạo; agent không là người review độc lập.

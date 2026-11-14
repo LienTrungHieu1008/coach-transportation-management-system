@@ -1,10 +1,10 @@
-# TripQueryPort — đề xuất điểm ghép P07
+# TripQueryPort — điểm ghép P07, contract 0.1
 
-Trạng thái: **review candidate 0.1**, cùng [OpenAPI](openapi.yaml) và [quyết định API](pa4-api-decisions.md). Đây là đặc tả, chưa có interface/class production. Phương sở hữu port tại `vn.edu.team11.coach.trip.contract`; Huy chỉ import contract, không entity/repository Trip. Tên `TripQueryPort` theo SAD, chưa mở rộng sang AI ngoài task.
+Trạng thái: **leader Trung Hiếu đã duyệt contract 0.1 tại C1 ngày 14/11/2026**, cùng [OpenAPI](openapi.yaml) và [quyết định C1](../../pa/PA4/C1_DECISIONS.md). Chưa ghi các thành viên khác đã approve. Đây là đặc tả, chưa có interface/class production. Phương sở hữu port tại `vn.edu.team11.coach.trip.contract`; Huy chỉ import contract, không entity/repository Trip. Tên `TripQueryPort` theo SAD, chưa mở rộng sang AI ngoài task.
 
 ## Giao diện cần thống nhất
 
-Chữ ký Java dự kiến:
+Chữ ký Java dùng cho triển khai:
 
 ```java
 TripSeatFacts getSeatAvailabilityFacts(
@@ -40,11 +40,11 @@ Phương công bố `TripQueryException` cùng `TripQueryErrorCode` trong `trip.
 | ESSENTIAL_DATA_INCOMPLETE | Dữ liệu cấu hình bắt buộc thiếu/không hợp lệ | 409 |
 | TRIP_DATA_UNAVAILABLE | Không thể đọc/xác minh facts vì lỗi hạ tầng | 503 `AVAILABILITY_UNAVAILABLE` khi qua API P07 |
 
-P07 validate format trước khi gọi port (400). Nếu nhiều lỗi cùng tồn tại, thứ tự đề xuất: format → Trip tồn tại → đủ dữ liệu để xác minh Segment → Segment → eligibility. Thiếu cấu hình khiến không xác minh được Segment là ESSENTIAL_DATA_INCOMPLETE, không đoán là INVALID_SEGMENT. Không đính kèm SQL/stack hoặc dữ liệu nhạy cảm vào HTTP response.
+P07 validate format trước khi gọi port (400). Nếu nhiều lỗi cùng tồn tại, thứ tự dùng theo C1: format → Trip tồn tại → đủ dữ liệu để xác minh Segment → Segment → eligibility. Thiếu cấu hình khiến không xác minh được Segment là ESSENTIAL_DATA_INCOMPLETE, không đoán là INVALID_SEGMENT. Không đính kèm SQL/stack hoặc dữ liệu nhạy cảm vào HTTP response.
 
 ## Transaction và consistency
 
-- Application P07 điều phối trong transaction read-only REQUIRED cùng DataSource/transaction manager; dùng snapshot nhất quán cho Trip/layout/allocations (đề xuất PostgreSQL REPEATABLE READ). Trip implementation tham gia transaction caller, không REQUIRES_NEW và không gọi provider.
+- Application P07 điều phối trong transaction read-only REQUIRED cùng DataSource/transaction manager; dùng snapshot nhất quán cho Trip/layout/allocations (PostgreSQL REPEATABLE READ theo C1). Trip implementation tham gia transaction caller, không REQUIRES_NEW và không gọi provider.
 - Không khóa ghế khi xem và không ghi Booking. Availability là snapshot informational; không cam kết còn ghế khi request sau bắt đầu.
 - Huy truy vấn allocations thuộc Booking và kiểm tra điều kiện hiệu lực, overlap trên indices đã được port xác minh. Không truy vấn trực tiếp bảng Trip để tìm layout/thứ tự.
 - Job cleanup thuộc Booking thực hiện transaction ghi riêng, idempotent; không được phụ thuộc việc người dùng mở trang. Nếu job trễ, query vẫn loại hold có `asOf >= expiresAt`.
