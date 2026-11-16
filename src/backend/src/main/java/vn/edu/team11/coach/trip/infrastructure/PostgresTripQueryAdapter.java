@@ -381,14 +381,10 @@ public class PostgresTripQueryAdapter implements TripQueryPort {
 
 
         try {
-        List<TripStopRow> segmentStops = tripStops.subList(
-                fromStop.get().stopOrder(),
-                toStop.get().stopOrder() + 1
-        );
-
-        for (int i = 0; i < segmentStops.size() - 1; i++) {
-                UUID legFrom = segmentStops.get(i).stopId();
-                UUID legTo = segmentStops.get(i + 1).stopId();
+        // Essential data is a property of the whole Trip, not only the requested Segment.
+        for (int i = 0; i < tripStops.size() - 1; i++) {
+                UUID legFrom = tripStops.get(i).stopId();
+                UUID legTo = tripStops.get(i + 1).stopId();
 
                 Long fare = jdbc.query(
                         """

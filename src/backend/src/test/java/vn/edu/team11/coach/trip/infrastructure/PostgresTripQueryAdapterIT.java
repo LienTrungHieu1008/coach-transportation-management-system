@@ -195,6 +195,44 @@ class PostgresTripQueryAdapterIT {
 
         @Test
         @Sql("/fixtures/trip_demo.sql")
+        void missingFareOutsideSelectedSegmentReturnsEssentialDataIncomplete() {
+                UUID tripId = UUID.fromString("11111111-1111-4111-8111-111111111111");
+                UUID stopA = UUID.fromString("22222222-2222-4222-8222-222222222222");
+                UUID stopB = UUID.fromString("33333333-3333-4333-8333-333333333333");
+                UUID stopC = UUID.fromString("99999999-9999-4999-8999-999999999999");
+
+                assertThat(jdbc.update("""
+                        DELETE FROM leg_fare
+                        WHERE trip_id = ? AND from_stop_id = ? AND to_stop_id = ?
+                        """, tripId, stopB, stopC)).isEqualTo(1);
+
+                assertThatThrownBy(() -> tripQueryPort.getSeatAvailabilityFacts(
+                        tripId, stopA, stopB, Instant.parse("2026-11-20T00:00:00Z")))
+                        .isInstanceOfSatisfying(TripQueryException.class, error ->
+                                assertThat(error.getCode()).isEqualTo(
+                                        TripQueryErrorCode.ESSENTIAL_DATA_INCOMPLETE));
+        }
+
+        @Test
+        @Sql("/fixtures/trip_demo.sql")
+        void completeTripFaresAllowShortSegment() {
+                UUID tripId = UUID.fromString("11111111-1111-4111-8111-111111111111");
+                UUID stopA = UUID.fromString("22222222-2222-4222-8222-222222222222");
+                UUID stopB = UUID.fromString("33333333-3333-4333-8333-333333333333");
+
+                TripSeatFacts facts = tripQueryPort.getSeatAvailabilityFacts(
+                        tripId, stopA, stopB, Instant.parse("2026-11-20T00:00:00Z"));
+
+                assertThat(facts.tripId()).isEqualTo(tripId);
+                assertThat(facts.fromStopId()).isEqualTo(stopA);
+                assertThat(facts.toStopId()).isEqualTo(stopB);
+                assertThat(facts.fromStopIndex()).isZero();
+                assertThat(facts.toStopIndex()).isEqualTo(1);
+                assertThat(facts.seatLayout().seats()).hasSize(6);
+        }
+
+        @Test
+        @Sql("/fixtures/trip_demo.sql")
         void missingPhysicalSeatReturnsEssentialDataIncomplete() {
         UUID tripId = UUID.fromString(
                 "11111111-1111-4111-8111-111111111111"
