@@ -1,6 +1,6 @@
 # TripQueryPort — điểm ghép P07, contract 0.1
 
-Trạng thái: **leader Trung Hiếu đã duyệt contract 0.1 tại C1 ngày 14/11/2026**, cùng [OpenAPI](openapi.yaml) và [quyết định C1](../../pa/PA4/C1_DECISIONS.md). Chưa ghi các thành viên khác đã approve. Đây là đặc tả, chưa có interface/class production. Phương sở hữu port tại `vn.edu.team11.coach.trip.contract`; Huy chỉ import contract, không entity/repository Trip. Tên `TripQueryPort` theo SAD, chưa mở rộng sang AI ngoài task.
+Trạng thái cập nhật 16/11/2026: **leader Trung Hiếu đã duyệt contract 0.1 tại C1**, cùng [OpenAPI](openapi.yaml) và [quyết định C1](../../pa/PA4/C1_DECISIONS.md). Interface/DTO production đã merge qua PR #3; schema V3 và manifest đã merge qua PR #4. Adapter PostgreSQL nằm ở PR #6, còn chờ review/merge; chưa coi P3 runtime hoặc H2 đã hoàn thành. Không ghi approval thay thành viên. Phương sở hữu port tại `vn.edu.team11.coach.trip.contract`; Huy chỉ import contract, không entity/repository Trip. Tên `TripQueryPort` theo SAD, chưa mở rộng sang AI ngoài task.
 
 ## Giao diện cần thống nhất
 
@@ -26,6 +26,14 @@ TripSeatFacts getSeatAvailabilityFacts(
 | asOf | Instant chính caller cung cấp để xác nhận snapshot tính toán |
 
 Port chỉ trả facts thành công nếu Trip Scheduled, `asOf < bookingClosesAt`, Segment hợp lệ và đủ essential data theo BR-P05-01. Không trả facts có layout rỗng hoặc Stop indices chưa xác minh. Không trả allocations hoặc Booking vì đó không thuộc ownership Trip.
+
+## Mapping layout đã chốt — 16/11/2026
+
+- `Vehicle.seatLayoutId` và DTO `SeatLayout.id` cùng lấy từ `vehicle.seat_layout_id` trong V3; một layout ID riêng cho mỗi Vehicle theo unique constraint hiện tại.
+- V3 không có bảng `seat_layout` riêng. Adapter đọc Vehicle và các `physical_seat` của Vehicle để dựng DTO; không tạo UUID mới khi đọc và không dùng `layout_template` làm ID.
+- `LayoutSeat.physicalSeatId` lấy từ `physical_seat.physical_seat_id`; `row`/`column` lấy từ `seat_row`/`seat_column`, giữ `deck` và label. Không suy ID từ nhãn hoặc tọa độ.
+- H2 ánh xạ DTO này sang OpenAPI `SeatLayout` bằng cùng ID/ghế; không đổi schema HTTP. Bộ ID/layout dùng chung ở [manifest P1](../test/p1-trip-demo-manifest.md).
+- Đây là chốt mapping hiện có, không sửa migration V3 đã chia sẻ; thay đổi schema sau này phải thêm migration mới.
 
 ## Kết quả lỗi có kiểu
 
