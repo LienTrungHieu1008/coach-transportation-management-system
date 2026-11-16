@@ -103,6 +103,12 @@ Phạm vi code: `src/backend/src/{main,test}/java/vn/edu/team11/coach/booking/`,
 
 H1 unit tests có thể bắt đầu với DTO/contract đã chốt, không cần đợi P3 implementation. Chỉ dùng fixture để minh họa trạng thái Booking; không báo là đã có chức năng tạo Booking/thanh toán.
 
+**Tiến độ H1 ngày 15/11:** đã có core Java thuần Segment/hiệu lực allocation/tính availability và 63 unit tests trên nhánh `feat/h1-seat-allocation`; full backend verify đạt 106 tests, không failure/error/skip. Xem [báo cáo H1](../../docs/test/h1-seat-allocation-verification.md). Đây là phần logic/tests, **chưa hoàn thành toàn bộ H1**: còn V4/FK/fixtures theo V3 và manifest của Phương, review thành viên và tích hợp. H2/H3 chưa hiện thực; Pending→Expired để lại H3 theo lựa chọn người dùng. Chưa commit/push/merge phần H1 này.
+
+**Checkpoint Booking ngày 16/11:** fetch thành công; `origin/main` vẫn ở `0760fba` với V1/V2. PR #4 V3 và PR #3 interface/DTO port đều open/Draft, chưa merge; chưa có adapter Trip thật. Theo lựa chọn chỉ dùng dependency đã merge vào main, H1/V4 chờ V3/manifest trên main, H3 chờ H1/V4 trên main, H2 chờ H1 + contract port trên main; nghiệm thu H2 còn cần adapter thật cùng snapshot và leader ghép public GET/security/error. Đã lưu [kế hoạch tiếp tục](../../docs/superpowers/plans/2026-11-16-booking-continuation.md) và [bằng chứng phụ thuộc](../../docs/test/h1-seat-allocation-verification.md). Chỉ cập nhật tài liệu, chưa bắt đầu feature tiếp theo, không chạy lại backend tests hay commit/push/mở PR/merge; kết quả 15/11 vẫn là lịch sử H1 domain, không phải V4/H2/H3.
+
+**Cập nhật workflow Booking sau checkpoint 16/11:** người dùng đã chọn PR `feat/h1-seat-allocation` → `feat/p1-trip-schema`, sau khi PR được ghép mới code trực tiếp trên nhánh Phương; lựa chọn này thay điều kiện main-only trước đó cho công việc của Huy. Nhánh Huy đã fast-forward lên P1 `2b671b9`, giữ nguyên core/tests. Full backend verify trên nền P1 đạt **130 tests** (68 unit + 62 PostgreSQL IT), không failure/error/skip; cleanup thành công. Đã giao commit/push/mở PR core, không tự merge. H1 vẫn một phần, còn V4/FK/fixtures/persistence; H2/H3 chưa hiện thực. Xem báo cáo H1 và kế hoạch tiếp tục để phân biệt kết quả lịch sử với trạng thái hiện tại.
+
 ## Khánh Hoàng — giao diện xuyên suốt
 
 Phạm vi: `src/frontend/src/features/` theo feature; API client ở `src/frontend/src/shared/api/`; thay trang foundation khi có flow thật. Reviewer chính: **Đức Hiếu**, chủ UC đối chiếu response.
