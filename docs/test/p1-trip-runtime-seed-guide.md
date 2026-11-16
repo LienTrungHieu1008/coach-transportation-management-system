@@ -99,7 +99,6 @@ Never use `TRUNCATE ... CASCADE`, `DROP SCHEMA` or
   to Huy.
 - P3 runtime validation and API implementation are
   separate deliverables.
-```
 
 ## Run the runtime seed atomically
 
