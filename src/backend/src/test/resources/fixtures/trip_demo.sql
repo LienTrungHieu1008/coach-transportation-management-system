@@ -59,16 +59,27 @@ INSERT INTO route_stop (
 
 -- 4. DEMO VEHICLE - SIX SEATS
 
+
 INSERT INTO vehicle (
-    vehicle_id, vehicle_code, vehicle_type,
-    capacity, is_active
+    vehicle_id,
+    vehicle_code,
+    license_plate,
+    vehicle_type,
+    capacity,
+    layout_template,
+    seat_layout_id,
+    is_active
 ) VALUES (
     '66666666-6666-4666-8666-666666666666',
     'DEMO-VEHICLE-01',
+    '47B-123.45',
     'Demo coach',
     6,
+    'SEATED_6_1_DECK',
+    'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     TRUE
 );
+
 
 -- 5. PHYSICAL SEATS
 -- Coordinates (deck, seat_row, seat_column)

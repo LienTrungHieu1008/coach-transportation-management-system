@@ -13,6 +13,12 @@ Migration:
 Fixture:
 `src/backend/src/test/resources/fixtures/trip_demo.sql`
 
+Runtime demo seed:
+`src/backend/src/test/resources/fixtures/trip_demo_runtime.sql`
+
+Runtime seed/reset guide:
+`docs/test/p1-trip-runtime-seed-guide.md`
+
 Integration tests:
 `src/backend/src/test/java/vn/edu/team11/coach/trip/infrastructure/TripSchemaIT.java`
 
@@ -48,6 +54,23 @@ Vehicle ID:
 `66666666-6666-4666-8666-666666666666`
 
 Vehicle code: `DEMO-VEHICLE-01`
+License plate: `47B-123.45` (synthetic demo value)
+
+Vehicle type: `Demo coach`
+
+Layout template: `SEATED_6_1_DECK`
+
+Seat layout ID:
+`bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb`
+
+Layout identity mapping (proposed):
+
+- `Vehicle.seatLayoutId` = `vehicle.seat_layout_id`.
+- `SeatLayout.id` = `vehicle.seat_layout_id`.
+- Each PhysicalSeat keeps its own stable `physical_seat_id`.
+- Do not generate new layout/seat UUIDs when reading the database.
+- Current V3 uses one distinct layout ID per Vehicle.
+- This mapping is pending leader confirmation before merge.
 
 Capacity: 6
 
@@ -73,6 +96,16 @@ Coordinates are 0-based.
 | Day | 11111111-1111-4111-8111-111111111111 | aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa10 | 20/11/2026 09:00 |
 | Overnight | 11111111-1111-4111-8111-111111111112 | aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa11 | 20/11/2026 22:30 |
 
+### Schedule representation
+
+- `schedule.operating_days` is stored as TEXT.
+- The supported demo value is `DAILY`, meaning every day.
+- Weekly operating-day patterns are not implemented in P1.
+- `first_stop_departure_time` uses local time in
+  `Asia/Ho_Chi_Minh`.
+- Actual TripStop instants are stored as TIMESTAMPTZ.
+- Trip queries must use the stored TripStop instants rather
+  than reconstructing them from the Schedule template.
 Both Trips:
 
 - Route: DEMO-ABC
@@ -82,7 +115,12 @@ Both Trips:
 
 The fixture uses fixed dates for repeatable tests.
 
-Runtime demo with D = tomorrow is not yet implemented.
+
+A separate runtime demo seed uses D = tomorrow in
+Asia/Ho_Chi_Minh. See `trip_demo_runtime.sql` and
+`docs/test/p1-trip-runtime-seed-guide.md`.
+
+The fixed fixture remains unchanged for repeatable tests.
 
 ## 5. Trip Stop Times
 
@@ -134,7 +172,7 @@ Command:
 
 Latest reported result on 2026-11-16:
 
-- Tests run: 52
+- Tests run: 62
 - Failures: 0
 - Errors: 0
 - Skipped: 0
@@ -148,14 +186,43 @@ Cleanup:
 This reports the latest Maven results from the P1 working branch.
 It does not certify all P3/P07 runtime behavior.
 
-## 9. Pending Review
+## 9. Review Status and Remaining Work
 
-- Confirm PhysicalSeat coordinates and Stop index with Huy.
-- Confirm operating_days format.
-- Review Schedule/Trip relationships and layout identifier.
-- Validate Stop order continuity and consecutive LegFare coverage.
-- Complete missing/invalid Trip data tests.
-- Prepare runtime demo dates using D = tomorrow.
-- Review V3 before integration with V4.
+### Confirmed by Huy for V4
 
-No Booking or SeatAllocation records are created by this fixture.
+- Stop index is 0-based.
+- Segment interval is `[fromIndex, toIndex)`.
+- Existing six PhysicalSeat UUIDs and two Trip UUIDs
+  are sufficient for V4 Booking/hold tests.
+- `DAILY` is acceptable for the fixed demo fixture.
+- PhysicalSeat UUIDs must remain stable.
+
+### Implemented locally, pending PR update
+
+- Vehicle `license_plate` with a unique constraint.
+- Vehicle `layout_template`.
+- Proposed stable Vehicle `seat_layout_id`.
+- Integration tests for Vehicle fields and constraints.
+- Fixture checks for contiguous RouteStop indices.
+- Fixture checks for chronological TripStop times.
+- Fixture checks for complete, forward and consecutive LegFares.
+- Latest verification: 62 tests, BUILD SUCCESS.
+
+
+
+### Remaining work
+
+- Obtain leader confirmation for the proposed `seatLayoutId`
+  mapping before merge.
+- Implement runtime validation for Stop index continuity,
+  chronological TripStop times, and forward/consecutive
+  LegFares with complete fare coverage in the P3 DB adapter.
+- Handle incomplete or inconsistent Trip facts according to
+  the existing TripQueryPort/API contract; never default
+  missing fares to zero.
+- Implement the P3 PostgreSQL TripQueryPort adapter.
+- Complete final V3/V4 integration review before merge.
+
+
+No Booking or SeatAllocation records are created by
+this fixture.

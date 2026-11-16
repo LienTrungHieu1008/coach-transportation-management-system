@@ -87,11 +87,15 @@ CREATE TABLE route_stop (
 -- =========================================================
 -- A Vehicle is assigned to a Trip and owns physical seats.
 
+
 CREATE TABLE vehicle (
     vehicle_id UUID NOT NULL,
     vehicle_code TEXT NOT NULL,
+    license_plate TEXT NOT NULL,
     vehicle_type TEXT NOT NULL,
     capacity INTEGER NOT NULL,
+    layout_template TEXT NOT NULL,
+    seat_layout_id UUID NOT NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
 
     CONSTRAINT vehicle_pk
@@ -100,15 +104,28 @@ CREATE TABLE vehicle (
     CONSTRAINT vehicle_code_uk
         UNIQUE (vehicle_code),
 
+    CONSTRAINT vehicle_license_plate_uk
+        UNIQUE (license_plate),
+
+    CONSTRAINT vehicle_seat_layout_id_uk
+        UNIQUE (seat_layout_id),
+
     CONSTRAINT vehicle_code_nonblank
         CHECK (char_length(btrim(vehicle_code)) > 0),
+
+    CONSTRAINT vehicle_license_plate_nonblank
+        CHECK (char_length(btrim(license_plate)) > 0),
 
     CONSTRAINT vehicle_type_nonblank
         CHECK (char_length(btrim(vehicle_type)) > 0),
 
     CONSTRAINT vehicle_capacity_positive
-        CHECK (capacity > 0)
+        CHECK (capacity > 0),
+
+    CONSTRAINT vehicle_layout_template_nonblank
+        CHECK (char_length(btrim(layout_template)) > 0)
 );
+
 
 -- =========================================================
 -- 5. PHYSICAL_SEAT

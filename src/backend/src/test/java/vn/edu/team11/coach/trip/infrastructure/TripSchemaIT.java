@@ -4,6 +4,7 @@ package vn.edu.team11.coach.trip.infrastructure;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -139,11 +140,24 @@ void rejectsNegativeSeatCoordinates() {
 
     jdbc.update(
         """
-        INSERT INTO vehicle
-            (vehicle_id, vehicle_code, vehicle_type, capacity)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO vehicle (
+            vehicle_id,
+            vehicle_code,
+            license_plate,
+            vehicle_type,
+            capacity,
+            layout_template,
+            seat_layout_id
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        vehicleId, "V-" + vehicleId, "SLEEPER", 6
+        vehicleId,
+        "V-" + vehicleId,
+        "PLATE-" + vehicleId,
+        "SLEEPER",
+        6,
+        "SLEEPER_6_1_DECK",
+        UUID.randomUUID()
     );
 
     assertThatThrownBy(() -> jdbc.update(
@@ -370,11 +384,24 @@ void rejectsDuplicatePhysicalSeatPosition() {
 
     jdbc.update(
         """
-        INSERT INTO vehicle
-            (vehicle_id, vehicle_code, vehicle_type, capacity)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO vehicle (
+            vehicle_id,
+            vehicle_code,
+            license_plate,
+            vehicle_type,
+            capacity,
+            layout_template,
+            seat_layout_id
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        vehicleId, "V-" + vehicleId, "DEMO_COACH", 6
+        vehicleId,
+        "V-" + vehicleId,
+        "PLATE-" + vehicleId,
+        "DEMO_COACH",
+        6,
+        "SEATED_6_1_DECK",
+        UUID.randomUUID()
     );
 
     jdbc.update(
@@ -426,6 +453,270 @@ void rejectsTripStopOutsideItsRoute() {
         otherStopId,
         java.time.OffsetDateTime.parse("2026-11-20T03:00:00Z")
     )).isInstanceOf(DataIntegrityViolationException.class);
+}
+
+
+@Test
+@Sql("/fixtures/trip_demo.sql")
+void demoVehicleHasStableIdentityAndLayout() {
+    UUID vehicleId = UUID.fromString(
+        "66666666-6666-4666-8666-666666666666"
+    );
+
+    Map<String, Object> vehicle = jdbc.queryForMap(
+        """
+        SELECT license_plate, layout_template, seat_layout_id
+        FROM vehicle
+        WHERE vehicle_id = ?
+        """,
+        vehicleId
+    );
+
+    assertThat(vehicle.get("license_plate"))
+        .isEqualTo("47B-123.45");
+
+    assertThat(vehicle.get("layout_template"))
+        .isEqualTo("SEATED_6_1_DECK");
+
+    assertThat(vehicle.get("seat_layout_id"))
+        .isEqualTo(UUID.fromString(
+            "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
+        ));
+}
+
+@Test
+@Sql("/fixtures/trip_demo.sql")
+void rejectsDuplicateVehicleLicensePlate() {
+    UUID vehicleId = UUID.randomUUID();
+
+    assertThatThrownBy(() -> jdbc.update(
+        """
+        INSERT INTO vehicle (
+            vehicle_id, vehicle_code, license_plate,
+            vehicle_type, capacity, layout_template, seat_layout_id
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        vehicleId,
+        "V-" + vehicleId,
+        "47B-123.45",
+        "DEMO_COACH",
+        6,
+        "SEATED_6_1_DECK",
+        UUID.randomUUID()
+    )).isInstanceOf(DataIntegrityViolationException.class);
+}
+
+@Test
+@Sql("/fixtures/trip_demo.sql")
+void rejectsDuplicateVehicleSeatLayoutId() {
+    UUID vehicleId = UUID.randomUUID();
+
+    assertThatThrownBy(() -> jdbc.update(
+        """
+        INSERT INTO vehicle (
+            vehicle_id, vehicle_code, license_plate,
+            vehicle_type, capacity, layout_template, seat_layout_id
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        vehicleId,
+        "V-" + vehicleId,
+        "PLATE-" + vehicleId,
+        "DEMO_COACH",
+        6,
+        "SEATED_6_1_DECK",
+        UUID.fromString("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb")
+    )).isInstanceOf(DataIntegrityViolationException.class);
+}
+
+@Test
+void rejectsBlankVehicleLicensePlate() {
+    UUID vehicleId = UUID.randomUUID();
+
+    assertThatThrownBy(() -> jdbc.update(
+        """
+        INSERT INTO vehicle (
+            vehicle_id, vehicle_code, license_plate,
+            vehicle_type, capacity, layout_template, seat_layout_id
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        vehicleId,
+        "V-" + vehicleId,
+        "   ",
+        "DEMO_COACH",
+        6,
+        "SEATED_6_1_DECK",
+        UUID.randomUUID()
+    )).isInstanceOf(DataIntegrityViolationException.class);
+}
+
+@Test
+void rejectsBlankVehicleLayoutTemplate() {
+    UUID vehicleId = UUID.randomUUID();
+
+    assertThatThrownBy(() -> jdbc.update(
+        """
+        INSERT INTO vehicle (
+            vehicle_id, vehicle_code, license_plate,
+            vehicle_type, capacity, layout_template, seat_layout_id
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        vehicleId,
+        "V-" + vehicleId,
+        "PLATE-" + vehicleId,
+        "DEMO_COACH",
+        6,
+        "   ",
+        UUID.randomUUID()
+    )).isInstanceOf(DataIntegrityViolationException.class);
+}
+
+@Test
+@Sql("/fixtures/trip_demo.sql")
+void demoRouteStopIndicesAreContiguousFromZero() {
+    Long invalidCount = jdbc.queryForObject(
+        """
+        SELECT count(*)
+        FROM (
+            SELECT
+                route_id,
+                stop_order,
+                row_number() OVER (
+                    PARTITION BY route_id
+                    ORDER BY stop_order
+                ) - 1 AS expected_order
+            FROM route_stop
+        ) ordered_stops
+        WHERE stop_order <> expected_order
+        """,
+        Long.class
+    );
+
+    assertThat(invalidCount).isZero();
+}
+
+@Test
+@Sql("/fixtures/trip_demo.sql")
+void demoTripsHaveEveryConsecutiveLegFare() {
+    Long invalidCount = jdbc.queryForObject(
+        """
+        WITH ordered_stops AS (
+            SELECT
+                ts.trip_id,
+                ts.stop_id AS from_stop_id,
+                lead(ts.stop_id) OVER (
+                    PARTITION BY ts.trip_id
+                    ORDER BY rs.stop_order
+                ) AS to_stop_id
+            FROM trip_stop ts
+            JOIN route_stop rs
+              ON rs.route_id = ts.route_id
+             AND rs.stop_id = ts.stop_id
+        )
+        SELECT count(*)
+        FROM ordered_stops os
+        LEFT JOIN leg_fare lf
+          ON lf.trip_id = os.trip_id
+         AND lf.from_stop_id = os.from_stop_id
+         AND lf.to_stop_id = os.to_stop_id
+        WHERE os.to_stop_id IS NOT NULL
+          AND lf.trip_id IS NULL
+        """,
+        Long.class
+    );
+
+    assertThat(invalidCount).isZero();
+}
+
+@Test
+@Sql("/fixtures/trip_demo.sql")
+void demoTripsHaveChronologicalStopTimes() {
+    Long invalidCount = jdbc.queryForObject(
+        """
+        WITH stop_times AS (
+            SELECT
+                ts.trip_id,
+                rs.stop_order,
+                ts.planned_arrival_time,
+                ts.planned_departure_time,
+                lag(
+                    COALESCE(
+                        ts.planned_departure_time,
+                        ts.planned_arrival_time
+                    )
+                ) OVER (
+                    PARTITION BY ts.trip_id
+                    ORDER BY rs.stop_order
+                ) AS previous_stop_time
+            FROM trip_stop ts
+            JOIN route_stop rs
+              ON rs.route_id = ts.route_id
+             AND rs.stop_id = ts.stop_id
+        )
+        SELECT count(*)
+        FROM stop_times
+        WHERE previous_stop_time IS NOT NULL
+          AND COALESCE(
+              planned_arrival_time,
+              planned_departure_time
+          ) <= previous_stop_time
+        """,
+        Long.class
+    );
+
+    assertThat(invalidCount).isZero();
+}
+
+@Test
+@Sql("/fixtures/trip_demo.sql")
+void demoTripsHaveOnlyForwardConsecutiveLegFares() {
+    Long invalidCount = jdbc.queryForObject(
+        """
+        SELECT count(*)
+        FROM leg_fare lf
+        JOIN trip_stop from_ts
+          ON from_ts.trip_id = lf.trip_id
+         AND from_ts.stop_id = lf.from_stop_id
+        JOIN route_stop from_rs
+          ON from_rs.route_id = from_ts.route_id
+         AND from_rs.stop_id = from_ts.stop_id
+        JOIN trip_stop to_ts
+          ON to_ts.trip_id = lf.trip_id
+         AND to_ts.stop_id = lf.to_stop_id
+        JOIN route_stop to_rs
+          ON to_rs.route_id = to_ts.route_id
+         AND to_rs.stop_id = to_ts.stop_id
+        WHERE to_rs.stop_order <> from_rs.stop_order + 1
+        """,
+        Long.class
+    );
+
+    assertThat(invalidCount).isZero();
+}
+
+@Test
+@Sql("/fixtures/trip_demo_runtime.sql")
+void runtimeDemoTripsDepartTomorrowInVietnam() {
+    java.time.LocalDate tomorrowInVietnam =
+        java.time.LocalDate.now(
+            java.time.ZoneId.of("Asia/Ho_Chi_Minh")
+        ).plusDays(1);
+
+    List<java.time.LocalDate> departureDates =
+        jdbc.queryForList(
+            """
+            SELECT departure_date
+            FROM trip
+            ORDER BY trip_id
+            """,
+            java.time.LocalDate.class
+        );
+
+    assertThat(departureDates)
+        .containsExactly(tomorrowInVietnam, tomorrowInVietnam);
 }
 
 }
