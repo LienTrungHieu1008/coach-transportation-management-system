@@ -100,3 +100,33 @@ Never use `TRUNCATE ... CASCADE`, `DROP SCHEMA` or
 - P3 runtime validation and API implementation are
   separate deliverables.
 ```
+
+## Run the runtime seed atomically
+
+Run only against a fresh, isolated demo PostgreSQL database
+after Flyway migrations have completed.
+
+Use `psql` with both flags:
+
+- `-1` (`--single-transaction`): Execute the entire seed file in one transaction.
+- `-v ON_ERROR_STOP=1`: Stop immediately when a SQL or script error occurs.
+- `-X`: Ignore local psql startup configuration.
+
+From the repository root, run this command in Windows CMD:
+
+```bat
+psql -X -v ON_ERROR_STOP=1 -1 -d "<DEMO_DATABASE_URL>" -f "src/backend/src/test/resources/fixtures/trip_demo_runtime.sql"
+```
+
+Replace `<DEMO_DATABASE_URL>` with the PostgreSQL connection
+string for your isolated demo database.
+
+If any statement fails, psql stops with a nonzero exit code,
+and the entire seed transaction is rolled back.
+
+Do not run this seed against shared or production databases.
+The seed uses fixed UUIDs and is not idempotent. To reseed,
+recreate the isolated demo database first.
+
+Do not add BEGIN or COMMIT to the SQL fixture because
+`psql -1` manages the transaction.

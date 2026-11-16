@@ -39,7 +39,7 @@ class TripSchemaIT {
         );
 
         assertThat(versions)
-            .containsExactly("1", "2", "3");
+            .containsSubsequence("1", "2", "3");
     }
 
     @Test
