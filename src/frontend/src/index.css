@@ -1,27 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  font-family: "Atkinson Hyperlegible", Inter, "Segoe UI", sans-serif;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
   color: var(--color-foreground);
   background: var(--color-background);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   font-optical-sizing: auto;
   font-weight: 400;
-  --color-primary: #1e3a8a;
-  --color-primary-strong: #172d6c;
-  --color-secondary: #2563eb;
+  --color-primary: #183b60;
+  --color-primary-strong: #102c4b;
+  --color-secondary: #2763a0;
   --color-accent: #c2410c;
-  --color-background: #f3f7fc;
+  --color-background: #f5f6f8;
   --color-surface: #ffffff;
-  --color-foreground: #17233d;
-  --color-muted-foreground: #53627a;
-  --color-muted: #e9eff7;
-  --color-border: #d7e0ed;
+  --color-foreground: #182c42;
+  --color-muted-foreground: #526173;
+  --color-muted: #edf1f5;
+  --color-border: #dce3ea;
   --color-success: #166534;
   --color-warning: #9a4c0b;
   --color-danger: #b42318;
-  --shadow-card: 0 14px 38px rgb(23 45 108 / 8%);
+  --shadow-card: 0 8px 28px rgb(16 44 75 / 6%);
+  --radius-card: 18px;
   --motion-fast: 160ms ease;
   --motion-standard: 220ms ease;
 }
@@ -29,14 +32,37 @@
 * { box-sizing: border-box; }
 html { min-width: 320px; scroll-behavior: smooth; }
 body { min-width: 320px; margin: 0; }
+img, svg { max-width: 100%; }
+a { color: inherit; }
+button, input, select, summary { -webkit-tap-highlight-color: transparent; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: not-allowed; }
 button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible, summary:focus-visible {
-  outline: 3px solid #f59e0b;
+  outline: 3px solid #3279bb;
   outline-offset: 3px;
 }
 ::selection { background: #dbeafe; color: #17233d; }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --color-primary: #a9c9ec;
+    --color-primary-strong: #dceafd;
+    --color-secondary: #95bde9;
+    --color-accent: #c2410c;
+    --color-background: #101a28;
+    --color-surface: #172538;
+    --color-foreground: #eef3f9;
+    --color-muted-foreground: #b5c2d3;
+    --color-muted: #213248;
+    --color-border: #35485f;
+    --color-success: #97dbb2;
+    --color-warning: #edc18b;
+    --color-danger: #ffb4a8;
+    --shadow-card: 0 8px 28px rgb(0 0 0 / 15%);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
