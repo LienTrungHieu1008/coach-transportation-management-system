@@ -55,9 +55,10 @@ lỗi rollback toàn bộ, không đổi Confirmed/Cancelled hoặc gia hạn ex
 Lượt local ngày 17/11/2026: **329 tests pass**, không failure/error/skip, bằng lệnh
 `docker compose -p team11-huy-booking-test -f compose.test.yaml run --rm backend-test`;
 sau đó `docker compose -p team11-huy-booking-test -f compose.test.yaml down`.
-Tests Java và fixture cố định Booking giữ local; riêng SQL runtime bên dưới được bàn giao qua PR.
-Số 329 là kết quả toàn backend trước khi đóng gói, không phải số tests CI. Xem Checks của PR #5
-trên đúng commit mới nhất; CI chạy trên source đã publish, không chứa các tests Booking local.
+Tests Booking đã đưa vào PR cùng fixture cố định và SQL runtime. Bộ tests bao phủ domain,
+application/API, schema/repository, expiry và tích hợp P3 thật. Cấu hình test tắt scheduler tự động;
+tests gọi service/job trực tiếp. Số 329 ở trên là kết quả local đã ghi nhận; xem Checks của PR #5
+trên đúng commit mới nhất để biết kết quả CI, hiện chạy cả tests Booking đã publish.
 Giữ sửa scope MVC test nền tảng để không nạp H2 vào slice thiếu service; assertion cũ giữ nguyên.
 
 Đối chiếu P3 ngày 17/11 trên commit `0984289`: 4 tests map/expiry/asOf/snapshot và 5 tests
