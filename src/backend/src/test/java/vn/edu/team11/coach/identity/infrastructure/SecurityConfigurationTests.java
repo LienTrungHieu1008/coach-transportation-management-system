@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest({CsrfController.class, SecurityConfigurationTests.SecurityProbeController.class})
+@WebMvcTest(controllers = {CsrfController.class, SecurityConfigurationTests.SecurityProbeController.class})
 @Import({SecurityConfiguration.class, SecurityConfigurationTests.SecurityProbeController.class})
 class SecurityConfigurationTests {
     @Autowired
