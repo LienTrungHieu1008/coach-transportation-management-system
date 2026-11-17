@@ -60,6 +60,21 @@ Số 329 là kết quả toàn backend trước khi đóng gói, không phải s
 trên đúng commit mới nhất; CI chạy trên source đã publish, không chứa các tests Booking local.
 Giữ sửa scope MVC test nền tảng để không nạp H2 vào slice thiếu service; assertion cũ giữ nguyên.
 
+Đối chiếu P3 ngày 17/11 trên commit `0984289`: 4 tests map/expiry/asOf/snapshot và 5 tests
+hết ghế/lỗi đọc/cleanup/rollback đều PASS trên PostgreSQL 16. Chạy mục tiêu bằng Maven
+`test-compile failsafe:integration-test failsafe:verify -Dit.test=<class#method> -DfailIfNoTests=true`
+trong `backend-test` của project Compose riêng; không chạy lại toàn bộ suite.
+
+| Ca bàn giao P07 | Kết quả backend đã chạy |
+|---|---|
+| A–C đủ sáu ghế, đúng ID/thứ tự/expiry | PASS |
+| B–C tái sử dụng ghế Confirmed A–B | PASS |
+| Đúng expiry ghế FREE; cleanup lặp và rollback khi lỗi | PASS |
+| Hết ghế vẫn 200, no-store, không lộ hành khách | PASS qua MVC không có security filters |
+| Lỗi đọc Trip hoặc allocations trả 503, không giả FREE | PASS qua MVC không có security filters |
+
+Đây là bằng chứng tích hợp backend qua P3 thật, chưa phải kết quả flow public/FE của QA.
+
 ## Demo cho Hoàng và QA
 
 SQL runtime dùng nguyên UUID Account/Trip/Stop/ghế của Phương, không tự chạy khi app khởi động.
@@ -105,7 +120,8 @@ Sau mốc expiry B2 phải FREE dù cleanup trễ. Lỗi truy xuất phải là 
   toàn chuyến và cùng snapshot Trip–Booking với một asOf; không cần chờ P2/P4 để ghép H2.
 - Nội dung SAD/weekly phần Huy: GET chỉ đọc qua port/core, H3 ghi transaction riêng; ba bảng V4,
   FK và luồng lỗi 503 mô tả ở trên. Không có API tạo Booking hoặc giữ ghế trong lần xem.
-- Minh Phương cần review phần mới của PR #5; nhận xét core cũ chưa thay review V4/H2/H3.
+- Minh Phương đã [review V4/H2/H3, README và SQL demo tại `0984289`](https://github.com/LienTrungHieu1008/coach-transportation-management-system/pull/5#pullrequestreview-5933584040),
+  xác nhận tương thích P3 và không yêu cầu sửa. Review GitHub là COMMENTED, chưa phải APPROVED.
 - Leader C2 sở hữu public GET/security chung; Hoàng nối F4; Đức Hiếu tổng hợp SAD/weekly và QA.
   Chưa thực thi năm ca public: map A–C, B–C kề nhau, expiry/cleanup, hết ghế vẫn 200, lỗi đọc 503.
   Các ca hết ghế/lỗi hạ tầng chỉ dựng trên DB demo riêng; kết quả local không thay báo cáo QA.
