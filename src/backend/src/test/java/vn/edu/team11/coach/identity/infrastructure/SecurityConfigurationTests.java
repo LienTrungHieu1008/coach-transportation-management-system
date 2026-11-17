@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import vn.edu.team11.coach.identity.api.CsrfController;
+
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.emptyString;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -18,7 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest
+@WebMvcTest(controllers = {CsrfController.class, SecurityConfigurationTests.SecurityProbeController.class})
 @Import({SecurityConfiguration.class, SecurityConfigurationTests.SecurityProbeController.class})
 class SecurityConfigurationTests {
     @Autowired
