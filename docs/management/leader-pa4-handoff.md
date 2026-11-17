@@ -1,4 +1,13 @@
-# Phần việc Trung Hiếu — bàn giao 14/11/2026
+# Phần việc Trung Hiếu — bàn giao, cập nhật 16/11/2026
+
+## Trạng thái bàn giao hiện tại
+
+- I1/V2 đã merge qua PR #2; P1/V3 qua PR #4 và interface/DTO P3 qua PR #3 đã có trên main (`dd1ca72` khi kiểm tra ngày 16/11). Không giao lại các phần này như chưa viết.
+- Leader chốt mapping `vehicle.seat_layout_id` → `Vehicle.seatLayoutId`/`SeatLayout.id` tại [contract port](../contracts/trip-query-port.md); không sửa V3 đã chia sẻ.
+- Adapter P3 đang ở PR #6, chờ review/merge; H1 core ở PR #5 chưa đại diện toàn bộ V4/H2/H3. F1 ở PR #7. Các PR chưa merge không là baseline nghiệm thu; không suy CI/review từ nội dung mô tả của tác giả.
+- Huy có thể làm logic/tests song song và dùng interface/manifest trên main; nghiệm thu ghép port thật cần adapter đã review và kiểm chứng tích hợp.
+
+Các mục bên dưới giữ nội dung bàn giao ban đầu; trạng thái merge được cập nhật bởi phần này.
 
 ## C1 và tài liệu giao việc
 
@@ -28,7 +37,7 @@ Tests đã chạy và điểm đang vướng:
 
 Leader cùng owner thống nhất PR chứa thay đổi chung; chỉ permit GET chính xác theo contract, không permit cả `/api/**`. Review JSON error/status theo OpenAPI nhưng không tự đổi body 401/403 nền tảng ngoài task. Chạy verify với DB test; kiểm tra GET public không bị yêu cầu login, writes/private routes vẫn bị bảo vệ. Sau đó ghép FE từng màn, kiểm tra Segment giữ nguyên và dữ liệu lỗi không hiển thị thành công. Đức Hiếu review tích hợp; owner sửa nghiệp vụ module mình.
 
-**Chưa hoàn thành C2:** chưa có P2/P3/P4/H2 và FE nghiệp vụ để kiểm chứng flow. I1 pass không chứng minh các route đó hoạt động.
+**Chưa hoàn thành C2:** P3 mới có interface trên main, adapter còn ở PR #6; chưa có flow P2/P4/H2 và FE nối thật được kiểm chứng. I1 pass không chứng minh các route đó hoạt động.
 
 ## C3: đầu vào cần nhận, không tự tạo kết quả
 

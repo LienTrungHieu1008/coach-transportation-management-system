@@ -1,8 +1,8 @@
-# Task PA4 giao cho thành viên — cập nhật 14/11/2026
+# Task PA4 giao cho thành viên — cập nhật 16/11/2026
 
 Phạm vi đã chốt: P04/P05/P07. **Trung Hiếu đã duyệt C1 kỹ thuật và phân công dưới đây ngày 14/11/2026**; từng thành viên cần phản hồi nhận việc và lịch dự kiến. C1 là quyết định kỹ thuật đã chốt; các task hiện thực còn **chưa nghiệm thu**. Mốc là mục tiêu nội bộ, không phải kết quả đã hoàn thành. Đọc [handbook](../../docs/team-handbook.md) để biết cách tạo branch, push, PR và review.
 
-**Tiến độ I1 ngày 14/11:** đã viết V2, fixture và tests; full backend verify đạt 43 tests,0 skipped. [Contract Account cho Huy](../../docs/contracts/identity-account.md) và [báo cáo kiểm chứng](../../docs/test/i1-account-verification.md) đã có. Chờ Hoàng review/merge trước khi tính I1 nghiệm thu hoặc V2 có trên main; các task còn lại chưa được đánh dấu xong.
+**Bàn giao ngày 16/11:** I1/V2 đã merge qua PR #2; P1/V3 + fixture/manifest qua PR #4 và interface/DTO P3 qua PR #3 đã có trên main. Mapping layout đã chốt tại [contract port](../../docs/contracts/trip-query-port.md). Adapter PostgreSQL P3 còn ở PR #6, H1 core ở PR #5, F1 ở PR #7; không coi các PR đang mở là đã nghiệm thu. [Contract Account](../../docs/contracts/identity-account.md), [manifest P1](../../docs/test/p1-trip-demo-manifest.md) và [báo cáo I1](../../docs/test/i1-account-verification.md) là đầu vào bàn giao. Kết quả test cũ là bằng chứng lịch sử, chưa chạy lại trong lần sửa tài liệu này.
 
 ## Đọc mã task và migration cho đúng
 
@@ -11,8 +11,8 @@ Phạm vi đã chốt: P04/P05/P07. **Trung Hiếu đã duyệt C1 kỹ thuật 
 | Mã / file | Nghĩa cụ thể | Ai làm / tình trạng |
 |---|---|---|
 | `V1__spring_session.sql` | Thay đổi DB số 1: tạo hai bảng lưu phiên và thuộc tính phiên của Spring Session, kèm index/FK. Không phải bảng Account. | Đã có trong baseline; giữ nguyên. |
-| `V2__identity_account.sql` | Thay đổi số 2: tạo cấu trúc Account/role tối thiểu để Booking tham chiếu đúng người dùng. | Trung Hiếu, task I1; đã viết/test, chờ review/merge. |
-| `V3__trip_read_model.sql` | Thay đổi số 3: tạo cấu trúc tuyến/Stop/chuyến/xe/ghế/giá từng leg theo SAD. Đây là dữ liệu Trip có thẩm quyền, không nhân bản một bộ Trip thứ hai. | Phương, task P1; chưa viết. |
+| `V2__identity_account.sql` | Thay đổi số 2: tạo cấu trúc Account/role tối thiểu để Booking tham chiếu đúng người dùng. | Trung Hiếu, task I1; đã merge PR #2. |
+| `V3__trip_read_model.sql` | Thay đổi số 3: tạo cấu trúc tuyến/Stop/chuyến/xe/ghế/giá từng leg theo SAD. Đây là dữ liệu Trip có thẩm quyền, không nhân bản một bộ Trip thứ hai. | Phương, task P1; đã merge PR #4, manifest đã có. |
 | `V4__booking_availability.sql` | Thay đổi số 4: tạo cấu trúc Booking/ghế trong Booking/phân bổ ghế để tính availability và expiry. | Huy, task H1; chưa viết. |
 
 `V2` là **version migration**; `I1/P1/H1` là **mã việc được giao**; `UC-P04` là **mã yêu cầu nghiệp vụ**. Chúng không cùng một hệ đánh số. Trong tên file, `V2` là số thứ tự, `__` ngăn cách với mô tả, `.sql` là phần SQL thực thi.
@@ -138,7 +138,7 @@ Phạm vi: `docs/test/`, bản SAD PA4 riêng trong `docs/analysis and design/`,
 
 | ID | Task / mốc mục tiêu | Phụ thuộc | Đầu ra để nghiệm thu / reviewer |
 |---|---|---|---|
-| I1 | Schema Account V2 — đã hiện thực/test 14/11, chờ review/merge | C1 | `identity_account(account_id UUID)` và constraints theo [contract I1](../../docs/contracts/identity-account.md); 35 Account IT +8 tests nền tảng pass trên PostgreSQL mới, có upgrade V1 giữ session. Fixture DISABLED tách schema, không login mặc định/P01/P02. **Hoàng review**, Đức Hiếu hỗ trợ kiểm tra. |
+| I1 | Schema Account V2 — đã merge PR #2 | C1 | `identity_account(account_id UUID)` và constraints theo [contract I1](../../docs/contracts/identity-account.md); 35 Account IT +8 tests nền tảng pass trên PostgreSQL mới, có upgrade V1 giữ session. Fixture DISABLED tách schema, không login mặc định/P01/P02. **Hoàng review**, Đức Hiếu hỗ trợ kiểm tra. |
 | C2 | Ghép từng API từ 14–17/11; chốt flow 17/11 | Từng phần theo PR endpoint sẵn sàng; flow cuối cần I1 + P2/P3/P4 + H2/H3 + F2/F3/F4 | Điều phối merge đã review; sở hữu security/error mapping chung. Ghép cùng owner endpoint ngay khi API cần route public, không chờ đủ tất cả endpoint mới bắt đầu. Chỉ mở GET đúng contract khi endpoint tồn tại; route khác vẫn bảo vệ, writes không bị mở. Chạy tests từng phần và demo xuyên suốt bằng Compose/DB thật. **Đức Hiếu review**, tác giả sửa lỗi module mình. |
 | C3 | Weekly, demo và gói nộp — 20/11 | Q2/Q3 + mô tả prototype | Mỗi người gửi việc thực tế/bằng chứng; tổng hợp weekly từ 07/11, chạy thử demo, kiểm tra gói PA4-Group11. Đức Hiếu đóng gói hỗ trợ, Trung Hiếu duyệt/nộp ngày 21/11 và lưu bằng chứng. Không tự ghi đã nộp khi chưa có kết quả. |
 

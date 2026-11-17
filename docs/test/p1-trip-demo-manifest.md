@@ -3,7 +3,7 @@
 
 Owner: Do Minh Phuong
 Reviewer: Truong Dinh Nhat Huy
-Status: Draft — pending review
+Status (16/11/2026): P1/V3 merged via PR #4; layout mapping confirmed by leader in `docs/contracts/trip-query-port.md`. P3 PostgreSQL adapter is pending review/merge in PR #6. Merge status does not establish V3/V4 integration acceptance or approval of later changes.
 
 ## 1. Source
 
@@ -63,14 +63,14 @@ Layout template: `SEATED_6_1_DECK`
 Seat layout ID:
 `bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb`
 
-Layout identity mapping (proposed):
+Layout identity mapping (confirmed by leader, 16/11/2026):
 
 - `Vehicle.seatLayoutId` = `vehicle.seat_layout_id`.
 - `SeatLayout.id` = `vehicle.seat_layout_id`.
 - Each PhysicalSeat keeps its own stable `physical_seat_id`.
 - Do not generate new layout/seat UUIDs when reading the database.
 - Current V3 uses one distinct layout ID per Vehicle.
-- This mapping is pending leader confirmation before merge.
+- No separate `seat_layout` table exists in V3; construct the DTO from Vehicle and its PhysicalSeats.
 
 Capacity: 6
 
@@ -201,7 +201,7 @@ It does not certify all P3/P07 runtime behavior.
 
 - Vehicle `license_plate` with a unique constraint.
 - Vehicle `layout_template`.
-- Proposed stable Vehicle `seat_layout_id`.
+- Stable Vehicle `seat_layout_id` (mapping confirmed by leader on 16/11/2026).
 - Integration tests for Vehicle fields and constraints.
 - Fixture checks for contiguous RouteStop indices.
 - Fixture checks for chronological TripStop times.
@@ -212,8 +212,7 @@ It does not certify all P3/P07 runtime behavior.
 
 ### Remaining work
 
-- Obtain leader confirmation for the proposed `seatLayoutId`
-  mapping before merge.
+- Layout mapping confirmation is complete; use the published port contract.
 - Implement runtime validation for Stop index continuity,
   chronological TripStop times, and forward/consecutive
   LegFares with complete fare coverage in the P3 DB adapter.
