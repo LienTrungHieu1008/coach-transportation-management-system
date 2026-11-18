@@ -9,120 +9,129 @@
 - `src/frontend/src/shared/api/journeyTypes.ts`
 - `src/frontend/src/App.test.tsx`
 
-**Cách review:** đọc mã nguồn và đối chiếu [UC Spec v1.8](../requirements/Team%2011%20-%20rup_ucspec-v2_final.pdf) (P04/P05/P07), [C1](../../pa/PA4/C1_DECISIONS.md), [OpenAPI 0.1](../contracts/openapi.yaml), [manifest dữ liệu demo P1](p1-trip-demo-manifest.md) và yêu cầu mục b của [đề PA4](../../pa/PA4/PA4.pdf).
-
-**Chưa kiểm chứng trong lần review này:** chưa chạy `npm ci/lint/typecheck/test/build`, chưa mở trình duyệt, chưa kiểm tra trực quan desktop/mobile, chưa chạy backend. Kết quả CI của PR #7 do tác giả/leader báo, tôi không chạy lại. Nhận xét dưới đây là review mã nguồn và tài liệu, không phải kết quả thực thi.
+**Cập nhật 18/11:** sửa theo góp ý của leader trên PR #11 — tách nhận xét đọc mã với lỗi đã chạy (mục 1), tách việc còn lại của F2–F4 khỏi nhận xét thuộc F1 (mục 4 và 5), làm rõ giới hạn của bằng chứng mức IT (mục 6), và sửa lại nhận xét về nhãn trang "Lịch trình" cho đúng mã nguồn (R2). Mã cũ `F1-01…F1-10` được ánh xạ sang mã mới ở mục 8 để các bình luận đã viết trên PR vẫn tra được.
 
 ---
 
-## 1. Kết luận
+## 1. Tài liệu này là gì và không là gì
+
+| | |
+|---|---|
+| **Là** | Nhận xét từ việc **đọc mã nguồn** và đối chiếu [UC Spec v1.8](../requirements/Team%2011%20-%20rup_ucspec-v2_final.pdf) (P04/P05/P07), [C1](../../pa/PA4/C1_DECISIONS.md), [OpenAPI 0.1](../contracts/openapi.yaml), [manifest P1](p1-trip-demo-manifest.md) và yêu cầu mục b của [đề PA4](../../pa/PA4/PA4.pdf). |
+| **Không là** | Kết quả thực thi. **Không có mục nào trong tài liệu này là lỗi đã chạy ra.** |
+
+Trong lần review này tôi **chưa chạy**: `npm ci`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, chưa mở trình duyệt, chưa kiểm tra desktop/mobile, chưa chạy backend hay Compose. Kết quả CI của PR #7 do tác giả/leader báo; tôi không chạy lại và không trích dẫn như bằng chứng của mình.
+
+Hệ quả cho cách dùng tài liệu:
+
+- Mỗi mục dưới đây là **nhận xét đọc mã (R)** hoặc **việc còn lại đã biết (W)**, không phải defect đã tái hiện. Không mục nào được đưa vào bug report theo mẫu `test-report template-v1.1.xlsx` ở trạng thái hiện tại.
+- Một nhận xét chỉ trở thành **defect** khi tôi chạy ca kiểm thử tương ứng ở Q3, ghi được steps + actual thật trên một commit cụ thể. Khi đó nó mới có Defect ID, severity và owner trong báo cáo.
+- Nếu Hoàng hoặc chủ UC cho rằng tôi đọc sai mã hay sai phạm vi, phản hồi trên PR; tôi sửa tài liệu chứ không giữ nhận xét sai.
+
+## 2. Kết luận
 
 F1 **đạt mục tiêu prototype luồng P04 → P05 → P07**: bốn màn có thật, điều hướng giữ được Segment, các nhánh lỗi/rỗng/thiếu dữ liệu đều có trạng thái riêng, và quan trọng nhất là **không chỗ nào biến dữ liệu chưa xác minh thành FREE hay giá 0**.
 
-Còn **một thiếu sót cần xử lý trước khi nộp** (F1-01: chưa có tài liệu mô tả bốn màn — đây là phần đề PA4 chấm điểm) và một số điểm cần sửa/ghi nhận khi làm F2–F4.
+Trong phạm vi F1 có **một việc cần xử lý trước khi nộp** (R1 — chưa có tài liệu mô tả bốn màn, là phần đề PA4 chấm điểm). Các điểm còn lại hoặc là rủi ro phạm vi cần leader quyết (R2), hoặc là **việc vốn thuộc F2–F4**, không tính là lỗi của F1.
 
-| Mức | Số lượng | Ý nghĩa |
-|---|---:|---|
-| Cao | 1 | Ảnh hưởng điểm PA4 hoặc đánh giá sai năng lực sản phẩm; cần xử lý trước 20/11 |
-| Trung bình | 5 | Phải xử lý khi nối API thật (F2–F4), nếu không sẽ sai contract hoặc gây hiểu nhầm |
-| Thấp | 4 | Cải thiện chất lượng, không chặn |
+## 3. Điểm F1 làm đúng (giữ nguyên khi làm F2–F4)
 
-## 2. Điểm làm tốt (giữ nguyên khi làm F2–F4)
-
-1. **Không suy đoán trạng thái ghế.** `JourneyPages.tsx:154` lấy `statusBySeat.get(...)?.status ?? 'UNKNOWN'` — ghế thiếu dữ liệu rơi về UNKNOWN chứ không phải FREE. Nhánh lỗi availability hiển thị "Không có ghế nào được xem là trống" và ẩn toàn bộ sơ đồ. Đúng C1 mục 2 (Ghế) và UC-P07 A3.
+1. **Không suy đoán trạng thái ghế.** `JourneyPages.tsx:154` lấy `statusBySeat.get(...)?.status ?? 'UNKNOWN'` — ghế thiếu dữ liệu rơi về UNKNOWN chứ không phải FREE. Nhánh lỗi availability ẩn toàn bộ sơ đồ và ghi "Không có ghế nào được xem là trống". Đúng C1 mục 2 (Ghế) và UC-P07 A3.
 2. **Điều kiện đi tiếp đúng.** `canContinue = allowed && segment !== null && segment.fareAmountVnd !== null` (`JourneyPages.tsx:133`) — khớp C1: eligibility không tự chứng minh đã chọn Segment, và thiếu giá thì không cho sang ghế.
 3. **Phân biệt thiếu optional và thiếu essential.** Thiếu `description` vẫn xem được và vẫn cho đi tiếp; thiếu stops/legFares/vehicle thì chặn — đúng BR-P05-02.
 4. **Giá lấy nguyên từ dữ liệu, không cộng ở client.** `money()` chỉ định dạng; không có phép cộng leg nào trong FE. Đúng C1 ("BE tính tổng leg").
-5. **Ghi nhãn trung thực.** `DemoLabel`, footer và `demoData.ts:3` đều nói rõ đây là snapshot ví dụ, chưa nối API. Không giả là dữ liệu live.
+5. **Ghi nhãn trung thực.** `DemoLabel`, footer và `demoData.ts:3` đều nói rõ đây là snapshot ví dụ, chưa nối API.
 6. **Giữ Segment khi điều hướng.** `useJourneyState` giữ `criteria` và `trip` qua các màn; test "preserves the journey through details, seats and back" bao phủ việc quay lại.
 7. **Múi giờ.** Mọi chỗ hiển thị giờ/ngày đều đặt `timeZone: 'Asia/Ho_Chi_Minh'` (`JourneyPages.tsx:16–19`), đúng BR-P04-05.
 
-## 3. Điểm cần xử lý
+## 4. Nhận xét thuộc phạm vi F1
 
-### F1-01 (Cao) — Chưa có tài liệu mô tả bốn màn hình
+Đây là những điểm nằm trong đầu ra F1 theo TASKS ("bốn màn, mỗi màn có mục đích/thông tin/cách dùng và đường đi giữa màn").
 
-Đề PA4 mục b yêu cầu: với **mỗi màn hình** phải mô tả **mục đích, thông tin hiển thị và cách người dùng sử dụng**; đây là phần của 15 điểm prototype. Trong repo hiện chưa có tài liệu nào như vậy — `docs/test/f1-prototype-verification.md` là báo cáo sửa tests, không phải mô tả màn hình. TASKS cũng ghi đầu ra F1 là "mỗi màn có mục đích/thông tin/cách dùng và đường đi giữa màn".
+### R1 (Cao) — Chưa có tài liệu mô tả bốn màn hình
 
-**Đề nghị:** Hoàng bổ sung một tài liệu (gợi ý `docs/analysis and design/pa4-ui-prototype.md`) gồm ảnh chụp từng màn + ba đoạn mô tả, cho đúng bốn màn trong luồng: Trang chủ/tìm chuyến, Kết quả, Chi tiết chuyến, Sơ đồ ghế. Tôi cần tài liệu này để đưa vào hồ sơ Q2/gói nộp; hạn hợp lý là **18/11** để kịp tổng hợp trước 20/11 12h.
+Đề PA4 mục b yêu cầu với **mỗi màn hình** phải mô tả **mục đích, thông tin hiển thị và cách người dùng sử dụng**; đây là phần của 15 điểm prototype. Trong repo chưa có tài liệu nào như vậy — `docs/test/f1-prototype-verification.md` là báo cáo sửa tests, không phải mô tả màn hình. TASKS cũng ghi đây là đầu ra của F1.
 
-### F1-02 (Trung bình) — Màn "Lịch trình" dùng dữ liệu bịa, nằm ngoài ba UC
+**Đề nghị:** Hoàng bổ sung một tài liệu (gợi ý `docs/analysis and design/pa4-ui-prototype.md`) gồm ảnh chụp từng màn + ba đoạn mô tả, cho đúng bốn màn trong luồng: Trang chủ/tìm chuyến, Kết quả, Chi tiết chuyến, Sơ đồ ghế. Tôi cần tài liệu này cho hồ sơ Q2 và gói nộp; hạn hợp lý là **18/11**.
 
-`JourneyPages.tsx:92–117`: `scheduleTrips` là bốn chuyến Sài Gòn–Nha Trang/Đà Lạt/Cần Thơ với giá và giờ tự đặt, hiển thị như một trang chức năng có trên thanh điều hướng chính.
+### R2 (Trung bình) — Trang "Lịch trình" nằm ngoài ba UC đã chốt
 
-Rủi ro: người chấm có thể hiểu đây là chức năng của hệ thống nhưng không có UC/API tương ứng; TASKS cũng yêu cầu không thêm chức năng hoạt động giả ngoài ba UC. Trang có ghi "dữ liệu giả lập" nhưng nhãn nằm cuối trang, dưới danh sách.
+**Đính chính so với bản trước:** bản trước tôi viết nhãn minh hoạ "nằm cuối trang, dưới danh sách". Đọc lại mã thì **không đúng**. Trang đã ghi nhãn ở bốn chỗ: câu mô tả đầu trang "Tham khảo các chuyến xe đang có trong lịch mẫu" (`JourneyPages.tsx:103`), dòng ngay trên danh sách "Dữ liệu minh họa · Chưa kết nối cơ sở dữ liệu" (`:106`), nhãn "Theo lịch mẫu" trên **từng thẻ** (`:108`), và ghi chú cuối trang (`:112`). Việc ghi nhãn của Hoàng là đầy đủ và tôi rút lại nhận xét cũ.
 
-**Đề nghị:** bỏ trang này khỏi điều hướng chính trước khi demo/nộp, hoặc giữ lại nhưng đổi nhãn thành phần minh họa ngoài phạm vi PA4 và nêu ngay đầu trang. Quyết định cuối thuộc Hoàng + leader; tôi chỉ nêu rủi ro khi chấm.
+Điểm còn lại không phải chuyện nhãn mà là **phạm vi**: `scheduleTrips` (`:92–97`) là bốn chuyến Sài Gòn–Nha Trang/Đà Lạt/Cần Thơ với tuyến, giờ và giá tự đặt, không thuộc UC-P04/P05/P07 và không có API/dữ liệu tương ứng, nhưng lại đứng ngang hàng với "Tìm chuyến" trên thanh điều hướng chính (`App.tsx:9`). Rủi ro khi chấm: người đọc có thể coi đây là một chức năng của hệ thống, trong khi phạm vi PA4 chỉ có ba UC.
 
-### F1-03 (Trung bình) — Dữ liệu mẫu không khớp bộ demo chung của nhóm
+**Đề nghị:** leader quyết định giữ hay bỏ trang này trước demo 19/11. Nếu giữ, cân nhắc đưa ra khỏi thanh điều hướng chính để không nằm trong luồng được chấm. Đây là quyết định phạm vi, không phải lỗi hiện thực.
 
-`demoData.ts` lấy theo `docs/contracts/examples/` nên lệch với [manifest P1](p1-trip-demo-manifest.md) — là bộ dữ liệu cả nhóm đã thống nhất:
+### R3 (Thấp) — Hạn giữ chỗ chỉ hiện trong tooltip
 
-| Điểm | F1 hiện có | Manifest/C1 |
+`expiresAt` được đưa vào thuộc tính `title` của ô ghế (`JourneyPages.tsx:154`). Trên thiết bị cảm ứng không có hover nên người dùng mobile không thấy được hạn giữ chỗ, dù đây là thông tin UC-P07 nhấn mạnh. **Đề nghị:** hiện hạn giữ chỗ dạng chữ trong phần tóm tắt hoặc chú giải.
+
+### R4 (Thấp) — Ô ghế là `div` mang `aria-label`
+
+Ô ghế không có `role`, nên trình đọc màn hình coi là phần tử chung và `aria-label` có thể bị bỏ qua tuỳ trình đọc. Gợi ý thêm `role="img"` hoặc dựng dạng danh sách để nhãn "Ghế A1: Còn trống" được đọc ổn định.
+
+### R5 (Thấp) — Nhãn tầng xe suy từ ghế đầu tiên
+
+`availability?.layout.seats[0]?.deck === 0 ? 'Tầng 1' : 'Tầng chưa xác định'` (`JourneyPages.tsx:154`) chỉ đúng với xe một tầng. Dữ liệu demo hiện một tầng nên chưa sai; ghi nhận để xử lý nếu layout mở rộng.
+
+## 5. Việc còn lại của F2–F4 — không tính là lỗi F1
+
+Những điểm dưới đây **F1 không có nghĩa vụ làm**: theo TASKS, F1 là prototype bốn màn, còn nối API thật, refresh và danh sách kết quả thuộc F2/F3/F4. Ghi ở đây để không bị bỏ sót và để QA biết ca nào đang chờ phần nào.
+
+| Mã | Việc | Vì sao cần | Ca kiểm thử đang chờ |
+|---|---|---|---|
+| W1 | Lấy tên Stop hiển thị từ response (`selectedSegment`, `stops`, `availability.fromStopId/toStopId`) thay vì tra từ `criteria` (`JourneyPages.tsx:131–132, 143–144`) | Khi server trả Segment khác yêu cầu, hoặc người dùng đổi tiêu chí rồi quay lại, hai nguồn có thể lệch nhau | TC-P05-01, TC-P07-01 |
+| W2 | Làm mới theo contract: mỗi 15 giây khi tab hiển thị, khi quay lại foreground, khi tới expiry/cutoff; response cũ không ghi đè response mới. Hiện `refresh()` (`:148`) chỉ chạy khi bấm nút | C1 mục 2 (Refresh và cleanup) | TC-P07-09, TC-P07-03 |
+| W3 | Màn kết quả render danh sách nhiều chuyến, sắp xếp theo giờ lên tăng dần, có `page`/`size`; hiện chỉ render một `demoTrip` và chuỗi cố định "1 chuyến trong ví dụ contract" (`:122`) | OpenAPI `/trips`; BR-P04-01 | TC-P04-01, TC-P04-06 |
+| W4 | Cho chọn đủ ba Stop A/B/C để đi được Segment A→C và chuyến qua đêm; hiện form chặn mọi cặp khác A→B (`:49`) | BR-P04-03 (giá cộng leg), BR-P04-05 (ngày tại Stop lên) | TC-P04-02, TC-P04-03 |
+| W5 | Gỡ các nút "Preview nhánh UC-…" (`:124, :136, :154`) hoặc đặt sau cờ chỉ bật khi dev, trước demo/nộp | Khi FE đã nối API thật mà vẫn còn, người xem dễ nhầm là hệ thống thật; tinh thần C1 là không để công tắc giả lỗi trong sản phẩm chạy thật | — (xem mục 6) |
+
+### Về dữ liệu mẫu lệch manifest — không phải lỗi của F1
+
+Bản trước tôi xếp việc này thành nhận xét F1. Đọc kỹ hơn thì `demoData.ts` **khớp đúng** `docs/contracts/examples/search.json` và `availability.json` như chú thích ở `demoData.ts:3` đã nói. Sai lệch nằm giữa **examples trong contract** và **manifest dữ liệu demo P1**:
+
+| Điểm | examples (F1 dùng) | manifest P1 / C1 |
 |---|---|---|
-| Giá A→B | 120.000đ (`demoData.ts:18, 35, 42`) | 100.000đ |
+| Giá A→B | 120.000đ | 100.000đ |
 | Số Stop | 2 (A, B) | 3 (A, B, C — `9999…9999`) |
 | Số ghế | 2 (A1, A2) | 6 (A1, A2, B1, B2, C1, C2) |
 | `seatLayoutId` | `5555…5555` | `bbbb…bbbb` |
 | Giờ lên Trip ngày | 03:00Z (10:00 VN) | 02:00Z (09:00 VN) |
 
-Hệ quả cho kiểm thử: không thể hiện được hai điểm then chốt của UC — **giá A→C = tổng hai leg** (BR-P04-03, ca TC-P04-02) và **chuyến qua đêm lên tại Stop giữa tuyến** (BR-P04-05, ca TC-P04-03). Prototype cũng chặn cứng việc chọn cặp Stop khác A→B (`JourneyPages.tsx:49`).
+Hoàng dùng đúng nguồn được giao, nên đây **không phải lỗi F1**. Việc cần làm thuộc hai phía khác: Phương/leader quyết định có đồng bộ examples với manifest hay không, và F2–F4 khi nối API thật phải lấy dữ liệu từ server theo manifest chứ không dùng lại con số trong examples.
 
-**Đề nghị:** khi làm F2–F4, lấy dữ liệu từ API thật theo bộ demo trong manifest; nếu còn cần snapshot cho tests FE thì cập nhật snapshot theo manifest (3 Stop, 6 ghế, 100k/150k) để QA và FE nói cùng một bộ dữ liệu.
+## 6. Bằng chứng mức IT không thay cho kết quả functional của Q3
 
-### F1-04 (Trung bình) — Các nút "Preview nhánh UC-..." phải được gỡ trước khi demo/nộp
+Trong [ma trận ca Q1](pa4-test-cases.md) có 5 ca ghi mức `IT` (TC-P04-07, TC-P04-10, TC-P05-06, TC-P05-10, TC-P07-08). Lý do: theo C1, API public **không** được thêm công tắc giả lỗi, nên QA không tạo được tình huống 503 hay ép đồng hồ hệ thống từ bên ngoài.
 
-`JourneyPages.tsx:124, 136, 154` có khối `<details class="demo-controls">` cho phép bấm để ép trạng thái 503, "Trip đã đóng", "Hết ghế"… Với F1 thì hợp lý, nhưng khi FE nối API thật mà vẫn còn, người xem có thể nhầm là hệ thống thật và QA có thể vô tình ghi kết quả từ nút giả thay vì từ API. Tinh thần C1 là không để công tắc giả lỗi trong sản phẩm chạy thật.
+Cách tôi sẽ ghi những ca này ở Q3, để không ai hiểu nhầm:
 
-**Đề nghị:** Hoàng gỡ (hoặc đặt sau cờ chỉ bật khi dev) trong F2–F4. Tôi sẽ không dùng các nút này làm bằng chứng cho bất kỳ ca nào ở Q3; ca 503 vẫn xác minh theo mức `IT` như đã ghi trong [ma trận ca](pa4-test-cases.md).
+1. Đề PA4 yêu cầu **thực thi kiểm thử chức năng**. Kết quả chạy integration test của owner **không phải** kết quả functional và **không được** đánh dấu Pass cho ca chức năng.
+2. Với các ca mức `IT`, báo cáo Q3 ghi trạng thái **"không thực thi được ở mức chức năng"** kèm lý do, rồi dẫn tên test, lệnh chạy và commit của owner như **thông tin bổ sung** về hành vi đã được kiểm chứng ở tầng khác.
+3. Con số "đã thực thi" trong báo cáo chỉ đếm các ca chạy thật ở mức UI/API/DB. Hiện có 25 ca thuộc nhóm này, vẫn vượt mức tối thiểu 15 ca của đề.
+4. Tương tự, các nút "Preview nhánh UC-…" của prototype (W5) **không** được dùng làm bằng chứng cho bất kỳ ca nào. Trạng thái lỗi ép bằng nút bấm trên FE không chứng minh backend trả đúng mã lỗi.
 
-### F1-05 (Trung bình) — Màn chi tiết/ghế lấy tên Stop từ tiêu chí tìm kiếm, không từ response
+Khi bắt đầu Q3 tôi sẽ chỉnh lại mục 6 của [test plan](pa4-test-plan.md) theo đúng cách diễn đạt này, để định nghĩa mức `IT` trong plan không bị đọc thành "đã chạy".
 
-`DetailsPage` và `SeatsPage` hiển thị `from`/`to` bằng cách tra `criteria.fromStopId/toStopId` trong `demoStops` (`JourneyPages.tsx:131–132, 143–144`), trong khi dữ liệu Segment lại nằm ở `detailState.selectedSegment` / `availability.fromStopId`. Hai nguồn này có thể lệch nhau khi người dùng đổi tiêu chí rồi quay lại, hoặc khi server trả Segment khác với yêu cầu.
-
-**Đề nghị:** F3/F4 lấy Stop hiển thị từ chính response (`selectedSegment`, `stops`, `availability.fromStopId/toStopId`), chỉ dùng `criteria` để gửi request.
-
-### F1-06 (Trung bình) — Chưa có cơ chế làm mới theo contract (sẽ làm ở F4)
-
-`refresh()` (`JourneyPages.tsx:148`) chỉ phát lại snapshot khi người dùng bấm. C1 yêu cầu FE tự làm mới **mỗi 15 giây khi tab đang hiển thị, khi quay lại foreground và khi tới expiry/cutoff**, đồng thời response cũ không được ghi đè response mới.
-
-Ghi nhận đây là việc của F4, không phải lỗi của F1; nêu ở đây để không bị bỏ sót — ca TC-P07-09 đang chờ phần này.
-
-### F1-07 (Thấp) — Hạn giữ chỗ chỉ hiện trong tooltip
-
-`expiresAt` được đưa vào thuộc tính `title` của ô ghế (`JourneyPages.tsx:154`). Trên thiết bị cảm ứng không có hover nên người dùng mobile không thấy được hạn giữ chỗ, dù đây là thông tin UC-P07 nhấn mạnh.
-
-**Đề nghị:** hiện hạn giữ chỗ dạng chữ trong phần tóm tắt hoặc chú giải, không chỉ dựa vào tooltip.
-
-### F1-08 (Thấp) — Ô ghế là `div` mang `aria-label`
-
-Ô ghế không có `role`, nên trình đọc màn hình coi là phần tử chung; `aria-label` có thể bị bỏ qua tuỳ trình đọc. Gợi ý thêm `role="img"` (hoặc dựng dạng danh sách) để nhãn "Ghế A1: Còn trống" được đọc ổn định.
-
-### F1-09 (Thấp) — Nhãn tầng xe suy từ ghế đầu tiên
-
-`availability?.layout.seats[0]?.deck === 0 ? 'Tầng 1' : 'Tầng chưa xác định'` (`JourneyPages.tsx:154`) chỉ đúng với xe một tầng. Xe hai tầng sẽ hiển thị sai. Hiện chưa chặn gì vì dữ liệu demo một tầng; ghi nhận để xử lý nếu layout mở rộng.
-
-### F1-10 (Thấp) — Số lượng kết quả đang là chuỗi cố định
-
-`'1 chuyến trong ví dụ contract'` (`JourneyPages.tsx:122`) và việc chỉ render đúng một `demoTrip` khiến màn kết quả chưa thể hiện danh sách nhiều chuyến, thứ tự theo giờ lên tăng dần và phân trang (`page`/`size`) như OpenAPI quy định. Cần có ở F2 để chạy được ca TC-P04-01 (hai chuyến, đúng thứ tự).
-
-## 4. Đối chiếu với yêu cầu đề PA4 mục b
+## 7. Đối chiếu với yêu cầu đề PA4 mục b
 
 | Yêu cầu | Tình trạng |
 |---|---|
 | Màn hình chính | Có (Trang chủ + form tìm chuyến) |
 | Ít nhất 3 màn cho kịch bản chính | Có (Kết quả, Chi tiết, Sơ đồ ghế) |
-| Khớp kịch bản trong UC spec | Có, luồng P04 → P05 → P07 đúng thứ tự; còn thiếu nhánh Segment A→C và chuyến qua đêm (F1-03) |
-| Mô tả mục đích/thông tin/cách dùng từng màn | **Chưa có** (F1-01) |
+| Khớp kịch bản trong UC spec | Có; luồng P04 → P05 → P07 đúng thứ tự. Segment A→C và chuyến qua đêm chưa đi được — thuộc W4 |
+| Mô tả mục đích/thông tin/cách dùng từng màn | **Chưa có** (R1) |
 | Đủ thành phần để người dùng hoàn thành việc của mình | Có cho luồng xem; không có nút đặt/thanh toán giả — đúng phạm vi |
 
-## 5. Việc tôi đề nghị và người xử lý
+## 8. Việc đề nghị, người xử lý và ánh xạ mã cũ
 
-| Mã | Người xử lý | Hạn đề nghị |
-|---|---|---|
-| F1-01 tài liệu mô tả bốn màn | Khánh Hoàng | 18/11 |
-| F1-02 trang Lịch trình | Khánh Hoàng + leader quyết định | trước demo 19/11 |
-| F1-03 đồng bộ dữ liệu theo manifest | Khánh Hoàng (phối hợp Minh Phương) | khi làm F2–F4 |
-| F1-04 gỡ nút preview nhánh | Khánh Hoàng | trước demo 19/11 |
-| F1-05, F1-06, F1-07 … F1-10 | Khánh Hoàng | trong F2–F4 |
+| Mã | Nội dung | Người xử lý | Hạn đề nghị | Mã ở bản 17/11 |
+|---|---|---|---|---|
+| R1 | Tài liệu mô tả bốn màn | Khánh Hoàng | 18/11 | F1-01 |
+| R2 | Phạm vi trang "Lịch trình" | Leader quyết định, Hoàng thực hiện | trước demo 19/11 | F1-02 |
+| R3–R5 | Tooltip hạn giữ chỗ, `role` ô ghế, nhãn tầng xe | Khánh Hoàng | trong F2–F4 | F1-07, F1-08, F1-09 |
+| W1–W4 | Stop từ response, refresh theo contract, danh sách/sắp xếp/phân trang, đủ ba Stop | Khánh Hoàng | theo mốc F2–F4 (19/11) | F1-05, F1-06, F1-10, một phần F1-03 |
+| W5 | Gỡ nút preview nhánh | Khánh Hoàng | trước demo 19/11 | F1-04 |
+| — | Examples lệch manifest | Minh Phương + leader | khi rà contract | phần còn lại của F1-03 |
 
-Các điểm trên là nhận xét review, không phải lỗi đã kiểm chứng khi chạy. Sau khi F2–F4 nối API thật, tôi sẽ kiểm tra lại bằng 30 ca trong [ma trận ca Q1](pa4-test-cases.md) và ghi kết quả thực thi ở báo cáo Q3; những điểm trên nếu còn sẽ được ghi thành defect theo mẫu test-report.
+Sau khi F2–F4 nối API thật, tôi chạy 30 ca trong [ma trận ca Q1](pa4-test-cases.md) và ghi kết quả ở báo cáo Q3. Điểm nào còn tồn tại và tái hiện được khi chạy sẽ trở thành defect có steps, actual và commit cụ thể; trước lúc đó chúng vẫn chỉ là nhận xét đọc mã.
