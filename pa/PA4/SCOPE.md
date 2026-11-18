@@ -30,6 +30,11 @@ Leader đã duyệt [C1](C1_DECISIONS.md) và giao phân công tại [TASKS](TAS
 
 Prototype tương ứng có thể gồm Trang chủ, Kết quả tìm chuyến, Chi tiết chuyến và Sơ đồ ghế. Cần thực hiện đủ flow/nhánh test theo UC đã chọn; không dùng màn hình mẫu hoặc dữ liệu hardcode để báo là phần mềm hoàn chỉnh.
 
+**Quyết định demo ngày 18/11/2026 của leader:** ẩn trang Lịch trình khỏi điều hướng
+và luồng demo; chỉ dùng bốn màn Trang chủ/tìm → Kết quả → Chi tiết → Ghế của
+P04/P05/P07. Thay đổi FE được bàn giao/review riêng; quyết định phạm vi không tự
+chứng minh implementation đã merge hoặc QA đã nghiệm thu.
+
 ## Những gì bộ khung hiện tại cần bàn giao
 
 - Frontend React/TypeScript/Vite/Tailwind với lint/typecheck/test/build thật.

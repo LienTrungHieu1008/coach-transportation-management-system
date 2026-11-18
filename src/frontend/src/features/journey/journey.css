@@ -175,6 +175,15 @@
 .driver-label span { color: var(--color-primary); font-size: 22px; }
 .seat-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 28px 8px; }
 .seat { display: grid; min-height: 60px; place-items: center; border: 1.5px solid var(--color-secondary); border-bottom-width: 5px; border-radius: 11px 11px 16px 16px; background: var(--color-surface); color: var(--color-primary); font-size: 16px; font-weight: 650; }
+.seat svg { width: 26px; height: 26px; }
+.seat small { font-size: 11px; text-align: center; }
+.seat-cell { min-width: 0; }
+.seat-expiry { display: block; margin-top: 8px; font-size: 12px; overflow-wrap: anywhere; }
+.search-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 16px; margin-top: 24px; }
+.trip-card + .trip-card { margin-top: 20px; }
+.operator-logo svg, .vehicle-panel > svg { width: 32px; height: 32px; flex-shrink: 0; }
+.skip-link { position: absolute; left: 16px; top: -100px; z-index: 10; padding: 12px; background: var(--color-surface); color: var(--color-primary); }
+.skip-link:focus { top: 12px; }
 .seat-unavailable { border-color: #7e8997; background: #d4dce5; color: #3c4c61; }
 .seat-unknown { border-style: dashed; border-color: var(--color-warning); color: var(--color-warning); background: var(--color-muted); }
 .rear-label { padding-top: 16px; border-top: 1px dashed #93a3b5; color: var(--color-muted-foreground); font-size: 12px; letter-spacing: 2px; text-align: center; }
