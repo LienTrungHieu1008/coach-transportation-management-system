@@ -7,7 +7,7 @@ Spring Boot, PostgreSQL 16, Flyway, JdbcTemplate; không thêm dependency.
 
 `GET /api/v1/trips/{tripId}/seat-availability?fromStopId={uuid}&toStopId={uuid}` công khai,
 không cần cookie đăng nhập. ID phải là UUID chuẩn; mỗi query đúng một giá trị.
-Chỉ mở đúng GET này; private/write vẫn cần xác thực, request ghi cần CSRF hợp lệ.
+GET chi tiết Trip của P4 cũng công khai; private/write vẫn cần xác thực, request ghi cần CSRF hợp lệ.
 Chưa có API tạo Booking, thanh toán hoặc luồng login.
 
 Controller → application → TripQueryPort của Phương → BookingRepository → core.
@@ -90,13 +90,20 @@ Một lệnh, một transaction; SQL/file lỗi phải dừng và rollback toàn
 Bộ chuẩn tạo 2 Account, 2 Trip, 6 physical seats, 5 Booking/seats/allocations.
 Booking mẫu chỉ thuộc **Trip ngày** bên dưới; Trip qua đêm không có allocation mẫu.
 
-## 3. Gọi đủ ba Segment
+## 3. Từ P4 sang H2 và gọi đủ ba Segment
+
+Gọi P4 với cặp Stop đã chọn, chỉ cho tiếp tục khi `bookingEligibility.allowed=true`.
+Truyền nguyên `tripId/fromStopId/toStopId` sang H2; eligibility không bảo đảm còn ghế.
+H2 vẫn xác minh qua P3 và đọc allocations hiện tại, không suy FREE từ response P4.
+P4 có thể trả 200 với eligibility false; không gọi đó là chuyến còn đặt được.
 
 ```bash
 export TRIP_ID=11111111-1111-4111-8111-111111111111
 export STOP_A=22222222-2222-4222-8222-222222222222
 export STOP_B=33333333-3333-4333-8333-333333333333
 export STOP_C=99999999-9999-4999-8999-999999999999
+curl -i --get "$BOOKING_API_BASE_URL/api/v1/trips/$TRIP_ID" \
+  --data-urlencode "fromStopId=$STOP_A" --data-urlencode "toStopId=$STOP_C"
 curl -i --get "$BOOKING_API_BASE_URL/api/v1/trips/$TRIP_ID/seat-availability" \
   --data-urlencode "fromStopId=$STOP_A" --data-urlencode "toStopId=$STOP_B"
 curl -i --get "$BOOKING_API_BASE_URL/api/v1/trips/$TRIP_ID/seat-availability" \
@@ -192,9 +199,18 @@ Tests ở `src/backend/src/test/java/vn/edu/team11/coach/booking/`; security chu
 `identity/infrastructure/SecurityConfigurationTests.java`, HTTP Trip ở `trip/api/PublicTripsSecurityIT.java`.
 Chạy full backend verify gồm unit + PostgreSQL integration; tests tắt scheduler tự động,
 gọi service/job trực tiếp. Tests 503 dùng lỗi truy xuất riêng; không thêm nút giả lỗi vào API.
-Verify cuối ngày 18/11/2026: **467 tests PASS** (227 unit, 240 integration), không failure/error/skip.
+Checkpoint H2 trước ghép P4 ngày 18/11/2026: **467 tests PASS** (227 unit, 240 integration), không failure/error/skip.
 Runtime HTTP thật đã PASS ba Segment chuẩn, expiry khi cleanup tắt, bật cleanup, ba Segment hết ghế,
 private/write và reset/reseed với expiry mới. Request/response và kết quả CI được ghi ở PR bàn giao.
+
+Bản ghép P4 (`fb28ece3`) + H2 (`47c21c6`), base main `0115a8c`: **587 tests PASS**
+(299 unit, 288 integration), không failure/error/skip. Lệnh verify dùng project riêng
+`team11-huy-booking-test` theo `compose.test.yaml`, sau đó `down` không `-v`.
+HTTP thật đã PASS P4 → H2 cho ba Segment, cùng Trip/Stop/layout, eligibility/giá và
+trạng thái ghế đúng seed; hai GET công khai, private/write/CSRF vẫn được bảo vệ.
+Không chạy lại vòng chờ expiry/cleanup/hết ghế vì logic và fixtures giữ nguyên;
+bằng chứng checkpoint H2 phía trên vẫn được giữ tại PR #14. P4 trả partial details khi
+Route/Stop inactive vẫn là quyết định chờ Trung Hiếu xác nhận.
 
 Hoàng đọc bước 1–4 để nối F4; Đức Hiếu dùng cả bộ chuẩn/hết ghế/cleanup/reset cho QA.
 Phương rà UUID/layout/Segment, P3 và snapshot; Trung Hiếu rà security và điều phối merge.
