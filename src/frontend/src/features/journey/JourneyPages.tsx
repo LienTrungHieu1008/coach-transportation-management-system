@@ -37,7 +37,9 @@ function DemoLabel() {
 
 function SearchForm({ criteria, setCriteria, onSubmit }: { criteria: SearchCriteria; setCriteria: (value: SearchCriteria) => void; onSubmit: () => void }) {
   const [message, setMessage] = useState('')
-  const minDate = dateInVietnam(new Date())
+  // F1 replays a fixed OpenAPI snapshot, including its server clock.
+  // Real API integration must use authoritative server time instead.
+  const minDate = dateInVietnam(new Date(demoDetails.serverTime))
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const from = demoStops.find((stop) => stop.id === criteria.fromStopId)
@@ -54,6 +56,7 @@ function SearchForm({ criteria, setCriteria, onSubmit }: { criteria: SearchCrite
     <div className="field"><label htmlFor="to-stop">Điểm trả</label><select id="to-stop" value={criteria.toStopId} onChange={(event) => setCriteria({ ...criteria, toStopId: event.target.value })}><option value="">Chọn điểm trả</option>{demoStops.map((stop) => <option key={stop.id} value={stop.id}>{stop.name}</option>)}</select></div>
     <div className="field date-field"><label htmlFor="boarding-date">Ngày lên xe</label><input id="boarding-date" type="date" min={minDate} value={criteria.boardingDate} onChange={(event) => setCriteria({ ...criteria, boardingDate: event.target.value })}/></div>
     <button className="primary-button search-button" type="submit"><JourneyIcon name="search"/> Tìm chuyến</button>
+    <p className="prototype-note">Ngày mô phỏng: {minDate.split('-').reverse().join('/')} · Theo snapshot, không phải ngày hiện tại.</p>
     {message && <p className="form-notice" role="alert">{message}</p>}
   </form>
 }
