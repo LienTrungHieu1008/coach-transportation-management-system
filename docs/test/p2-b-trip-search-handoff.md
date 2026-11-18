@@ -1,7 +1,10 @@
 # P2-B — bàn giao GET /api/v1/trips
 
-Ngày: 17/11/2026. Owner: Đỗ Minh Phương. Nhánh: `feat/p2-p4-trip-apis`.
-Đây là bàn giao implementation/tests chưa commit, chưa thay approval của reviewer.
+Ngày bàn giao gốc: 17/11/2026. Owner: Đỗ Minh Phương. Nhánh triển khai: `feat/p2-p4-trip-apis`.
+Checkpoint 18/11/2026: [PR #10](https://github.com/LienTrungHieu1008/coach-transportation-management-system/pull/10)
+đã merge ngày 17/11 tại `5f2d824`, có trong `main` ở `0115a8c`.
+Trung Hiếu đã approve C2/security; chưa có bằng chứng Huy approve nghiệp vụ Trip
+hoặc QA/UI nghiệm thu. P4 chưa triển khai.
 
 ## Phạm vi và nguồn
 
@@ -13,7 +16,7 @@ Ngày: 17/11/2026. Owner: Đỗ Minh Phương. Nhánh: `feat/p2-p4-trip-apis`.
   nhưng không xác minh được mới gây 503; loại Trip chắc chắn không Scheduled,
   đã đóng bán hoặc sai ngày; mỗi leg toàn Trip và tổng Segment phải biểu diễn
   được trong `0..9007199254740991`, không cần cộng tổng toàn Trip.
-- Không sửa P2-A, P3, Booking, security/common mapping, OpenAPI, SAD, migration,
+- Phạm vi lượt P2-B gốc: không sửa P2-A, P3, Booking, security/common mapping, OpenAPI, SAD, migration,
   Q1/workbook, frontend hoặc dependency. Không triển khai P4.
 
 ## Luồng xử lý và dữ liệu
@@ -91,7 +94,7 @@ Repository IT dùng PostgreSQL thật, service/repository thật và chỉ mock 
 SnapshotIT spy target repository chỉ điều phối interleaving, vẫn chạy SQL thật.
 FE/UI chưa chạy; kết quả API/IT không thay kết quả functional UI của Q3.
 
-## Các lượt kiểm tra thực sự đã chạy
+## Các lượt kiểm tra lịch sử — 17/11/2026, trước commit `d0899a4`
 
 Từ gốc repo:
 
@@ -118,11 +121,18 @@ không `-v`, không dùng volume phát triển. `git diff --check` đã đạt.
 
 ## Phụ thuộc / còn chờ review
 
-- Anonymous GET vẫn 401 vì SecurityConfiguration hiện tại; public acceptance
-  BLOCKED chờ Hiếu/C2 mở đúng GET /api/v1/trips. Test dùng authenticated user
-  không được tính là public acceptance; không tắt security filter.
-- Error handlers chỉ scoped TripSearchController; Hiếu rà khi ghép C2, không
-  có thay đổi common/security mapping trong lượt này.
+- Checkpoint sau merge: `SecurityConfiguration` đã permitAll đúng anonymous
+  `GET /api/v1/stops` và `GET /api/v1/trips` từ `d0899a4`; không còn chờ mở public
+  hai endpoint này. CSRF và bảo vệ các route khác vẫn giữ nguyên.
+- Theo báo cáo PR #10 và review C2 của Trung Hiếu: full backend verify 223/223
+  PASS (94 Surefire + 129 Failsafe, 0 failures/errors/skipped), gồm
+  `PublicStopsSecurityIT` (5) và `PublicTripsSecurityIT` (9) qua HTTP/security filter
+  tới PostgreSQL thật. [CI run 44103586250](https://github.com/LienTrungHieu1008/coach-transportation-management-system/actions/runs/44103586250)
+  tại head `d0899a4`: frontend/backend/gate SUCCESS. Không chạy lại trong lượt sửa Markdown này.
+- Error handlers chỉ scoped TripSearchController; approval C2/security không
+  thay review tích hợp error mapping chung hoặc review nghiệp vụ Trip của Huy.
 - Q1 Case IDs/workbook/bằng chứng Q3 vẫn do Đức Hiếu xác nhận; không sửa Q1.
-- Đã đối chiếu SHA256 11 file P2-A với đầu lượt: không file nào thay đổi.
-- Chưa commit/push/merge/rebase hoặc chuyển nhánh. Dừng chờ Phương review.
+- Bằng chứng lượt P2-B gốc ngày 17/11: đã đối chiếu SHA256 11 file P2-A với đầu lượt,
+  không file nào thay đổi; lúc đó chưa commit/push. Implementation sau đó đã vào PR #10 và merge.
+- Lượt cập nhật checkpoint chỉ sửa Markdown trên `docs/p2-post-merge-handoff`;
+  không commit/push/merge/rebase hoặc chuyển nhánh. Dừng chờ Phương review.
