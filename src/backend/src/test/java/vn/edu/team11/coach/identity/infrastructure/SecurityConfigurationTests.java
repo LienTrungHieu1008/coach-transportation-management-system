@@ -67,7 +67,7 @@ class SecurityConfigurationTests {
 
     @ParameterizedTest
     @ValueSource(strings = {"/api/v1/trips/", "/api/v1/trips/11111111-1111-4111-8111-111111111111",
-            "/api/v1/trips/11111111-1111-4111-8111-111111111111/seat-availability",
+            "/api/v1/trips/11111111-1111-4111-8111-111111111111/seat-availability/private",
             "/api/v1/stops/", "/api/v1/stops/other", "/api/v1/other"})
     void publicMatchersDoNotExposeOtherPaths(String path) throws Exception {
         mvc.perform(get(path))
@@ -77,7 +77,11 @@ class SecurityConfigurationTests {
 
     @ParameterizedTest
     @CsvSource({"POST,/api/v1/stops", "PUT,/api/v1/stops", "PATCH,/api/v1/stops", "DELETE,/api/v1/stops",
-            "POST,/api/v1/trips", "PUT,/api/v1/trips", "PATCH,/api/v1/trips", "DELETE,/api/v1/trips"})
+            "POST,/api/v1/trips", "PUT,/api/v1/trips", "PATCH,/api/v1/trips", "DELETE,/api/v1/trips",
+            "POST,/api/v1/trips/11111111-1111-4111-8111-111111111111/seat-availability",
+            "PUT,/api/v1/trips/11111111-1111-4111-8111-111111111111/seat-availability",
+            "PATCH,/api/v1/trips/11111111-1111-4111-8111-111111111111/seat-availability",
+            "DELETE,/api/v1/trips/11111111-1111-4111-8111-111111111111/seat-availability"})
     void publicPathWritesStillRequireCsrfAndAuthentication(String method, String path) throws Exception {
         var verb = HttpMethod.valueOf(method);
         mvc.perform(request(verb, path).with(user("passenger")))
