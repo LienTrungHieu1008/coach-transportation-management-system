@@ -11,8 +11,14 @@ chấp nhận đề xuất nhóm A và chốt các điểm nhóm B tại mục 4
 Đây là nguồn xác nhận trong hội thoại, không phải bằng chứng đã cập nhật C1
 hoặc một approval implementation/PR trên GitHub.
 
-Tài liệu này ghi nhận quyết định cho P2/P4, chưa chứng minh API hoặc tests đã
-được hiện thực. Nhóm C vẫn chờ Đức Hiếu xác nhận. Việc tạo tài liệu không cấp
+Checkpoint 18/11/2026: P2-A/P2-B đã triển khai và merge qua
+[PR #10](https://github.com/LienTrungHieu1008/coach-transportation-management-system/pull/10)
+ngày 17/11 tại `5f2d824`, có trong `main` ở `0115a8c`. Anonymous GET `/api/v1/stops`
+và `/api/v1/trips` đã mở; Trung Hiếu đã approve C2/security. Theo báo cáo PR/review,
+HTTP + PostgreSQL security tests và CI đã PASS, full backend verify 223/223 tests;
+chi tiết tại [handoff P2-B](../test/p2-b-trip-search-handoff.md).
+P4 chưa triển khai; chưa có bằng chứng Huy approve nghiệp vụ Trip hoặc QA/UI nghiệm thu.
+Nhóm C vẫn chờ Đức Hiếu xác nhận. Việc tạo tài liệu không cấp
 quyền sửa Q1, OpenAPI, C1, SAD, P3, security, migration hoặc workbook.
 
 ## 2. Căn cứ
@@ -100,8 +106,8 @@ cho phép thay đổi validation hoặc contract P3.
 P4 có luồng đọc riêng trong module Trip để hỗ trợ partial details, không phụ
 thuộc hoàn toàn vào `TripQueryPort`. Giữ nguyên OpenAPI, C1, SAD và P3 contract.
 Không sửa `SecurityConfiguration`; Trung Hiếu/C2 phụ trách security và phối hợp
-error mapping chung. Việc public GET đã được contract xác định, nhưng vẫn cần
-ghép C2 trước nghiệm thu HTTP anonymous.
+error mapping chung. P2 đã ghép C2 và kiểm chứng HTTP anonymous cho hai GET
+`/api/v1/stops`, `/api/v1/trips` trong PR #10; P4 vẫn cần ghép C2 và kiểm chứng riêng.
 
 ## 5. P4 partial details, P3 và Booking
 
@@ -198,9 +204,11 @@ P4 eligibility không chứng minh còn ghế hoặc bảo đảm lần gọi P0
 Snapshot test P3 hiện có không chứng minh snapshot xuyên Trip–Booking; việc đó
 thuộc tích hợp H2. P2/P4 không cần V4 để kiểm thử dữ liệu Trip riêng.
 
-## 6. Test cases tương ứng — nội dung đề xuất, chưa thực thi
+## 6. Test cases tương ứng — đề xuất tại ngày 17/11/2026
 
 Tên subcase trong bảng là nhãn mô tả, chưa phải Case ID Q1 chính thức.
+Tại thời điểm ghi nhận, các ca chưa thực thi; bằng chứng P2 sau đó xem handoff
+P2-B. Không suy ra các ca P4 hoặc QA/UI trong bảng đã PASS.
 
 | Nhóm / ca Q1 liên quan | Tiền điều kiện và expected cần có |
 |---|---|
@@ -277,9 +285,10 @@ Maven xanh hoặc tests P3 cũ làm kết quả P2/P4 hay toàn bộ ca UI.
 Nội dung expected A/B đã được Phương chấp nhận; nhóm C là phối hợp tài liệu và
 ghi bằng chứng, chưa có xác nhận của Đức Hiếu, không được ghi thay approval.
 
-## 9. Phạm vi lần bàn giao này
+## 9. Phạm vi lần bàn giao tài liệu gốc — 17/11/2026
 
 Chỉ thêm file Markdown này. Không sửa Q1, OpenAPI, C1, SAD, source production,
 P3, Booking, migration, dependency, security, cấu hình chung hoặc workbook.
 Không chạy build/tests/Docker, không commit/push/merge hoặc đổi nhánh.
-Các ca ở đây là thiết kế/đề xuất, **chưa thực thi**, không đánh dấu pass.
+Các ca ở đây tại thời điểm bàn giao gốc là thiết kế/đề xuất, **chưa thực thi**;
+checkpoint P2 sau merge ở mục 1 không đánh dấu toàn bộ bảng hoặc P4/QA/UI pass.
