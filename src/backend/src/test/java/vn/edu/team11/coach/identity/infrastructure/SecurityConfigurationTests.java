@@ -66,7 +66,7 @@ class SecurityConfigurationTests {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/api/v1/trips/", "/api/v1/trips/11111111-1111-4111-8111-111111111111",
+    @ValueSource(strings = {"/api/v1/trips/", "/api/v1/trips/11111111-1111-4111-8111-111111111111/operations",
             "/api/v1/trips/11111111-1111-4111-8111-111111111111/seat-availability",
             "/api/v1/stops/", "/api/v1/stops/other", "/api/v1/other"})
     void publicMatchersDoNotExposeOtherPaths(String path) throws Exception {
