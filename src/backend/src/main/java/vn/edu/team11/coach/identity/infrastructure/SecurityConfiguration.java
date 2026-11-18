@@ -27,6 +27,8 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/health", "/api/session/csrf").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/stops").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/trips").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/trips/{tripId}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/trips/{tripId}/seat-availability").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(sessions -> sessions.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .csrf(csrf -> csrf.csrfTokenRepository(tokens))

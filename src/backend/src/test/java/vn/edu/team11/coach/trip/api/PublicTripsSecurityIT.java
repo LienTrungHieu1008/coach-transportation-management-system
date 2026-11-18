@@ -101,8 +101,8 @@ class PublicTripsSecurityIT {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/api/v1/trips/", "/api/v1/trips/11111111-1111-4111-8111-111111111111",
-            "/api/v1/trips/11111111-1111-4111-8111-111111111111/seat-availability"})
+    @ValueSource(strings = {"/api/v1/trips/", "/api/v1/trips/11111111-1111-4111-8111-111111111111/operations",
+            "/api/v1/trips/11111111-1111-4111-8111-111111111111/seat-availability/private"})
     void unapprovedTripPathsStillRequireAuthentication(String path) throws Exception {
         assertSecurityError(get(path), 401, "UNAUTHENTICATED");
     }

@@ -33,9 +33,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.context.WebApplicationContext;
 
-import vn.edu.team11.coach.booking.api.SeatAvailabilityController;
-import vn.edu.team11.coach.booking.api.SeatAvailabilityExceptionHandler;
 import vn.edu.team11.coach.booking.api.SeatAvailabilityResponse;
 import vn.edu.team11.coach.booking.application.SeatAvailabilityApplicationService;
 import vn.edu.team11.coach.trip.contract.LayoutSeat;
@@ -49,6 +48,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -82,8 +82,7 @@ class SeatAvailabilityIT {
     @Autowired private SeatAvailabilityApplicationService service;
     @Autowired private TripQueryPort port;
     @Autowired private BookingRepository repository;
-    @Autowired private SeatAvailabilityController controller;
-    @Autowired private SeatAvailabilityExceptionHandler errors;
+    @Autowired private WebApplicationContext webContext;
     @Autowired private ObjectMapper json;
     @Autowired private JdbcTemplate jdbc;
     @Autowired private DataSource dataSource;
@@ -135,8 +134,7 @@ class SeatAvailabilityIT {
         };
         ((Advised) port).addAdvice(tripObserver);
         ((Advised) repository).addAdvice(bookingObserver);
-        // Real controller/service/ports, with no security filters: this is not public-route acceptance.
-        mvc = MockMvcBuilders.standaloneSetup(controller).setControllerAdvice(errors).build();
+        mvc = MockMvcBuilders.webAppContextSetup(webContext).apply(springSecurity()).build();
     }
 
     @AfterEach
@@ -157,6 +155,21 @@ class SeatAvailabilityIT {
     @AfterAll
     void dropOwnedSchema() {
         jdbc.execute("drop schema booking_availability_task5 cascade");
+    }
+
+    @Test
+    void anonymousClientCanReadSeatAvailability() throws Exception {
+        mvc.perform(get("/api/v1/trips/{tripId}/seat-availability", TRIP)
+                        .param("fromStopId", A.toString()).param("toStopId", C.toString()))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(jsonPath("$.tripId").value(TRIP.toString()))
+                .andExpect(jsonPath("$.layout.id").value("bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"))
+                .andExpect(jsonPath("$.seats.length()").value(6))
+                .andExpect(jsonPath("$.seats[0].physicalSeatId").value(SEATS.getFirst().toString()))
+                .andExpect(jsonPath("$.seats[0].status").value("FREE"))
+                .andExpect(jsonPath("$.seats[1].status").value("UNAVAILABLE"))
+                .andExpect(jsonPath("$.seats[3].expiresAt").value("2026-11-19T00:10:00Z"));
     }
 
     @Test
@@ -273,7 +286,7 @@ class SeatAvailabilityIT {
     }
 
     @Test
-    void allBlockedRealMapIs200NoStoreAndContainsNoBookingOrTravellerDataWithoutSecurityFilters() throws Exception {
+    void allBlockedRealMapIs200NoStoreAndContainsNoBookingOrTravellerData() throws Exception {
         jdbc.execute("""
                 insert into booking_seat (booking_seat_id, booking_id, physical_seat_id, traveller_name, fare_amount_vnd)
                 select physical_seat_id, 'dddddddd-dddd-4ddd-8ddd-dddddddddd02', physical_seat_id,
@@ -315,7 +328,7 @@ class SeatAvailabilityIT {
     @CsvSource({"missing-trip,404,TRIP_NOT_FOUND", "missing-stop,422,STOP_NOT_SERVED",
             "reversed,422,INVALID_SEGMENT", "same-stop,422,INVALID_SEGMENT",
             "cancelled,409,TRIP_NOT_BOOKABLE", "missing-fare,409,ESSENTIAL_DATA_INCOMPLETE"})
-    void realTripErrorsRetainTypedMappingAndSafeNoStoreBodyWithoutSecurityFilters(
+    void realTripErrorsRetainTypedMappingAndSafeNoStoreBody(
             String scenario, int httpStatus, String code) throws Exception {
         UUID trip = TRIP;
         UUID from = A;
@@ -360,7 +373,7 @@ class SeatAvailabilityIT {
 
     @ParameterizedTest
     @CsvSource({"leg_fare", "seat_allocation"})
-    void actualDatabaseReadFailureIsUnavailableAndNeverFalseFreeWithoutSecurityFilters(String table) throws Exception {
+    void actualDatabaseReadFailureIsUnavailableAndNeverFalseFree(String table) throws Exception {
         var before = bookingRows();
         jdbc.execute("alter table " + table + " rename to task5_unavailable");
         try {
