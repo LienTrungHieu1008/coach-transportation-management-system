@@ -59,3 +59,6 @@ export type SearchCriteria = {
   toStopId: string
   boardingDate: string
 }
+
+export type SegmentSelection = Pick<SearchCriteria, 'fromStopId' | 'toStopId'>
+export type TripSearchPage = { items: TripSearchItem[]; page: number; size: number; totalElements: number; totalPages: number; serverTime: string }

@@ -25,6 +25,14 @@
 
 Request/response/schema chính xác và ví dụ nằm trong OpenAPI; không tạo một bộ DTO khác trong tài liệu này.
 
+**Bổ sung P4-01, Trung Hiếu chốt ngày 18/11/2026:** Trip tồn tại nhưng Route hoặc
+bất kỳ Stop thuộc tuyến inactive vẫn cho xem chi tiết xác minh được (HTTP 200),
+`bookingEligibility.allowed=false`, reason `ESSENTIAL_DATA_INCOMPLETE`; không tự
+đổi Trip thành `Cancelled`. FE chặn tiếp tục sang xem ghế khi eligibility false.
+Quyết định và tiêu chí review cho PR #13/#16 cùng PR sau nằm tại
+[P4-01 — Route/Stop inactive](../../docs/contracts/pa4-api-decisions.md#p4-inactive-route-stop).
+Đây là duyệt quy tắc P4, không phải duyệt implementation hoặc nghiệm thu QA/UI.
+
 ## 3. Điểm ghép và ai sửa gì
 
 - **Phương:** Trip/Stop/leg fares/Vehicle/PhysicalSeat/layout; ba API Trip và `TripQueryPort.getSeatAvailabilityFacts(tripId, fromStopId, toStopId, asOf)`.

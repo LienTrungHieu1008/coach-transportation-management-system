@@ -1,4 +1,4 @@
-# Trạng thái và quyết định API PA4 — cập nhật 14/11/2026
+# Trạng thái và quyết định API PA4 — cập nhật 18/11/2026
 
 ## Đã được người giao việc đồng ý
 
@@ -32,6 +32,39 @@ Nguồn cụ thể tại [bản đối chiếu](pa4-api-proposal.md). Không s�
 | Cache/error body | GET trả no-store; `{code,message,fieldErrors:[{field,message}]}`, chưa bắt buộc traceId vì baseline chưa tracing. Không sửa error body security của baseline trong task contract. | Phương, Huy, Hoàng |
 
 Không còn câu hỏi placeholder trong schema; nếu người triển khai phát hiện vướng mắc hoặc mâu thuẫn, báo leader chốt thay đổi trước khi sửa OpenAPI, examples, port và FE/BE/test liên quan. Không tự tạo phiên bản contract riêng trên nhánh task.
+
+<a id="p4-inactive-route-stop"></a>
+
+## P4-01 — Route/Stop inactive: leader chốt ngày 18/11/2026
+
+**Trạng thái: Trung Hiếu đã duyệt trong hội thoại**, bằng yêu cầu ghi quyết định
+vào repo sau khi xem giải thích phương án. Áp dụng cho UC-P05/P4,
+`GET /api/v1/trips/{tripId}`; dùng làm căn cứ review PR #13, bản ghép #16 và PR sau.
+
+- Trip tồn tại nhưng Route hoặc bất kỳ Stop thuộc tuyến của Trip có `is_active=false`:
+  vẫn trả HTTP 200 với thông tin xác minh được; giữ Segment/giờ/giá nếu xác minh được,
+  không đoán dữ liệu thiếu.
+- `bookingEligibility.allowed=false`; `reasons` chứa `ESSENTIAL_DATA_INCOMPLETE`.
+  Vẫn trả thêm các reason khác nếu đúng điều kiện, theo thứ tự enum của OpenAPI.
+- Giữ nguyên trạng thái Trip; inactive không tự chuyển Trip thành `Cancelled`
+  và không tự biến thành lỗi 404. Trip không tồn tại vẫn 404; cặp Stop xác định
+  được là sai vẫn 422; lỗi truy xuất DB vẫn 503 theo contract hiện hành.
+- FE vẫn hiển thị chi tiết và lý do không thể tiếp tục, chặn bước sang xem ghế
+  khi eligibility false. HTTP 200 không đồng nghĩa được phép tiếp tục.
+
+Ví dụ: chuyến A→B→C có đủ giá 100.000/150.000 VND nhưng Stop B inactive. Xem A→C
+vẫn có thể trả giá 250.000 VND đã xác minh, đồng thời eligibility false với
+`ESSENTIAL_DATA_INCOMPLETE`.
+
+**Phạm vi:** làm rõ cách phản hồi partial details P4, không đổi schema/enum OpenAPI,
+không nới P3/P07, không thay quy tắc search P2, migration hoặc SAD/UC gốc.
+Approval quyết định này không thay approval code, CI hoặc nghiệm thu QA/UI.
+
+**Kiểm tra khi review:** Phương giữ test Route inactive và Stop inactive riêng,
+xác nhận dữ liệu đã biết vẫn còn, eligibility false và trạng thái Trip không đổi;
+Hoàng kiểm tra hiển thị/chặn tiếp tục; Đức Hiếu ghi kết quả thực thi thực tế.
+Các nhãn “pending Trung Hiếu confirmation” về quyết định này trong handoff/PR cần
+được owner cập nhật, dẫn về mục P4-01 thay vì chờ chốt lại ở mỗi PR.
 
 ## Bàn giao để code riêng
 

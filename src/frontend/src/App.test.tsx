@@ -1,102 +1,107 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { availability, details, page, response, stops, trip } from './test/journeyFixtures'
 
-function search() {
-  const form = screen.getByLabelText('Điểm đón').closest('form')
-  if (!form) throw new Error('Search form is missing')
-  fireEvent.click(within(form).getByRole('button', { name: 'Tìm chuyến' }))
-}
-
-function openDetails() {
-  search()
-  fireEvent.click(screen.getByRole('button', { name: /Xem chi tiết/ }))
-}
-
-describe('public journey prototype', () => {
-  beforeEach(() => {
-    vi.useFakeTimers({ toFake: ['Date'] })
-    vi.setSystemTime(new Date('2026-11-21T03:00:00Z'))
+const fetcher = vi.fn()
+beforeEach(() => {
+  fetcher.mockReset().mockImplementation(async (input: string) => {
+    const url = new URL(input, 'http://localhost')
+    if (url.pathname === '/api/health') return response({ status: 'UP' })
+    if (url.pathname === '/api/v1/stops') return response({ items: stops, serverTime: details.serverTime })
+    if (url.pathname === '/api/v1/trips') return response({ ...page, page: Number(url.searchParams.get('page')) })
+    if (url.pathname.endsWith('/seat-availability')) return response(availability)
+    return response(details)
   })
-  afterEach(() => vi.useRealTimers())
-
-  it('keeps sample search usable after its real date, with a simulated clock label', () => {
+  vi.stubGlobal('fetch', fetcher)
+})
+async function search() {
+  await within(screen.getByLabelText('Điểm đón')).findByRole('option', { name: 'Demo Stop C' })
+  fireEvent.change(screen.getByLabelText('Điểm đón'), { target: { value: stops[0].id } })
+  fireEvent.change(screen.getByLabelText('Điểm trả'), { target: { value: stops[1].id } })
+  fireEvent.change(screen.getByLabelText('Ngày lên xe'), { target: { value: '2026-11-20' } })
+  fireEvent.submit(screen.getByLabelText('Điểm đón').closest('form')!)
+}
+async function openDetails() {
+  await search()
+  fireEvent.click(await screen.findByRole('button', { name: /Xem chi tiết/ }))
+  await screen.findByRole('heading', { name: 'Các điểm dừng theo thứ tự' })
+}
+describe('public journey connected to API', () => {
+  it('loads three Stops and hides Schedule and prototype controls', async () => {
     render(<App />)
-    expect(screen.getByLabelText<HTMLInputElement>('Ngày lên xe').validity.rangeUnderflow).toBe(false)
-    expect(screen.getByText(/Ngày mô phỏng: 20\/11\/2026/)).toBeTruthy()
-    search()
-    expect(screen.getByRole('button', { name: /Xem chi tiết/ })).toBeTruthy()
+    await within(screen.getByLabelText('Điểm đón')).findByRole('option', { name: 'Demo Stop C' })
+    expect(screen.queryByRole('button', { name: 'Lịch trình' })).toBeNull()
+    expect(screen.queryByText(/Preview nhánh/)).toBeNull()
   })
-
-  it('preserves the journey through details, seats and back', () => {
-    render(<App />)
-    openDetails()
+  it('preserves Trip and Segment through details, seats and back', async () => {
+    render(<App />); await openDetails()
     fireEvent.click(screen.getByRole('button', { name: /Xem tình trạng ghế/ }))
-    expect(screen.getByRole('heading', { name: 'Tình trạng ghế theo chặng' })).toBeTruthy()
-    expect(screen.getByLabelText('Ghế A1: Còn trống')).toBeTruthy()
+    await screen.findByLabelText('Ghế A1: Còn trống')
     expect(screen.getByLabelText('Ghế A2: Không khả dụng')).toBeTruthy()
-    expect(screen.getByText(/10:00 – 12:00/)).toBeTruthy()
-    fireEvent.click(screen.getByRole('button', { name: /← Quay lại/ }))
-    expect(screen.getByRole('button', { name: /Xem tình trạng ghế/ })).toBeTruthy()
+    expect(fetcher.mock.calls.map(c => c[0]).some(url => String(url).includes(`${trip.tripId}/seat-availability?fromStopId=${stops[0].id}&toStopId=${stops[1].id}`))).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: /Quay lại/ }))
+    await screen.findByRole('button', { name: /Xem tình trạng ghế/ })
   })
-
-  it('rejects identical stops', () => {
-    render(<App />)
-    fireEvent.change(screen.getByLabelText('Điểm trả'), { target: { value: '22222222-2222-4222-8222-222222222222' } })
-    search()
-    expect(screen.getByRole('alert').textContent).toContain('phải khác nhau')
-    expect(screen.queryByRole('button', { name: /Xem chi tiết/ })).toBeNull()
+  it('rejects identical Stops before calling search API', async () => {
+    render(<App />); await within(screen.getByLabelText('Điểm đón')).findByRole('option', { name: 'Demo Stop C' })
+    fireEvent.change(screen.getByLabelText('Điểm đón'), { target: { value: stops[0].id } })
+    fireEvent.change(screen.getByLabelText('Điểm trả'), { target: { value: stops[0].id } })
+    fireEvent.submit(screen.getByLabelText('Điểm đón').closest('form')!)
+    expect(screen.getByRole('alert').textContent).toContain('khác nhau')
+    expect(fetcher.mock.calls.some(c => String(c[0]).includes('/trips?'))).toBe(false)
   })
-
-  it('rejects dates before the simulated day even on direct form submission', () => {
-    render(<App />)
-    const date = screen.getByLabelText<HTMLInputElement>('Ngày lên xe')
-    fireEvent.change(date, { target: { value: '2026-11-19' } })
-    expect(date.validity.rangeUnderflow).toBe(true)
-    const form = date.closest('form')
-    if (!form) throw new Error('Search form is missing')
-    fireEvent.submit(form)
-    expect(screen.getByRole('alert').textContent).toContain('quá khứ')
-    expect(screen.queryByRole('button', { name: /Xem chi tiết/ })).toBeNull()
+  it('shows empty results from the server', async () => {
+    fetcher.mockImplementation(async (input: string) => input.includes('/trips?')
+      ? response({ ...page, items: [], totalElements: 0, totalPages: 0 }) : response({ items: stops, serverTime: details.serverTime }))
+    render(<App />); await search()
+    await screen.findByRole('heading', { name: 'Không có chuyến phù hợp' })
   })
-
-  it('shows empty results for a date without sample trips', () => {
-    render(<App />)
-    fireEvent.change(screen.getByLabelText('Ngày lên xe'), { target: { value: '2026-11-22' } })
-    search()
-    expect(screen.getByRole('heading', { name: 'Không có chuyến phù hợp trong ví dụ này' })).toBeTruthy()
-    expect(screen.queryByRole('button', { name: /Xem chi tiết/ })).toBeNull()
+  it('renders actual HTTP search failure and retries', async () => {
+    const base = fetcher.getMockImplementation()!
+    let failed = false
+    fetcher.mockImplementation(async (input: string) => {
+      if (input.includes('/trips?') && !failed) { failed = true; return response({ code: 'TRIP_DATA_UNAVAILABLE', message: 'Không thể xác minh chuyến xe', fieldErrors: [] }, 503) }
+      return base(input)
+    })
+    render(<App />); await search()
+    await screen.findByRole('alert')
+    fireEvent.click(screen.getByRole('button', { name: 'Thử lại' }))
+    await screen.findByRole('button', { name: /Xem chi tiết/ })
   })
-
-  it('blocks closed trips and missing essential facts, but permits missing optional description', () => {
-    render(<App />)
-    openDetails()
-    fireEvent.click(screen.getByRole('button', { name: 'Trip đã đóng' }))
+  it('preserves metadata and renders a second search page', async () => {
+    const base = fetcher.getMockImplementation()!
+    fetcher.mockImplementation(async (input: string) => input.includes('/trips?')
+      ? response({ ...page, page: Number(new URL(input, 'http://localhost').searchParams.get('page')), totalElements: 21, totalPages: 2 }) : base(input))
+    render(<App />); await search()
+    fireEvent.click(await screen.findByRole('button', { name: 'Trang sau' }))
+    await waitFor(() => expect(screen.getByText(/Trang 2\/2/)).toBeTruthy())
+    expect(fetcher.mock.calls.some(c => String(c[0]).includes('page=1'))).toBe(true)
+  })
+  it.each(['TRIP_NOT_SCHEDULED', 'BOOKING_CLOSED', 'ESSENTIAL_DATA_INCOMPLETE'])('blocks continuation for %s and preserves facts', async reason => {
+    const base = fetcher.getMockImplementation()!
+    fetcher.mockImplementation(async (input: string) => input.includes(`/trips/${trip.tripId}`)
+      ? response({ ...details, bookingEligibility: { allowed: false, reasons: [reason] } }) : base(input))
+    render(<App />); await openDetails()
     expect(screen.getByRole<HTMLButtonElement>('button', { name: /Xem tình trạng ghế/ }).disabled).toBe(true)
-    fireEvent.click(screen.getByRole('button', { name: 'Thiếu dữ liệu thiết yếu' }))
-    expect(screen.getByRole<HTMLButtonElement>('button', { name: /Xem tình trạng ghế/ }).disabled).toBe(true)
-    fireEvent.click(screen.getByRole('button', { name: 'Thiếu mô tả tùy chọn' }))
-    expect(screen.getByRole<HTMLButtonElement>('button', { name: /Xem tình trạng ghế/ }).disabled).toBe(false)
+    expect(screen.getAllByText(/100\.000/).length).toBeGreaterThan(0)
   })
-
-  it('hides results on retrieval failure and permits sample retry', () => {
-    render(<App />)
-    search()
-    fireEvent.click(screen.getByRole('button', { name: 'Lỗi không truy xuất được (503)' }))
-    expect(screen.getByRole('alert').textContent).toContain('Không thể xác minh')
+  it('renders nullable partial details without crashing', async () => {
+    const base = fetcher.getMockImplementation()!
+    fetcher.mockImplementation(async (input: string) => input.includes(`/trips/${trip.tripId}`)
+      ? response({ ...details, route: null, vehicle: null, selectedSegment: null, stops: [], legFares: [], bookingEligibility: { allowed: false, reasons: ['ESSENTIAL_DATA_INCOMPLETE'] } }) : base(input))
+    render(<App />); await openDetails()
+    expect(screen.getByText('Chưa có giá')).toBeTruthy()
+  })
+  it('shows loading and ignores late responses after navigating away', async () => {
+    const base = fetcher.getMockImplementation()!
+    let resolve: ((value: ReturnType<typeof response>) => void) | undefined
+    fetcher.mockImplementation((input: string) => input.includes('/trips?') ? new Promise(r => { resolve = r }) : base(input))
+    render(<App />); await search()
+    await screen.findByText('Đang tìm chuyến')
+    fireEvent.click(screen.getByRole('button', { name: /Quay lại/ }))
+    await act(async () => resolve?.(response(page)))
     expect(screen.queryByRole('button', { name: /Xem chi tiết/ })).toBeNull()
-    fireEvent.click(screen.getByRole('button', { name: 'Thử lại ví dụ' }))
-    expect(screen.getByRole('button', { name: /Xem chi tiết/ })).toBeTruthy()
-  })
-
-  it('never shows free seats when availability fails', () => {
-    render(<App />)
-    openDetails()
-    fireEvent.click(screen.getByRole('button', { name: /Xem tình trạng ghế/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Không tải được availability' }))
-    expect(screen.queryByLabelText('Ghế A1: Còn trống')).toBeNull()
-    expect(screen.getByRole('status').textContent).toContain('Không có ghế nào được xem là trống')
-    fireEvent.click(screen.getByRole('button', { name: 'Thử tải lại' }))
-    expect(screen.getByLabelText('Ghế A1: Còn trống')).toBeTruthy()
+    expect(within(screen.getByLabelText('Điểm đón').closest('form')!).getByRole('button', { name: /Tìm chuyến/ })).toBeTruthy()
   })
 })
