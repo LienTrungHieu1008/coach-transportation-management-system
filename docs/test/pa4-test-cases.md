@@ -4,7 +4,7 @@
 
 Đi kèm [kế hoạch kiểm thử](pa4-test-plan.md). Bản theo mẫu Moodle: `docs/test/PA4-Group11-test-cases.xlsx`.
 
-**Đã thực thi (Q3) ngày 20/11/2026 trên tag `pa4-v1.0` (`6e4f9aa`):** 25 Pass, 3 Pass (một phần), 2 Fail, 3 lỗi Low. Kết quả từng ca nằm trong cột *Actual Result*, *Status*, *Tester*, *Tested Date*, *Remark* của file Excel và trong [báo cáo kiểm thử](pa4-test-report.md). Nội dung ca dưới đây giữ nguyên bản Q1; Expected Result **chưa được chủ UC rà soát**.
+**Đã thực thi (Q3) ngày 20/11/2026 trên tag `pa4-v1.0` (`6e4f9aa`):** 22 Pass (API/UI), 3 Pass (test tự động: `TC-P04-07`, `TC-P05-06`, `TC-P05-10`, chưa chạy qua API/UI), 3 Pass (một phần), 2 Fail, 3 lỗi Low. Kết quả từng ca nằm trong cột *Actual Result*, *Status*, *Tester*, *Tested Date*, *Remark* của file Excel và trong [báo cáo kiểm thử](pa4-test-report.md). Nội dung ca dưới đây giữ nguyên bản Q1; Expected Result **chưa được chủ UC rà soát**.
 
 ## Quy ước
 

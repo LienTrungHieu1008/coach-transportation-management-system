@@ -12,6 +12,7 @@ Team 11 · Phiên bản **2.0 (nháp PA4)** · 19/11/2026 · Tài liệu: `PA4_G
 | Ngày | Phiên bản | Mô tả | Tác giả |
 |---|---|---|---|
 | 09/11/2026 | 1.3 | Bản nộp PA3: mục 1–4, mục 5–6 để trống. | Đinh Đức Hiếu (tổng hợp) |
+| 20/11/2026 | 2.0 nháp (sửa sau review) | Mục 4.3 dẫn quyết định P4-01 (Route/Stop inactive), bỏ mục chờ xác nhận ở Phụ lục B; mục 5.3 ghi rõ mức kiểm chứng Q3 (27 ca API/UI, 3 ca chỉ có test tự động). | Đinh Đức Hiếu |
 | 19/11/2026 | 2.0 nháp | Cập nhật mục 1–4 theo hiện thực PA4 (P04/P05/P07, Account V2, Trip V3, Booking V4, giao diện F1–F4); bổ sung mục 5 Deployment (UML) và mục 6 Implementation View. Chưa nhận feedback TA cho SAD PA3 nên chưa có mục sửa theo feedback. | Đinh Đức Hiếu (tổng hợp từ bàn giao của Minh Phương, Nhật Huy, Khánh Hoàng, Liên Trung Hiếu) |
 
 **Trạng thái rà soát:** Minh Phương rà mục 4.3, Nhật Huy rà mục 4.4, Khánh Hoàng rà mục 4.1/6,
@@ -65,7 +66,7 @@ Environment), SPA (Single-Page Application), VN (giờ Việt Nam, Asia/Ho_Chi_M
 
 - Team 11, SAD PA3 v1.3 (09/11/2026); Vision 1.8; Use-Case Specifications edition 1.8; Software Development Plan 1.7.
 - Đề PA4 môn CSC13002 ([pa/PA4/PA4.pdf](../../pa/PA4/PA4.pdf)); mẫu `rup_sad`, test-cases/test-report v1.1 trên Moodle.
-- Contract PA4: [C1_DECISIONS](../../pa/PA4/C1_DECISIONS.md), [OpenAPI 0.1](../contracts/openapi.yaml), [TripQueryPort](../contracts/trip-query-port.md), [P2/P4 design decisions](../contracts/p2-p4-design-decisions.md), [Identity Account](../contracts/identity-account.md), [kiến trúc](../contracts/architecture.md).
+- Contract PA4: [C1_DECISIONS](../../pa/PA4/C1_DECISIONS.md), [quyết định API PA4 (gồm P4-01)](../contracts/pa4-api-decisions.md), [OpenAPI 0.1](../contracts/openapi.yaml), [TripQueryPort](../contracts/trip-query-port.md), [P2/P4 design decisions](../contracts/p2-p4-design-decisions.md), [Identity Account](../contracts/identity-account.md), [kiến trúc](../contracts/architecture.md).
 - Bàn giao module: [P1 manifest](../test/p1-trip-demo-manifest.md), [P2 handoff](../test/p2-b-trip-search-handoff.md), [P4 handoff](../test/p4-trip-details-handoff.md), [Booking README](../../src/backend/src/main/java/vn/edu/team11/coach/booking/README.md), [FE handoff](../test/fe-api-integration-handoff.md), [UI prototype](pa4-ui-prototype.md).
 
 **Tổng quan tài liệu.** Mục 2 nêu mục tiêu/ràng buộc và trạng thái hiện thực. Mục 3 là mô hình use case và
@@ -255,9 +256,15 @@ tranh chấp (mục 4.3 PA3, Hình 11) giữ nguyên, chưa hiện thực.
 | `TripQueryPort`, `TripSeatFacts`, `SeatLayout`, `LayoutSeat`, `TripQueryException`/`TripQueryErrorCode` | contract | Port strict cho Booking: chỉ thành công khi Trip Scheduled, trước cutoff, Segment hợp lệ, essential đầy đủ; lỗi typed `TRIP_NOT_FOUND`, `STOP_NOT_SERVED`, `INVALID_SEGMENT`, `TRIP_NOT_BOOKABLE`, `ESSENTIAL_DATA_INCOMPLETE`, `TRIP_DATA_UNAVAILABLE`. |
 | `PostgresTripQueryAdapter` | infrastructure | Hiện thực `TripQueryPort` bằng PostgreSQL trong snapshot của caller; không đọc/ghi allocation. |
 
-**Quyết định PA4 cần lưu ý.** Trip tồn tại nhưng không bán được (đã huỷ, quá cutoff, thiếu dữ liệu, Route/Stop
-inactive) vẫn trả 200 chi tiết một phần với `allowed=false`; chỉ lỗi truy xuất thật trả 503. Trường hợp
-Route/Stop inactive đang chờ leader xác nhận (Phụ lục B).
+**Quyết định PA4 cần lưu ý.** Trip tồn tại nhưng không bán được (đã huỷ, quá cutoff, thiếu dữ liệu) vẫn trả
+200 chi tiết một phần với `allowed=false`; chỉ lỗi truy xuất thật trả 503.
+
+Route/Stop inactive theo [quyết định P4-01](../contracts/pa4-api-decisions.md#p4-inactive-route-stop), leader chốt
+ngày 18/11/2026:
+
+- P05 vẫn trả HTTP `200` với dữ liệu đã xác minh và giữ nguyên trạng thái Trip.
+- `bookingEligibility.allowed=false`, `reasons` chứa `ESSENTIAL_DATA_INCOMPLETE`.
+- Inactive không chuyển Trip thành `Cancelled` hay lỗi 404.
 
 ### 4.4 Component: Booking & Payment
 
@@ -328,7 +335,7 @@ có fallback. PA4 chưa tạo module `ai`, chưa gọi Gemini. Lưu ý cho PA5: 
 - **Phát triển:** `compose.dev.yaml` mở thêm DB 5432 và backend 8080 trên loopback; Vite dev server proxy `/api` tới 8080.
 - **Kiểm thử backend:** `compose.test.yaml` (project riêng) chạy Maven `verify` trên `maven:3.9-eclipse-temurin-21` với PostgreSQL 16 trên tmpfs; không dùng volume phát triển.
 - **CI:** GitHub Actions (`.github/workflows/ci.yml`) chạy FE lint/typecheck/Vitest/build và BE verify với PostgreSQL 16.
-- Cấu hình ở Hình D1 đã được dựng từ tag `pa4-v1.0` (DB tách riêng trên tmpfs) và chạy 30 ca kiểm thử chức năng ngày 20/11/2026; xem [báo cáo kiểm thử](../test/pa4-test-report.md).
+- Ngày 20/11/2026, cấu hình ở Hình D1 được dựng từ tag `pa4-v1.0` (DB tách riêng trên tmpfs) để thực thi Q3. Có 27/30 ca chạy qua API và/hoặc giao diện trên stack này. 3 ca (`TC-P04-07`, `TC-P05-06`, `TC-P05-10`) chỉ có bằng chứng test tự động từ lượt backend verify trên cùng commit, chưa chạy qua API/UI. Mức kiểm chứng từng ca xem [báo cáo kiểm thử](../test/pa4-test-report.md).
 - Chưa có môi trường triển khai công khai, HTTPS/TLS hay production.
 
 ## 6. Implementation View
@@ -392,14 +399,13 @@ chạy với PostgreSQL thật. Fixture SQL chỉ nạp vào DB demo/test riêng
 | 2 | Ghi phiên bản công nghệ thực tế; đọc PA4 dùng `JdbcTemplate`/SQL thay vì JPA entity; transaction đọc `REPEATABLE_READ`; bảng trạng thái theo mục tiêu | Mã nguồn `pa4-v1.0`, handoff P2/P4/H2 |
 | 3 | Đánh dấu P04/P05/P07 là UC hiện thực ở PA4 | Quyết định 12/11/2026 |
 | 4.0 | Thêm Hình L1, bảng HTTP→thành phần→lỗi; P05 không dùng port strict | OpenAPI 0.1, P2/P4 design decisions |
-| 4.1–4.4 | Ánh xạ lớp thiết kế → lớp hiện thực; schema V2/V3/V4; quyết định 200 + eligibility false; job dọn hold | Bàn giao Phương, Huy, Hoàng/Trung Hiếu |
+| 4.1–4.4 | Ánh xạ lớp thiết kế → lớp hiện thực; schema V2/V3/V4; quyết định 200 + eligibility false (gồm P4-01 Route/Stop inactive); job dọn hold | Bàn giao Phương, Huy, Hoàng/Trung Hiếu; quyết định P4-01 ngày 18/11 |
 | 5 | Mới: sơ đồ triển khai UML và mô tả nút/liên kết | Đề PA4 mục a |
 | 6 | Mới: cấu trúc thư mục mã nguồn | Đề PA4 mục a |
 
 ## Phụ lục B. Vấn đề còn mở
 
 1. **Feedback TA cho SAD PA3** chưa nhận; khi có sẽ cập nhật lại mục 1–4 và ghi vào lịch sử phiên bản.
-2. **P05 với Route/Stop inactive:** hiện trả 200 + `ESSENTIAL_DATA_INCOMPLETE`; Liên Trung Hiếu chưa xác nhận chính thức.
-3. **Rà soát nội dung module:** Phương (4.3), Huy (4.4), Hoàng (4.1) chưa xác nhận bản nháp này; Hoàng chưa xác nhận đã xem lại phần tích hợp F2–F4.
-4. **Chưa hiện thực:** login/role timeout, P08–P12, Staff/Admin, thanh toán, AI; benchmark NFR02; HTTPS.
-5. Kết quả kiểm thử chức năng theo mã ca nằm trong báo cáo Q3 ([pa4-test-report.md](../test/pa4-test-report.md)), không suy từ kết quả CI.
+2. **Rà soát nội dung module:** Phương (4.3), Huy (4.4), Hoàng (4.1) chưa xác nhận bản nháp này; Hoàng chưa xác nhận đã xem lại phần tích hợp F2–F4.
+3. **Chưa hiện thực:** login/role timeout, P08–P12, Staff/Admin, thanh toán, AI; benchmark NFR02; HTTPS.
+4. Kết quả kiểm thử theo mã ca và mức kiểm chứng của từng ca nằm trong báo cáo Q3 ([pa4-test-report.md](../test/pa4-test-report.md)), không suy từ kết quả CI.

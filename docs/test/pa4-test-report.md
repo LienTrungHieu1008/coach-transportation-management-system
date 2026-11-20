@@ -9,14 +9,17 @@ Bằng chứng thô: [evidence/pa4-q3/](evidence/pa4-q3/) — JSON từng reques
 
 ## 1. Tóm tắt
 
-| UC | Số ca | Pass | Pass một phần | Fail | Chưa chạy |
-|---|---:|---:|---:|---:|---:|
-| UC-P04 Search Trips | 10 | 10 | 0 | 0 | 0 |
-| UC-P05 View Trip Details | 10 | 8 | 2 | 0 | 0 |
-| UC-P07 View Seat Availability | 10 | 7 | 1 | 2 | 0 |
-| **Tổng** | **30** | **25** | **3** | **2** | **0** |
+| UC | Số ca | Pass (API/UI) | Pass (test tự động) | Pass một phần | Fail | Chưa chạy |
+|---|---:|---:|---:|---:|---:|---:|
+| UC-P04 Search Trips | 10 | 9 | 1 | 0 | 0 | 0 |
+| UC-P05 View Trip Details | 10 | 6 | 2 | 2 | 0 | 0 |
+| UC-P07 View Seat Availability | 10 | 7 | 0 | 1 | 2 | 0 |
+| **Tổng** | **30** | **22** | **3** | **3** | **2** | **0** |
 
-- Cả 30 ca đã thực thi ít nhất một lần trên bản `pa4-v1.0`; mỗi UC có ≥ 5 ca chạy runtime với backend + PostgreSQL thật.
+**Mức kiểm chứng:**
+- **27/30 ca** chạy qua API và/hoặc giao diện trên stack `pa4-v1.0` với backend + PostgreSQL thật. Mỗi UC có ≥ 5 ca loại này (P04: 9, P05: 8, P07: 10).
+- **3 ca `TC-P04-07`, `TC-P05-06`, `TC-P05-10`** chỉ có bằng chứng test tự động trong lượt backend verify chạy lại trên cùng commit. Các ca này **chưa chạy qua API/UI trong lượt demo** và được thống kê riêng ở cột "Pass (test tự động)".
+- Một số ca khác dùng test tự động cho một bước con, còn các bước chính chạy qua API/UI. Đó là phần quá cutoff của `TC-P04-08`, `TC-P07-06` và phần lỗi truy xuất của `TC-P04-10`, `TC-P07-08`; cột "Mức" ở mục 4 ghi rõ.
 - Luồng chính P04 → P05 → P07 chạy đúng trên giao diện: giá theo chặng, giờ, cutoff, trạng thái ghế theo Segment, Hold hết hạn và job dọn hold đều khớp expected.
 - **3 lỗi mức Low**, đều ở giao diện, giao **Khánh Hoàng**; không có lỗi Critical/High/Medium. Không phát hiện lỗi ở phần tìm chuyến/giá (Phương) hay trạng thái ghế/hold (Huy).
 - "Pass một phần": các điểm ER chạy được đều đạt, nhưng một bước UI không thực thi được (lý do ở mục 4). Không ghi Pass cho bước chưa chạy.
@@ -61,7 +64,7 @@ Cột "Mức": API = gọi HTTP; UI = thao tác trên giao diện; DB = truy v�
 | TC-P04-04 | UI+API | UI chặn ngày 19/11 bằng ràng buộc của ô ngày ("Value must be 11/20/2026 or later", thông báo của trình duyệt), giữ tiêu chí, không gửi tìm kiếm. API: 422 `PAST_BOARDING_DATE`. | Pass |
 | TC-P04-05 | UI+API | API: A→A và C→A 422 `INVALID_SEGMENT`; Stop UUID lạ 422 `STOP_NOT_SERVED`. UI: A→A bị chặn tại form ("Điểm đón và điểm trả phải khác nhau"); C→A hiện lỗi, không hiện kết quả rỗng, có "Quay lại" để sửa. Stop lạ không chọn được trên UI (danh mục chỉ có Stop phục vụ). Ghi lỗi **B01** về cách hiển thị. | Pass (kèm B01) |
 | TC-P04-06 | UI+API | 200, `items=[]`, `totalElements=0`; UI "Không có chuyến phù hợp — Hãy thử ngày hoặc điểm lên, xuống khác." | Pass |
-| TC-P04-07 | IT | Không chạy runtime tại đúng mốc (cutoff thật là 08:30 21/11, không có cơ chế đổi clock runtime). IT PASS: `TripSearchPolicyTest.exactCutoffIsClosedAndInstantBeforeIsOpen`, `PostgresTripSearchRepositoryIT.cutoffAndCompleteFareCoverageAgreeWithExistingP3Rules`, `overnightIntermediateBoardingStillClosesAtFirstStopCutoff`. | Pass |
+| TC-P04-07 | IT | **Chưa chạy qua API/UI trong lượt demo** (cutoff thật là 08:30 21/11, không có cơ chế đổi clock lúc chạy). Bằng chứng test tự động PASS: `TripSearchPolicyTest.exactCutoffIsClosedAndInstantBeforeIsOpen`, `PostgresTripSearchRepositoryIT.cutoffAndCompleteFareCoverageAgreeWithExistingP3Rules`, `overnightIntermediateBoardingStillClosesAtFirstStopCutoff`. | Pass (test tự động) |
 | TC-P04-08 | API+IT | Trip ngày Cancelled / Departed / Completed: tìm A→C ngày D chỉ còn Trip qua đêm (1/1). "Scheduled đã qua cutoff" theo IT `TripSearchPolicyTest.knownWrongDateOrClosedTripDoesNotFailForMissingFares` và các test cutoff ở TC-P04-07. | Pass |
 | TC-P04-09 | API | Thiếu `boardingDate`, `fromStopId=abc`, `size=101`: cả ba 400 `INVALID_REQUEST`, `fieldErrors` đúng một trường sai; message không có SQL/stack trace. | Pass |
 | TC-P04-10 | IT+API+UI | IT PASS: `TripSearchControllerTest.retrievalFailureIs503AndDoesNotExposeSql`, `PublicTripsSecurityIT.anonymousSearchRetainsValidationAndDatabaseFailureMapping`, `TripSearchServiceTest.emptyResultHasZeroPagesAndRetrievalFailuresAreNotReplacedByEmptySuccess`. Runtime: thiếu LegFare B–C hoặc ghế C2 → 503 `TRIP_DATA_UNAVAILABLE`, không trả danh sách một phần. UI: "Không thể tải dữ liệu" + "Thử lại", không hiện danh sách; sau khi khôi phục dữ liệu, "Thử lại" tải được 2 chuyến. | Pass (kèm B01) |
@@ -75,11 +78,11 @@ Cột "Mức": API = gọi HTTP; UI = thao tác trên giao diện; DB = truy v�
 | TC-P05-03 | API | 400 `INVALID_REQUEST`, `fieldErrors[toStopId]` "Stop parameters must be supplied together". | Pass |
 | TC-P05-04 | API | API: 404 `TRIP_NOT_FOUND`. Phần UI (mở URL chi tiết với tripId lạ) **không thực thi được**: SPA không có URL riêng cho trang chi tiết. | Pass một phần |
 | TC-P05-05 | API+UI | Cancelled/Departed/Completed: 200, giữ đúng status, Stop/giờ/giá; `allowed=false`, `reasons=[TRIP_NOT_SCHEDULED]`. UI (Cancelled): nhãn "Không thể tiếp tục", "Chuyến không còn mở bán.", nút xem ghế `disabled`. | Pass |
-| TC-P05-06 | IT | Không chạy runtime tại mốc cutoff (lý do như TC-P04-07). IT PASS: `TripDetailsPolicyTest.cutoffEqualityIsClosed` (3 biến thể), `PostgresTripDetailsRepositoryIT.q1CutoffUsesFirstStopForEverySegmentAndMatchesP3`, `q1MultipleReasonsAccumulateEvenWhenTripIsClosed`. | Pass |
+| TC-P05-06 | IT | **Chưa chạy qua API/UI trong lượt demo** (lý do như TC-P04-07). Bằng chứng test tự động PASS: `TripDetailsPolicyTest.cutoffEqualityIsClosed` (3 biến thể), `PostgresTripDetailsRepositoryIT.q1CutoffUsesFirstStopForEverySegmentAndMatchesP3`, `q1MultipleReasonsAccumulateEvenWhenTripIsClosed`. | Pass (test tự động) |
 | TC-P05-07 | API+UI | Thiếu LegFare B–C: A→C 200, `allowed=false` `[ESSENTIAL_DATA_INCOMPLETE]`, `legFares` chỉ A–B, `fareAmountVnd=null` (không 0); A→B vẫn giữ 100.000. Thiếu ghế C2: 200, `[ESSENTIAL_DATA_INCOMPLETE]`. UI (A→B): chỉ liệt kê giá A→B, báo "Thông tin thiết yếu chưa đủ…", nút ghế `disabled`. | Pass |
 | TC-P05-08 | UI+API | 200, `description=null`; UI "Mô tả tùy chọn chưa được cung cấp."; `allowed=true`; vào màn ghế được. | Pass |
 | TC-P05-09 | API | B→A: 422 `INVALID_SEGMENT`, không có `selectedSegment`. | Pass |
-| TC-P05-10 | IT | IT PASS: `TripDetailsControllerTest.databaseAndTransactionFailuresAre503WithoutPrivateCause`, `PublicTripDetailsSecurityIT.anonymousActualSqlFailureIs503AndDoesNotLeakInternals`, `TripDetailsServiceTest.retrievalErrorIsNeverConvertedToNotFound`. | Pass |
+| TC-P05-10 | IT | **Chưa chạy qua API/UI trong lượt demo** (không có cách gây lỗi truy xuất DB cho riêng API chi tiết mà không sửa source). Bằng chứng test tự động PASS: `TripDetailsControllerTest.databaseAndTransactionFailuresAre503WithoutPrivateCause`, `PublicTripDetailsSecurityIT.anonymousActualSqlFailureIs503AndDoesNotLeakInternals`, `TripDetailsServiceTest.retrievalErrorIsNeverConvertedToNotFound`. | Pass (test tự động) |
 
 ### UC-P07 View Seat Availability
 
@@ -123,7 +126,7 @@ Mong đợi: nêu rõ hết ghế và gợi ý chọn chuyến/đoạn khác. Th
 
 ## 6. Ghi chú và giới hạn
 
-1. **Ca mức IT** (P04-07, P04-10, P05-06, P05-10, P07-08 và phần quá cutoff của P04-08/P07-06) dựa trên lượt verify chạy lại trên đúng commit, đọc theo tên test; không phải quan sát runtime tại mốc mili-giây.
+1. **Bằng chứng test tự động.** `TC-P04-07`, `TC-P05-06`, `TC-P05-10` chỉ có bằng chứng này, chưa chạy qua API/UI trong lượt demo; cần lưu ý khi tổng hợp kết quả. Phần lỗi truy xuất của `TC-P04-10`, `TC-P07-08` và phần quá cutoff của `TC-P04-08`, `TC-P07-06` cũng dựa trên lượt verify. Lượt verify được chạy lại trên đúng commit và đối chiếu theo tên test; đó không phải quan sát runtime tại mốc mili-giây.
 2. **Ca chưa đủ bước UI:** TC-P05-02, TC-P05-04 cần mở trang chi tiết không qua tìm kiếm, nhưng SPA không có URL riêng; TC-P07-09 bước 3 cần làm chậm riêng một request. Đề xuất sửa ca ở Q1 (đưa phần đó về mức API/FE unit test) thay vì ghi Pass.
 3. Expected TC-P04-01 ghi "tuyến DEMO-ABC"; giao diện hiển thị tên tuyến "Demo Route A-B-C" (DEMO-ABC là mã tuyến). Không tính là lỗi; nên chỉnh câu chữ trong ca.
 4. Thông báo ngày quá khứ (TC-P04-04) là thông báo gốc của trình duyệt theo ngôn ngữ trình duyệt.
@@ -132,6 +135,6 @@ Mong đợi: nêu rõ hết ghế và gợi ý chọn chuyến/đoạn khác. Th
 
 ## 7. Việc tiếp theo
 
-- Hoàng sửa B01–B03, báo commit/PR; QA retest TC-P04-05, TC-P04-10, TC-P07-04, TC-P07-06 trên bản sửa và cập nhật báo cáo.
+- Hoàng sửa B01–B03 trong PR code riêng và báo commit/PR. Khi có bản sửa, QA retest TC-P04-05, TC-P04-10, TC-P07-04, TC-P07-06, ghi phiên bản mới vào báo cáo. Đến lúc đó, kết quả trên `pa4-v1.0` giữ nguyên: hai ca Fail, ba lỗi Open.
 - Q1: chỉnh TC-P04-01 (tên tuyến), TC-P05-02, TC-P05-04, TC-P07-09 bước 3 theo ghi chú 2–3.
 - Trung Hiếu duyệt báo cáo.
