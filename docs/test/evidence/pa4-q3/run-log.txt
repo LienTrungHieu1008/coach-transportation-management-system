@@ -1,0 +1,115 @@
+SEED_START_UTC=2026-11-20T02:24:57Z
+SEED_EXIT=0
+TC-P07-01 | AB | 200 | layout=['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] seats=['A1=FREE', 'A2=UNAVAILABLE', 'B1=UNAVAILABLE', 'B2=FREE', 'C1=FREE', 'C2=FREE'] closes=2026-11-21T01:30:00Z server=2026-11-20T02:24:59.146836Z | cache=no-store
+TC-P07-02 | BC | 200 | layout=['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] seats=['A1=FREE', 'A2=FREE', 'B1=UNAVAILABLE', 'B2=UNAVAILABLE@2026-11-20T02:26:58.184413Z', 'C1=FREE', 'C2=FREE'] closes=2026-11-21T01:30:00Z server=2026-11-20T02:24:59.191086Z | cache=no-store
+TC-P07-02 | AC | 200 | layout=['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] seats=['A1=FREE', 'A2=UNAVAILABLE', 'B1=UNAVAILABLE', 'B2=UNAVAILABLE@2026-11-20T02:26:58.184413Z', 'C1=FREE', 'C2=FREE'] closes=2026-11-21T01:30:00Z server=2026-11-20T02:24:59.209589Z | cache=no-store
+== TC-P07-03 DB after expiry 2026-11-20T02:27:24Z
+              booking_id              |  status   |          expires_at           |   kind    |          released_at
+--------------------------------------+-----------+-------------------------------+-----------+-------------------------------
+ dddddddd-dddd-4ddd-8ddd-dddddddddd01 | Confirmed | 2026-11-20 02:06:58.184413+00 | Confirmed |
+ dddddddd-dddd-4ddd-8ddd-dddddddddd02 | Confirmed | 2026-11-20 02:06:58.184413+00 | Confirmed |
+ dddddddd-dddd-4ddd-8ddd-dddddddddd03 | Expired   | 2026-11-20 02:26:58.184413+00 | Hold      | 2026-11-20 02:26:58.280232+00
+ dddddddd-dddd-4ddd-8ddd-dddddddddd04 | Expired   | 2026-11-20 02:06:58.184413+00 | Hold      | 2026-11-20 02:24:58.293408+00
+ dddddddd-dddd-4ddd-8ddd-dddddddddd05 | Cancelled | 2026-11-20 02:26:58.184413+00 | Hold      | 2026-11-20 02:23:58.184413+00
+(5 rows)
+
+== TC-P07-10 counts before UI browsing 2026-11-20T02:27:25Z
+ booking | booking_seat | seat_allocation
+---------+--------------+-----------------
+       5 |            5 |               5
+(1 row)
+
+== baseline round 2026-11-20T02:30:14Z
+TC-P04-01 | stops | 200 | stops=['Demo Stop A', 'Demo Stop B', 'Demo Stop C'] | cache=no-store
+TC-P04-01 | AB-D | 200 | total=2 pages=1 items=['111:2026-11-21T02:00:00Z->2026-11-21T04:00:00Z fare=100000 closes=2026-11-21T01:30:00Z', '112:2026-11-21T15:30:00Z->2026-11-21T17:30:00Z fare=100000 closes=2026-11-21T15:00:00Z'] | cache=no-store
+TC-P04-02 | AC-D | 200 | total=2 pages=1 items=['111:2026-11-21T02:00:00Z->2026-11-21T06:00:00Z fare=250000 closes=2026-11-21T01:30:00Z', '112:2026-11-21T15:30:00Z->2026-11-21T19:30:00Z fare=250000 closes=2026-11-21T15:00:00Z'] | cache=no-store
+TC-P04-03 | BC-D+1 | 200 | total=1 pages=1 items=['112:2026-11-21T17:30:00Z->2026-11-21T19:30:00Z fare=150000 closes=2026-11-21T15:00:00Z'] | cache=no-store
+TC-P04-03 | BC-D | 200 | total=1 pages=1 items=['111:2026-11-21T04:00:00Z->2026-11-21T06:00:00Z fare=150000 closes=2026-11-21T01:30:00Z'] | cache=no-store
+TC-P04-04 | AB-yesterday | 422 | code=PAST_BOARDING_DATE fieldErrors=['boardingDate'] | cache=no-store
+TC-P04-05 | AA | 422 | code=INVALID_SEGMENT fieldErrors=['toStopId'] | cache=no-store
+TC-P04-05 | CA | 422 | code=INVALID_SEGMENT fieldErrors=['toStopId'] | cache=no-store
+TC-P04-05 | unknown-stop | 422 | code=STOP_NOT_SERVED fieldErrors=['fromStopId'] | cache=no-store
+TC-P04-06 | AB-D+5 | 200 | total=0 pages=0 items=[] | cache=no-store
+TC-P04-09 | missing-date | 400 | code=INVALID_REQUEST fieldErrors=['boardingDate'] | cache=no-store
+TC-P04-09 | from-abc | 400 | code=INVALID_REQUEST fieldErrors=['fromStopId'] | cache=no-store
+TC-P04-09 | size-101 | 400 | code=INVALID_REQUEST fieldErrors=['size'] | cache=no-store
+TC-P05-01 | day-AC | 200 | status=Scheduled stops=['0:Demo Stop A arr=None dep=2026-11-21T02:00:00Z', '1:Demo Stop B arr=2026-11-21T04:00:00Z dep=2026-11-21T04:00:00Z', '2:Demo Stop C arr=2026-11-21T06:00:00Z dep=None'] legFares=['22-33=100000', '33-99=150000'] seg=2026-11-21T02:00:00Z->2026-11-21T06:00:00Z fare=250000 closes=2026-11-21T01:30:00Z desc=None elig={'allowed': True, 'reasons': []} | cache=no-store
+TC-P05-02 | day-no-segment | 200 | status=Scheduled stops=['0:Demo Stop A arr=None dep=2026-11-21T02:00:00Z', '1:Demo Stop B arr=2026-11-21T04:00:00Z dep=2026-11-21T04:00:00Z', '2:Demo Stop C arr=2026-11-21T06:00:00Z dep=None'] legFares=['22-33=100000', '33-99=150000'] seg=None closes=2026-11-21T01:30:00Z desc=None elig={'allowed': True, 'reasons': []} | cache=no-store
+TC-P05-03 | from-only | 400 | code=INVALID_REQUEST fieldErrors=['toStopId'] | cache=no-store
+TC-P05-04 | unknown-trip | 404 | code=TRIP_NOT_FOUND fieldErrors=[] | cache=no-store
+TC-P05-08 | day-AB | 200 | status=Scheduled stops=['0:Demo Stop A arr=None dep=2026-11-21T02:00:00Z', '1:Demo Stop B arr=2026-11-21T04:00:00Z dep=2026-11-21T04:00:00Z', '2:Demo Stop C arr=2026-11-21T06:00:00Z dep=None'] legFares=['22-33=100000', '33-99=150000'] seg=2026-11-21T02:00:00Z->2026-11-21T04:00:00Z fare=100000 closes=2026-11-21T01:30:00Z desc=None elig={'allowed': True, 'reasons': []} | cache=no-store
+TC-P05-09 | BA | 422 | code=INVALID_SEGMENT fieldErrors=['toStopId'] | cache=no-store
+TC-P07-05 | BA | 422 | code=INVALID_SEGMENT fieldErrors=[] | cache=no-store
+TC-P07-05 | unknown-trip | 404 | code=TRIP_NOT_FOUND fieldErrors=[] | cache=no-store
+TC-P07-05 | missing-from | 400 | code=INVALID_REQUEST fieldErrors=['fromStopId'] | cache=no-store
+TC-P07-03 | BC-after-expiry | 200 | layout=['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] seats=['A1=FREE', 'A2=FREE', 'B1=UNAVAILABLE', 'B2=FREE', 'C1=FREE', 'C2=FREE'] closes=2026-11-21T01:30:00Z server=2026-11-20T02:30:15.550226Z | cache=no-store
+TC-P07-10 | AB | 200 | layout=['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] seats=['A1=FREE', 'A2=UNAVAILABLE', 'B1=UNAVAILABLE', 'B2=FREE', 'C1=FREE', 'C2=FREE'] closes=2026-11-21T01:30:00Z server=2026-11-20T02:30:15.565596Z | cache=no-store
+== TC-P07-10 counts after UI browsing/refresh 2026-11-20T02:32:07Z
+ booking | booking_seat | seat_allocation | pending
+---------+--------------+-----------------+---------
+       5 |            5 |               5 |       0
+(1 row)
+
+== ROUND B reset + seed Account->Trip only 2026-11-20T02:34:20Z
+ Container team11-qa-backend-1 Healthy
+SEED_EXIT=0
+(1 row)
+
+GUARD_EXIT=0
+== status-apply Cancelled 2026-11-20T02:34:51Z
+Exact expected status state verified; success requires psql exit code 0.
+SCENARIO_EXIT=0
+TC-P04-08 | Cancelled-AC-D | 200 | total=1 pages=1 items=['112:2026-11-21T15:30:00Z->2026-11-21T19:30:00Z fare=250000 closes=2026-11-21T15:00:00Z'] | cache=no-store
+TC-P05-05 | Cancelled-day-AC | 200 | status=Cancelled stops=['0:Demo Stop A arr=None dep=2026-11-21T02:00:00Z', '1:Demo Stop B arr=2026-11-21T04:00:00Z dep=2026-11-21T04:00:00Z', '2:Demo Stop C arr=2026-11-21T06:00:00Z dep=None'] legFares=['22-33=100000', '33-99=150000'] seg=2026-11-21T02:00:00Z->2026-11-21T06:00:00Z fare=250000 closes=2026-11-21T01:30:00Z desc=None elig={'allowed': False, 'reasons': ['TRIP_NOT_SCHEDULED']} | cache=no-store
+TC-P07-06 | Cancelled-day-AC | 409 | code=TRIP_NOT_BOOKABLE fieldErrors=[] | cache=no-store
+== status-restore Cancelled (temp, for UI path) 2026-11-20T02:35:08Z
+SCENARIO_EXIT=0
+== status-apply Cancelled (UI path, seat page open) 2026-11-20T02:35:29Z
+SCENARIO_EXIT=0
+== status-restore Cancelled 2026-11-20T02:36:24Z
+SCENARIO_EXIT=0
+GUARD_EXIT=0
+== status-apply Departed 2026-11-20T02:36:27Z
+SCENARIO_EXIT=0
+TC-P04-08 | Departed-AC-D | 200 | total=1 pages=1 items=['112:2026-11-21T15:30:00Z->2026-11-21T19:30:00Z fare=250000 closes=2026-11-21T15:00:00Z'] | cache=no-store
+TC-P05-05 | Departed-day-AC | 200 | status=Departed stops=['0:Demo Stop A arr=None dep=2026-11-21T02:00:00Z', '1:Demo Stop B arr=2026-11-21T04:00:00Z dep=2026-11-21T04:00:00Z', '2:Demo Stop C arr=2026-11-21T06:00:00Z dep=None'] legFares=['22-33=100000', '33-99=150000'] seg=2026-11-21T02:00:00Z->2026-11-21T06:00:00Z fare=250000 closes=2026-11-21T01:30:00Z desc=None elig={'allowed': False, 'reasons': ['TRIP_NOT_SCHEDULED']} | cache=no-store
+TC-P07-06 | Departed-day-AC | 409 | code=TRIP_NOT_BOOKABLE fieldErrors=[] | cache=no-store
+== status-restore Departed
+SCENARIO_EXIT=0
+== status-apply Completed 2026-11-20T02:36:29Z
+SCENARIO_EXIT=0
+TC-P04-08 | Completed-AC-D | 200 | total=1 pages=1 items=['112:2026-11-21T15:30:00Z->2026-11-21T19:30:00Z fare=250000 closes=2026-11-21T15:00:00Z'] | cache=no-store
+TC-P05-05 | Completed-day-AC | 200 | status=Completed stops=['0:Demo Stop A arr=None dep=2026-11-21T02:00:00Z', '1:Demo Stop B arr=2026-11-21T04:00:00Z dep=2026-11-21T04:00:00Z', '2:Demo Stop C arr=2026-11-21T06:00:00Z dep=None'] legFares=['22-33=100000', '33-99=150000'] seg=2026-11-21T02:00:00Z->2026-11-21T06:00:00Z fare=250000 closes=2026-11-21T01:30:00Z desc=None elig={'allowed': False, 'reasons': ['TRIP_NOT_SCHEDULED']} | cache=no-store
+TC-P07-06 | Completed-day-AC | 409 | code=TRIP_NOT_BOOKABLE fieldErrors=[] | cache=no-store
+== status-restore Completed
+SCENARIO_EXIT=0
+GUARD_EXIT=0
+== fare-bc-apply 2026-11-20T02:36:46Z
+SCENARIO_EXIT=0
+TC-P04-10 | fare-bc-missing-AB-D | 503 | code=TRIP_DATA_UNAVAILABLE fieldErrors=[] | cache=no-store
+TC-P05-07 | fare-bc-missing-AC | 200 | status=Scheduled stops=['0:Demo Stop A arr=None dep=2026-11-21T02:00:00Z', '1:Demo Stop B arr=2026-11-21T04:00:00Z dep=2026-11-21T04:00:00Z', '2:Demo Stop C arr=2026-11-21T06:00:00Z dep=None'] legFares=['22-33=100000'] seg=2026-11-21T02:00:00Z->2026-11-21T06:00:00Z fare=None closes=2026-11-21T01:30:00Z desc=None elig={'allowed': False, 'reasons': ['ESSENTIAL_DATA_INCOMPLETE']} | cache=no-store
+TC-P05-07 | fare-bc-missing-AB | 200 | status=Scheduled stops=['0:Demo Stop A arr=None dep=2026-11-21T02:00:00Z', '1:Demo Stop B arr=2026-11-21T04:00:00Z dep=2026-11-21T04:00:00Z', '2:Demo Stop C arr=2026-11-21T06:00:00Z dep=None'] legFares=['22-33=100000'] seg=2026-11-21T02:00:00Z->2026-11-21T04:00:00Z fare=100000 closes=2026-11-21T01:30:00Z desc=None elig={'allowed': False, 'reasons': ['ESSENTIAL_DATA_INCOMPLETE']} | cache=no-store
+TC-P07-07 | fare-bc-missing-AC | 409 | code=ESSENTIAL_DATA_INCOMPLETE fieldErrors=[] | cache=no-store
+== fare-bc-restore (temp, UI path) 2026-11-20T02:37:09Z
+SCENARIO_EXIT=0
+== fare-bc-apply (UI path, seat page open) 2026-11-20T02:37:41Z
+SCENARIO_EXIT=0
+== fare-bc-restore 2026-11-20T02:38:32Z
+SCENARIO_EXIT=0
+GUARD_EXIT=0
+== seat-c2-apply 2026-11-20T02:38:34Z
+SCENARIO_EXIT=0
+TC-P04-10 | seat-c2-missing-AC-D | 503 | code=TRIP_DATA_UNAVAILABLE fieldErrors=[] | cache=no-store
+TC-P05-07 | seat-c2-missing-AC | 200 | status=Scheduled stops=['0:Demo Stop A arr=None dep=2026-11-21T02:00:00Z', '1:Demo Stop B arr=2026-11-21T04:00:00Z dep=2026-11-21T04:00:00Z', '2:Demo Stop C arr=2026-11-21T06:00:00Z dep=None'] legFares=['22-33=100000', '33-99=150000'] seg=2026-11-21T02:00:00Z->2026-11-21T06:00:00Z fare=250000 closes=2026-11-21T01:30:00Z desc=None elig={'allowed': False, 'reasons': ['ESSENTIAL_DATA_INCOMPLETE']} | cache=no-store
+TC-P07-07 | seat-c2-missing-AC | 409 | code=ESSENTIAL_DATA_INCOMPLETE fieldErrors=[] | cache=no-store
+== seat-c2-restore
+SCENARIO_EXIT=0
+GUARD_EXIT=0
+RESTORE | AC-D | 200 | total=2 pages=1 items=['111:2026-11-21T02:00:00Z->2026-11-21T06:00:00Z fare=250000 closes=2026-11-21T01:30:00Z', '112:2026-11-21T15:30:00Z->2026-11-21T19:30:00Z fare=250000 closes=2026-11-21T15:00:00Z'] | cache=no-store
+RESTORE | day-AC | 200 | status=Scheduled stops=['0:Demo Stop A arr=None dep=2026-11-21T02:00:00Z', '1:Demo Stop B arr=2026-11-21T04:00:00Z dep=2026-11-21T04:00:00Z', '2:Demo Stop C arr=2026-11-21T06:00:00Z dep=None'] legFares=['22-33=100000', '33-99=150000'] seg=2026-11-21T02:00:00Z->2026-11-21T06:00:00Z fare=250000 closes=2026-11-21T01:30:00Z desc=None elig={'allowed': True, 'reasons': []} | cache=no-store
+== ROUND C reset + seed all-unavailable 2026-11-20T02:38:47Z
+ Container team11-qa-backend-1 Healthy
+SEED_EXIT=0
+TC-P07-04 | AB | 200 | layout=['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] seats=['A1=UNAVAILABLE', 'A2=UNAVAILABLE', 'B1=UNAVAILABLE', 'B2=UNAVAILABLE', 'C1=UNAVAILABLE', 'C2=UNAVAILABLE'] closes=2026-11-21T01:30:00Z server=2026-11-20T02:39:09.097711Z | cache=no-store
+TC-P07-04 | AC | 200 | layout=['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] seats=['A1=UNAVAILABLE', 'A2=UNAVAILABLE', 'B1=UNAVAILABLE', 'B2=UNAVAILABLE', 'C1=UNAVAILABLE', 'C2=UNAVAILABLE'] closes=2026-11-21T01:30:00Z server=2026-11-20T02:39:09.174369Z | cache=no-store
+TC-P07-04 | BC | 200 | layout=['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] seats=['A1=UNAVAILABLE', 'A2=UNAVAILABLE', 'B1=UNAVAILABLE', 'B2=UNAVAILABLE', 'C1=UNAVAILABLE', 'C2=UNAVAILABLE'] closes=2026-11-21T01:30:00Z server=2026-11-20T02:39:09.211634Z | cache=no-store

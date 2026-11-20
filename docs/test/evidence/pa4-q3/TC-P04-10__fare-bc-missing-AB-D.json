@@ -1,0 +1,12 @@
+{
+  "case": "TC-P04-10",
+  "label": "fare-bc-missing-AB-D",
+  "request": "GET http://127.0.0.1:8088/api/v1/trips?fromStopId=22222222-2222-4222-8222-222222222222&toStopId=33333333-3333-4333-8333-333333333333&boardingDate=2026-11-21",
+  "status": 503,
+  "cacheControl": "no-store",
+  "body": {
+    "message": "Trip information could not be verified. Please retry.",
+    "code": "TRIP_DATA_UNAVAILABLE",
+    "fieldErrors": []
+  }
+}

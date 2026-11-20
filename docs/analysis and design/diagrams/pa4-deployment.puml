@@ -1,0 +1,41 @@
+@startuml PA4_Group11_Deployment
+' Nguồn chỉnh sửa của Hình D1 trong PA4_Group11_SAD_v2.0.md.
+' Ảnh SVG đi kèm (images/pa4-deployment.svg) được vẽ tay theo đúng nội dung này.
+skinparam componentStyle uml2
+skinparam shadowing false
+
+node "Máy tính để bàn / laptop" <<device>> as Desktop {
+  node "Trình duyệt web\n(Chrome, Edge, Safari)" <<executionEnvironment>> as DesktopBrowser {
+    artifact "React SPA\n(index.html, JS, CSS)" as SpaDesktop
+  }
+}
+
+node "Điện thoại di động" <<device>> as Mobile {
+  node "Trình duyệt di động\n(viewport 360–430 px)" <<executionEnvironment>> as MobileBrowser {
+    artifact "React SPA" as SpaMobile
+  }
+}
+
+node "Máy chủ ứng dụng\n(Docker host, Docker Compose)" <<device>> as Server {
+  node "web: nginx:stable-alpine" <<container>> as Web {
+    artifact "dist/ (Vite build)" as Dist
+    artifact "nginx.conf\n(static + proxy /api/)" as NginxConf
+  }
+  node "backend: eclipse-temurin:21-jre" <<container>> as Backend {
+    artifact "coach-backend-0.1.0-SNAPSHOT.jar\n(Spring Boot 3.5)" as Jar
+  }
+  node "db: postgres:16" <<container>> as Db {
+    database "team11_coach\n(Flyway V1–V4)" as Schema
+  }
+}
+
+node "Gemini Developer API" <<external>> as Gemini
+node "VNPay Sandbox (PA5)" <<external>> as VnPay
+
+Desktop -- Server : HTTPS (demo local: HTTP 127.0.0.1:8088)
+Mobile -- Server : HTTPS qua Internet
+Web -- Backend : HTTP 8080, mạng Compose nội bộ
+Backend -- Db : JDBC/TCP 5432, mạng Compose nội bộ
+Backend ..> Gemini : HTTPS (dự kiến, chưa hiện thực)
+Backend ..> VnPay : HTTPS (dự kiến PA5)
+@enduml

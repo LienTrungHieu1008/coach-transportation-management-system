@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" width="1000" height="640" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+  <title>PA4 Group 11 — UML Deployment Diagram</title>
+  <defs>
+    <marker id="open" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M0,0 L10,5 L0,10" fill="none" stroke="#333" stroke-width="1.3"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="640" fill="#ffffff"/>
+  <text x="500" y="24" text-anchor="middle" font-size="16" font-weight="bold" fill="#111">Hình D1. Deployment View — Smart Bus Booking (PA4, tag pa4-v1.0)</text>
+
+  <!-- Desktop device -->
+  <g stroke="#333" stroke-width="1.3">
+    <polygon points="30,80 42,68 302,68 290,80" fill="#dfe8f5"/>
+    <polygon points="290,80 302,68 302,218 290,230" fill="#c4d3ea"/>
+    <rect x="30" y="80" width="260" height="150" fill="#eef3fb"/>
+  </g>
+  <text x="160" y="98" text-anchor="middle" fill="#333">«device»</text>
+  <text x="160" y="116" text-anchor="middle" font-weight="bold" fill="#111">Máy tính để bàn / laptop</text>
+  <rect x="46" y="128" width="228" height="88" fill="#fff" stroke="#555"/>
+  <text x="160" y="146" text-anchor="middle" fill="#333">«executionEnvironment»</text>
+  <text x="160" y="163" text-anchor="middle" font-weight="bold" fill="#111">Trình duyệt (Chrome/Edge/Safari)</text>
+  <rect x="70" y="174" width="180" height="32" fill="#fff8e6" stroke="#8a6d1f"/>
+  <text x="160" y="195" text-anchor="middle" fill="#111">«artifact» React SPA</text>
+
+  <!-- Mobile device -->
+  <g stroke="#333" stroke-width="1.3">
+    <polygon points="30,350 42,338 302,338 290,350" fill="#dfe8f5"/>
+    <polygon points="290,350 302,338 302,488 290,500" fill="#c4d3ea"/>
+    <rect x="30" y="350" width="260" height="150" fill="#eef3fb"/>
+  </g>
+  <text x="160" y="368" text-anchor="middle" fill="#333">«device»</text>
+  <text x="160" y="386" text-anchor="middle" font-weight="bold" fill="#111">Điện thoại di động</text>
+  <rect x="46" y="398" width="228" height="88" fill="#fff" stroke="#555"/>
+  <text x="160" y="416" text-anchor="middle" fill="#333">«executionEnvironment»</text>
+  <text x="160" y="433" text-anchor="middle" font-weight="bold" fill="#111">Trình duyệt di động (360–430 px)</text>
+  <rect x="70" y="444" width="180" height="32" fill="#fff8e6" stroke="#8a6d1f"/>
+  <text x="160" y="465" text-anchor="middle" fill="#111">«artifact» React SPA</text>
+
+  <!-- Server device -->
+  <g stroke="#333" stroke-width="1.3">
+    <polygon points="390,60 402,48 962,48 950,60" fill="#e3efe3"/>
+    <polygon points="950,60 962,48 962,478 950,490" fill="#c9dfc9"/>
+    <rect x="390" y="60" width="560" height="430" fill="#f2f8f2"/>
+  </g>
+  <text x="670" y="78" text-anchor="middle" fill="#333">«device»</text>
+  <text x="670" y="96" text-anchor="middle" font-weight="bold" fill="#111">Máy chủ ứng dụng — Docker host (Docker Compose)</text>
+
+  <!-- web container -->
+  <rect x="410" y="110" width="520" height="100" fill="#fff" stroke="#555"/>
+  <text x="670" y="128" text-anchor="middle" fill="#333">«container» web</text>
+  <text x="670" y="145" text-anchor="middle" font-weight="bold" fill="#111">nginx:stable-alpine — cổng công bố 8088 → 80</text>
+  <rect x="425" y="158" width="235" height="40" fill="#fff8e6" stroke="#8a6d1f"/>
+  <text x="542" y="176" text-anchor="middle" fill="#111">«artifact» dist/ (Vite build)</text>
+  <text x="542" y="191" text-anchor="middle" fill="#555" font-size="11">phục vụ SPA tĩnh</text>
+  <rect x="680" y="158" width="235" height="40" fill="#fff8e6" stroke="#8a6d1f"/>
+  <text x="797" y="176" text-anchor="middle" fill="#111">«artifact» nginx.conf</text>
+  <text x="797" y="191" text-anchor="middle" fill="#555" font-size="11">reverse proxy /api/ → backend</text>
+
+  <!-- backend container -->
+  <rect x="410" y="240" width="520" height="100" fill="#fff" stroke="#555"/>
+  <text x="670" y="258" text-anchor="middle" fill="#333">«container» backend</text>
+  <text x="670" y="275" text-anchor="middle" font-weight="bold" fill="#111">eclipse-temurin:21-jre — cổng nội bộ 8080</text>
+  <rect x="440" y="288" width="460" height="40" fill="#fff8e6" stroke="#8a6d1f"/>
+  <text x="670" y="306" text-anchor="middle" fill="#111">«artifact» coach-backend-0.1.0-SNAPSHOT.jar (Spring Boot 3.5)</text>
+  <text x="670" y="321" text-anchor="middle" fill="#555" font-size="11">module identity · trip · booking (ai: chưa hiện thực)</text>
+
+  <!-- db container -->
+  <rect x="410" y="370" width="520" height="100" fill="#fff" stroke="#555"/>
+  <text x="670" y="388" text-anchor="middle" fill="#333">«container» db</text>
+  <text x="670" y="405" text-anchor="middle" font-weight="bold" fill="#111">postgres:16 — cổng nội bộ 5432, volume postgres-data</text>
+  <rect x="490" y="418" width="360" height="40" fill="#fff8e6" stroke="#8a6d1f"/>
+  <text x="670" y="436" text-anchor="middle" fill="#111">«database» schema Flyway V1–V4</text>
+  <text x="670" y="451" text-anchor="middle" fill="#555" font-size="11">session · identity_account · Trip read model · booking</text>
+
+  <!-- internal links -->
+  <line x1="670" y1="210" x2="670" y2="240" stroke="#333" stroke-width="1.5"/>
+  <text x="680" y="229" fill="#111" font-size="12">HTTP/JSON, mạng Compose</text>
+  <line x1="670" y1="340" x2="670" y2="370" stroke="#333" stroke-width="1.5"/>
+  <text x="680" y="359" fill="#111" font-size="12">JDBC/TCP</text>
+
+  <!-- client links -->
+  <line x1="302" y1="155" x2="390" y2="160" stroke="#333" stroke-width="1.5"/>
+  <text x="308" y="140" fill="#111" font-size="12">HTTPS</text>
+  <text x="308" y="178" fill="#555" font-size="11">(demo: HTTP</text>
+  <text x="308" y="192" fill="#555" font-size="11">127.0.0.1:8088)</text>
+  <line x1="302" y1="425" x2="390" y2="300" stroke="#333" stroke-width="1.5"/>
+  <text x="318" y="395" fill="#111" font-size="12">HTTPS</text>
+  <text x="318" y="410" fill="#555" font-size="11">qua Internet</text>
+
+  <!-- external nodes (planned) -->
+  <g stroke="#777" stroke-width="1.3" stroke-dasharray="6 4">
+    <polygon points="430,560 442,548 682,548 670,560" fill="#f4f4f4"/>
+    <polygon points="670,560 682,548 682,608 670,620" fill="#e6e6e6"/>
+    <rect x="430" y="560" width="240" height="60" fill="#fafafa"/>
+    <polygon points="720,560 732,548 962,548 950,560" fill="#f4f4f4"/>
+    <polygon points="950,560 962,548 962,608 950,620" fill="#e6e6e6"/>
+    <rect x="720" y="560" width="230" height="60" fill="#fafafa"/>
+  </g>
+  <text x="550" y="582" text-anchor="middle" fill="#555">«external system»</text>
+  <text x="550" y="600" text-anchor="middle" font-weight="bold" fill="#333">Gemini Developer API</text>
+  <text x="835" y="582" text-anchor="middle" fill="#555">«external system»</text>
+  <text x="835" y="600" text-anchor="middle" font-weight="bold" fill="#333">VNPay Sandbox (PA5)</text>
+  <line x1="550" y1="490" x2="550" y2="546" stroke="#555" stroke-width="1.3" stroke-dasharray="6 4" marker-end="url(#open)"/>
+  <line x1="835" y1="490" x2="835" y2="546" stroke="#555" stroke-width="1.3" stroke-dasharray="6 4" marker-end="url(#open)"/>
+  <text x="558" y="522" fill="#555" font-size="11">HTTPS — dự kiến, chưa hiện thực</text>
+  <text x="843" y="522" fill="#555" font-size="11">HTTPS — dự kiến PA5</text>
+</svg>
