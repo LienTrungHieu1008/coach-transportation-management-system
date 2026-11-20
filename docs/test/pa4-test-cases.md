@@ -4,7 +4,7 @@
 
 Đi kèm [kế hoạch kiểm thử](pa4-test-plan.md). Bản theo mẫu Moodle: `docs/test/PA4-Group11-test-cases.xlsx`.
 
-**Chưa ca nào được thực thi.** Cột *Actual Result*, *Status*, *Tester*, *Tested Date* trong file Excel để trống và sẽ được điền ở task Q3. Expected Result dưới đây **chưa được chủ UC rà soát**.
+**Đã thực thi (Q3) ngày 20/11/2026 trên tag `pa4-v1.0` (`6e4f9aa`):** 25 Pass, 3 Pass (một phần), 2 Fail, 3 lỗi Low. Kết quả từng ca nằm trong cột *Actual Result*, *Status*, *Tester*, *Tested Date*, *Remark* của file Excel và trong [báo cáo kiểm thử](pa4-test-report.md). Nội dung ca dưới đây giữ nguyên bản Q1; Expected Result **chưa được chủ UC rà soát**.
 
 ## Quy ước
 

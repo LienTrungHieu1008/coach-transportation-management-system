@@ -1,0 +1,56 @@
+{
+  "case": "RESTORE",
+  "label": "AC-D",
+  "request": "GET http://127.0.0.1:8088/api/v1/trips?fromStopId=22222222-2222-4222-8222-222222222222&toStopId=99999999-9999-4999-8999-999999999999&boardingDate=2026-11-21",
+  "status": 200,
+  "cacheControl": "no-store",
+  "body": {
+    "items": [
+      {
+        "tripId": "11111111-1111-4111-8111-111111111111",
+        "route": {
+          "id": "44444444-4444-4444-8444-444444444444",
+          "name": "Demo Route A-B-C"
+        },
+        "fromStop": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "name": "Demo Stop A"
+        },
+        "toStop": {
+          "id": "99999999-9999-4999-8999-999999999999",
+          "name": "Demo Stop C"
+        },
+        "boardingTime": "2026-11-21T02:00:00Z",
+        "alightingTime": "2026-11-21T06:00:00Z",
+        "vehicleType": "Demo coach",
+        "fareAmountVnd": 250000,
+        "bookingClosesAt": "2026-11-21T01:30:00Z"
+      },
+      {
+        "tripId": "11111111-1111-4111-8111-111111111112",
+        "route": {
+          "id": "44444444-4444-4444-8444-444444444444",
+          "name": "Demo Route A-B-C"
+        },
+        "fromStop": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "name": "Demo Stop A"
+        },
+        "toStop": {
+          "id": "99999999-9999-4999-8999-999999999999",
+          "name": "Demo Stop C"
+        },
+        "boardingTime": "2026-11-21T15:30:00Z",
+        "alightingTime": "2026-11-21T19:30:00Z",
+        "vehicleType": "Demo coach",
+        "fareAmountVnd": 250000,
+        "bookingClosesAt": "2026-11-21T15:00:00Z"
+      }
+    ],
+    "page": 0,
+    "size": 20,
+    "totalElements": 2,
+    "totalPages": 1,
+    "serverTime": "2026-11-20T02:38:39.179302106Z"
+  }
+}

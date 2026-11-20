@@ -1,0 +1,15 @@
+{
+  "case": "TC-P04-06",
+  "label": "AB-D+5",
+  "request": "GET http://127.0.0.1:8088/api/v1/trips?fromStopId=22222222-2222-4222-8222-222222222222&toStopId=33333333-3333-4333-8333-333333333333&boardingDate=2026-11-26",
+  "status": 200,
+  "cacheControl": "no-store",
+  "body": {
+    "items": [],
+    "page": 0,
+    "size": 20,
+    "totalElements": 0,
+    "totalPages": 0,
+    "serverTime": "2026-11-20T02:30:15.327736468Z"
+  }
+}

@@ -1,0 +1,33 @@
+Backend verify trên tag pa4-v1.0 (6e4f9aa), 20/11/2026
+Lệnh: docker compose -p team11-qa-verify -f compose.test.yaml run --rm backend-test (Maven clean verify, PostgreSQL 16 tmpfs)
+[INFO] Tests run: 299, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 288, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+VERIFY_EXIT=0
+
+Test liên quan các ca IT (tên test | lớp), tất cả PASS trong lượt trên:
+failedReadIsUnavailable | vn.edu.team11.coach.booking.api.SeatAvailabilityControllerTests
+failedFactReadIsUnavailableWithoutFreeFallback | vn.edu.team11.coach.booking.application.SeatAvailabilityApplicationServiceTests
+failedAllocationReadIsUnavailableWithoutFreeFallback | vn.edu.team11.coach.booking.application.SeatAvailabilityApplicationServiceTests
+databaseAndTransactionFailuresAre503WithoutPrivateCause | vn.edu.team11.coach.trip.api.TripDetailsControllerTest
+retrievalFailureIs503AndDoesNotExposeSql | vn.edu.team11.coach.trip.api.TripSearchControllerTest
+retrievalErrorIsNeverConvertedToNotFound | vn.edu.team11.coach.trip.application.TripDetailsServiceTest
+emptyResultHasZeroPagesAndRetrievalFailuresAreNotReplacedByEmptySuccess | vn.edu.team11.coach.trip.application.TripSearchServiceTest
+cutoffEqualityIsClosed(long)[1] | vn.edu.team11.coach.trip.domain.TripDetailsPolicyTest
+cutoffEqualityIsClosed(long)[2] | vn.edu.team11.coach.trip.domain.TripDetailsPolicyTest
+cutoffEqualityIsClosed(long)[3] | vn.edu.team11.coach.trip.domain.TripDetailsPolicyTest
+knownWrongDateOrClosedTripDoesNotFailForMissingFares | vn.edu.team11.coach.trip.domain.TripSearchPolicyTest
+exactCutoffIsClosedAndInstantBeforeIsOpen | vn.edu.team11.coach.trip.domain.TripSearchPolicyTest
+actualDatabaseReadFailureIsUnavailableAndNeverFalseFree(String)[1] | vn.edu.team11.coach.booking.infrastructure.SeatAvailabilityIT
+actualDatabaseReadFailureIsUnavailableAndNeverFalseFree(String)[2] | vn.edu.team11.coach.booking.infrastructure.SeatAvailabilityIT
+firstStopCutoffAllowsOneMicrosecondBeforeAndRejectsExactOrAfterEvenForBc | vn.edu.team11.coach.booking.infrastructure.SeatAvailabilityIT
+anonymousActualSqlFailureIs503AndDoesNotLeakInternals | vn.edu.team11.coach.trip.api.PublicTripDetailsSecurityIT
+anonymousSearchRetainsValidationAndDatabaseFailureMapping | vn.edu.team11.coach.trip.api.PublicTripsSecurityIT
+q1MultipleReasonsAccumulateEvenWhenTripIsClosed | vn.edu.team11.coach.trip.infrastructure.PostgresTripDetailsRepositoryIT
+q1CutoffUsesFirstStopForEverySegmentAndMatchesP3(long)[1] | vn.edu.team11.coach.trip.infrastructure.PostgresTripDetailsRepositoryIT
+q1CutoffUsesFirstStopForEverySegmentAndMatchesP3(long)[2] | vn.edu.team11.coach.trip.infrastructure.PostgresTripDetailsRepositoryIT
+q1CutoffUsesFirstStopForEverySegmentAndMatchesP3(long)[3] | vn.edu.team11.coach.trip.infrastructure.PostgresTripDetailsRepositoryIT
+tripAtExactCutoffReturnsNotBookable | vn.edu.team11.coach.trip.infrastructure.PostgresTripQueryAdapterIT
+missingArrivalAndMissingCutoffProduce503ForPotentialMatches | vn.edu.team11.coach.trip.infrastructure.PostgresTripSearchRepositoryIT
+cutoffAndCompleteFareCoverageAgreeWithExistingP3Rules | vn.edu.team11.coach.trip.infrastructure.PostgresTripSearchRepositoryIT
+overnightIntermediateBoardingStillClosesAtFirstStopCutoff | vn.edu.team11.coach.trip.infrastructure.PostgresTripSearchRepositoryIT
