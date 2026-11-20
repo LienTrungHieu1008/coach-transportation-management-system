@@ -1,0 +1,13 @@
+== RETEST B02 on 6ad7f73: reset + seed Account->Trip 2026-11-20T03:49:36Z
+ Container team11-qa-db-1 Healthy
+SEED_EXIT=0
+GUARD_EXIT=0
+== status-apply Cancelled (seat page open, observer armed) 2026-11-20T03:50:28Z
+SCENARIO_EXIT=0
+== observer result: blockedAt 03:50:41.721Z, polls after block 03:50:56/03:51:11/03:51:26, seat elements seen after block = 0
+== status-restore Cancelled 2026-11-20T03:51:42Z
+SCENARIO_EXIT=0
+GUARD_EXIT=0
+== backend stopped 2026-11-20T03:52:14Z
+== backend healthy 2026-11-20T03:53:06Z
+== recovered: 6 seats FREE, no alert at 2026-11-20T03:53:38Z
