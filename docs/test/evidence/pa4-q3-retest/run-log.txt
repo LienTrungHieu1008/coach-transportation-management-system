@@ -1,0 +1,18 @@
+== RETEST on 5bd859b: reset + seed Account->Trip 2026-11-20T03:28:37Z
+ Container team11-qa-backend-1 Healthy
+SEED_EXIT=0
+ 2026-11-21
+GUARD_EXIT=0
+== fare-bc-apply 2026-11-20T03:29:41Z
+SCENARIO_EXIT=0
+== fare-bc-restore 2026-11-20T03:30:00Z
+SCENARIO_EXIT=0
+GUARD_EXIT=0
+== status-apply Cancelled (seat page open) 2026-11-20T03:30:23Z
+SCENARIO_EXIT=0
+== status-restore Cancelled 2026-11-20T03:31:09Z
+SCENARIO_EXIT=0
+GUARD_EXIT=0
+== reset + seed all-unavailable 2026-11-20T03:31:11Z
+ Container team11-qa-backend-1 Healthy
+SEED_EXIT=0
