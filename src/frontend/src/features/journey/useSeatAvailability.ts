@@ -24,7 +24,9 @@ export function useSeatAvailability(selection: SeatSelection | null) {
       let requestActive = true
       const started = performance.now()
       controller = new AbortController()
-      setState(old => ({ ...old, loading: true, error: null }))
+      // Keep the last error until this request settles: clearing it here would re-show the previous
+      // seat map during every poll after a 409 (B02). Success clears it; a failure replaces it.
+      setState(old => ({ ...old, loading: true }))
       timeout = setTimeout(() => {
         if (!active || !requestActive) return
         requestActive = false; pending = false; queued = false; controller?.abort()
