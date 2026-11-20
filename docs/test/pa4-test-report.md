@@ -1,6 +1,6 @@
 # PA4 — Báo cáo kiểm thử (Test Report) Nhóm 11
 
-Task Q3 · Ngày thực thi: **20/11/2026** (lượt thử trước ngày 19/11 bị gián đoạn do tắt máy, không tính); retest bản sửa `5bd859b` cùng ngày ·
+Task Q3 · Ngày thực thi: **20/11/2026** (lượt thử trước ngày 19/11 bị gián đoạn do tắt máy, không tính); retest bản sửa `5bd859b` và `6ad7f73` (PR #20) cùng ngày ·
 Người thực thi: Đinh Đức Hiếu (thực thi cùng Claude Code trên máy của Đức Hiếu) · Người duyệt: Liên Trung Hiếu (chưa duyệt).
 
 Bản Excel theo mẫu Moodle: [PA4-Group11-test-report.xlsx](PA4-Group11-test-report.xlsx) (Test summary + Bug report).
@@ -24,7 +24,7 @@ Bằng chứng thô: [evidence/pa4-q3/](evidence/pa4-q3/) — JSON từng reques
 - **3 lỗi mức Low**, đều ở giao diện, giao **Khánh Hoàng**; không có lỗi Critical/High/Medium. Không phát hiện lỗi ở phần tìm chuyến/giá (Phương) hay trạng thái ghế/hold (Huy).
 - "Pass một phần": các điểm ER chạy được đều đạt, nhưng một bước UI không thực thi được (lý do ở mục 4). Không ghi Pass cho bước chưa chạy.
 - Bảng trên là kết quả trên `pa4-v1.0` và được giữ nguyên.
-- **Retest ngày 20/11/2026** trên bản sửa `5bd859b` ([PR #20](https://github.com/LienTrungHieu1008/coach-transportation-management-system/pull/20), **chưa merge**): cả 4 ca liên quan B01–B03 đều đạt. Chi tiết ở mục 5.1.
+- **Retest ngày 20/11/2026** trên bản sửa ([PR #20](https://github.com/LienTrungHieu1008/coach-transportation-management-system/pull/20), **chưa merge**, commit mới nhất `6ad7f73`): cả 4 ca liên quan B01–B03 đều đạt. Chi tiết ở mục 5.1.
 
 ## 2. Bản build và môi trường
 
@@ -129,21 +129,37 @@ Mong đợi: nêu rõ hết ghế và gợi ý chọn chuyến/đoạn khác. Th
 
 ### 5.1 Retest bản sửa
 
-| Hạng mục | Giá trị |
-|---|---|
-| Phiên bản | nhánh `fix/f2-f4-error-states`, commit `5bd859b` ([PR #20](https://github.com/LienTrungHieu1008/coach-transportation-management-system/pull/20), chưa merge, chưa có review của Hoàng). Chỉ đổi frontend; backend giống `pa4-v1.0`. |
-| Môi trường | Như mục 2: `compose.yaml` dựng từ worktree tại `5bd859b`, DB PostgreSQL 16 tmpfs riêng; trình duyệt tích hợp Chromium 156. Bước build image web đã chạy lại lint/typecheck/test/build (đạt). Ngoài ra, trên Node 24.19.0, 59 FE test đều PASS. |
-| Dữ liệu | DB mới: Account → Trip (D = 21/11/2026) với kịch bản `fare-bc` và `status` (Cancelled), sau đó DB mới với bộ `booking_all_unavailable_runtime.sql`. Guard sau mỗi lần khôi phục đều exit 0. |
-| Thời gian | 20/11/2026, 03:28–03:32 UTC |
+Bản sửa nằm trên nhánh `fix/f2-f4-error-states` ([PR #20](https://github.com/LienTrungHieu1008/coach-transportation-management-system/pull/20), chưa merge, chưa có review của Hoàng). PR chỉ đổi frontend; backend giống `pa4-v1.0`. Commit mới nhất được kiểm thử: **`6ad7f73`**. Có hai lượt retest trong cùng ngày 20/11/2026.
 
-| Ca | Lỗi | Kết quả retest | Status |
-|---|---|---|---|
-| TC-P04-05 | B01 | C→A: tiêu đề "Đoạn đường chưa hợp lệ", thông điệp tiếng Việt, nút "Sửa tiêu chí tìm kiếm" (không còn "Thử lại", không còn câu tiếng Anh lặp). Quay về form vẫn giữ C, A, 21/11. | Pass |
-| TC-P04-10 | B01 | Thiếu LegFare B–C: "Không thể tải dữ liệu — Chưa xác minh được thông tin chuyến xe. Hãy thử lại sau ít phút." kèm "Thử lại". Sau khi khôi phục dữ liệu, "Thử lại" tải được kết quả. | Pass |
-| TC-P07-06 | B02 | Đang xem ghế A→B thì Trip chuyển Cancelled: "Chuyến không còn mở bán" với lý do và 2 nút "Về chi tiết chuyến", "Chọn chuyến khác"; không còn phần tử ghế nào (0). "Chọn chuyến khác" về danh sách đã tải lại (chỉ còn Trip qua đêm). | Pass |
-| TC-P07-04 | B03 | Bộ hết ghế, A→C: khung "Đoạn này đã hết ghế trống" kèm nút "Chọn chuyến khác" và "Đổi điểm đón, điểm trả"; 6 ghế "Không khả dụng", không ghế FREE; không tràn ngang ở 375 px. | Pass |
+| Lượt | Commit | Thời gian (UTC) | Ca đã chạy | FE test (Node 24.19.0) |
+|---|---|---|---|---|
+| 1 | `5bd859b` | 03:28–03:32 | TC-P04-05, TC-P04-10, TC-P07-06, TC-P07-04 | 59 PASS |
+| 2 | `6ad7f73` | 03:49–03:54 | TC-P07-06, TC-P07-08 | 61 PASS |
 
-Bằng chứng: [evidence/pa4-q3-retest/](evidence/pa4-q3-retest/) (5 ảnh + `run-log.txt`). Thư mục này nằm trong PR #20 và chỉ có trên `main` sau khi PR #20 được merge.
+**Lượt 2:** `6ad7f73` sửa nốt B02. Ở `5bd859b`, sau khi nhận 409, mỗi lượt poll 15 s xoá `error` lúc bắt đầu gọi lại, nên sơ đồ ghế cũ hiện lại tạm thời. Commit này chỉ đổi `useSeatAvailability.ts` (giữ lỗi trong lúc refresh) và thêm test.
+- Lượt 2 chạy lại TC-P07-06 và TC-P07-08 (nhánh lỗi tạm thời của cùng hook).
+- **Không chạy lại** TC-P04-05, TC-P04-10, TC-P07-04 trên `6ad7f73`, vì commit không đụng tới màn tìm chuyến và nhánh hết ghế (không có lỗi). Kết quả của ba ca này lấy từ lượt 1; FE test của chúng vẫn PASS trên `6ad7f73`.
+
+**Môi trường và dữ liệu:**
+- Như mục 2: `compose.yaml` dựng từ worktree tại đúng commit, DB PostgreSQL 16 tmpfs riêng, trình duyệt tích hợp Chromium 156.
+- Bước build image web chạy lại lint/typecheck/test/build (đạt).
+- Dữ liệu: DB mới Account → Trip (D = 21/11/2026) với kịch bản `fare-bc` và `status` (Cancelled); lượt 1 thêm một DB mới với `booking_all_unavailable_runtime.sql`.
+- Guard sau mỗi lần khôi phục đều exit 0.
+
+| Ca | Lỗi | Lượt | Kết quả retest | Status |
+|---|---|---|---|---|
+| TC-P04-05 | B01 | 1 | C→A: tiêu đề "Đoạn đường chưa hợp lệ", thông điệp tiếng Việt, nút "Sửa tiêu chí tìm kiếm" (không còn "Thử lại", không còn câu tiếng Anh lặp). Quay về form vẫn giữ C, A, 21/11. | Pass |
+| TC-P04-10 | B01 | 1 | Thiếu LegFare B–C: "Không thể tải dữ liệu — Chưa xác minh được thông tin chuyến xe. Hãy thử lại sau ít phút." kèm "Thử lại". Sau khi khôi phục dữ liệu, "Thử lại" tải được kết quả. | Pass |
+| TC-P07-06 | B02 | 1 | Đang xem ghế A→B thì Trip chuyển Cancelled: "Chuyến không còn mở bán" với lý do và 2 nút "Về chi tiết chuyến", "Chọn chuyến khác"; không còn phần tử ghế nào (0). "Chọn chuyến khác" về danh sách đã tải lại (chỉ còn Trip qua đêm). | Pass |
+| TC-P07-06 | B02 | 2 | Như lượt 1, thêm kiểm tra qua các lượt poll. Bị chặn lúc 03:50:41Z, sau đó poll thêm 3 lần (03:50:56, 03:51:11, 03:51:26); MutationObserver ghi nhận **0 lần** phần tử ghế xuất hiện lại. Khôi phục Scheduled thì lượt poll kế tiếp hiện lại 6 ghế, hết thông báo lỗi. | Pass |
+| TC-P07-08 | — | 2 | Phần UI chạy lại vì hook thay đổi. Dừng backend → "Không thể tải dữ liệu" + "Thử lại", 6 ghế "Chưa xác minh", không ghế FREE. Bật lại backend → tự hồi phục (6 ghế, hết lỗi). | Pass |
+| TC-P07-04 | B03 | 1 | Bộ hết ghế, A→C: khung "Đoạn này đã hết ghế trống" kèm nút "Chọn chuyến khác" và "Đổi điểm đón, điểm trả"; 6 ghế "Không khả dụng", không ghế FREE; không tràn ngang ở 375 px. | Pass |
+
+Bằng chứng: [evidence/pa4-q3-retest/](evidence/pa4-q3-retest/).
+- Lượt 1: ảnh `RETEST-*`, `run-log.txt`.
+- Lượt 2: ảnh `RETEST2-*`, `run-log-6ad7f73.txt`.
+
+Thư mục này nằm trong PR #20 và chỉ có trên `main` sau khi PR #20 được merge.
 
 Ghi nhận khi retest: sau khi dựng lại image, trình duyệt vẫn dùng `index.html` cũ trong cache, phải tải lại kèm tham số mới thấy bundle mới. Có thể do nginx không gửi `Cache-Control` cho `index.html`. Đây không phải lỗi của B01–B03; nên xem xét trong task riêng.
 
@@ -158,11 +174,11 @@ Ghi nhận khi retest: sau khi dựng lại image, trình duyệt vẫn dùng `i
 
 ## 7. Việc tiếp theo
 
-- Bản sửa B01–B03 đã có ở PR #20 (`5bd859b`) và retest đạt (mục 5.1). Việc còn lại:
+- Bản sửa B01–B03 đã có ở PR #20 (commit mới nhất `6ad7f73`) và retest đạt (mục 5.1). Việc còn lại:
   - Hoàng review PR #20.
   - Trung Hiếu điều phối merge.
   - Sau khi merge, QA ghi commit trên `main` và chuyển B01–B03 sang Closed.
-  - Nếu PR #20 thay đổi thêm sau review, retest lại 4 ca trên commit mới.
+  - Nếu PR #20 thay đổi thêm sau `6ad7f73`, retest lại các ca bị ảnh hưởng trên commit mới.
 - Kết quả trên `pa4-v1.0` không đổi: hai ca Fail, ba lỗi tồn tại trên bản đó.
 - Q1: chỉnh TC-P04-01 (tên tuyến), TC-P05-02, TC-P05-04, TC-P07-09 bước 3 theo ghi chú 2–3.
 - Trung Hiếu duyệt báo cáo.
