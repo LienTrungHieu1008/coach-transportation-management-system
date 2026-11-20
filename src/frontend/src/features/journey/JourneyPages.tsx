@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
-import { JourneyApiError } from '../../shared/api/journey'
 import type { SearchCriteria, StopOption, TripDetails, TripSearchItem, TripSearchPage } from '../../shared/api/journeyTypes'
 import { JourneyIcon } from './JourneyIcon'
+import { describeError } from './journeyErrors'
 import { useSeatAvailability, type SeatSelection } from './useSeatAvailability'
 import { vietnamDate, type JourneyPage, type LoadState } from './useJourneyState'
 
@@ -17,10 +17,17 @@ function JourneyProgress({ current, onNavigate }: Navigation & { current: number
     {i < current ? <button className="progress-step-link" onClick={() => onNavigate(step.page)}><span className="step-number">✓</span><b>{step.label}</b></button> : <span className="progress-step-content"><span className="step-number">0{i + 1}</span><b>{step.label}</b></span>}
   </li>)}</ol></nav>
 }
-function ErrorPanel({ error, onRetry }: { error: Error; onRetry: () => void }) {
-  return <div className="empty-state error-state" role="alert"><span>!</span><h2>Không thể tải dữ liệu</h2><p>{error.message}</p>
-    {error instanceof JourneyApiError && error.body?.fieldErrors.length ? <ul>{error.body.fieldErrors.map((f, i) => <li key={`${f.field}-${i}`}>{f.message}</li>)}</ul> : null}
-    <button className="outline-button" onClick={onRetry}>Thử lại</button></div>
+function ErrorPanel({ error, onRetry, onNavigate, onDetails }: { error: Error; onRetry: () => void; onNavigate?: (page: JourneyPage) => void; onDetails?: () => void }) {
+  const view = describeError(error)
+  // Without navigation (e.g. Stop catalogue on Home) retrying is the only recovery available.
+  const action = onNavigate ? view.action : 'retry'
+  return <div className="empty-state error-state" role="alert"><span>!</span><h2>{view.title}</h2><p>{view.message}</p>
+    <div className="error-actions">
+      {action === 'retry' && <button className="outline-button" onClick={onRetry}>Thử lại</button>}
+      {action === 'edit-criteria' && <button className="outline-button" onClick={() => onNavigate?.('home')}>Sửa tiêu chí tìm kiếm</button>}
+      {action === 'back-to-search' && <button className="outline-button" onClick={() => onNavigate?.('home')}>Về trang tìm chuyến</button>}
+      {action === 'choose-other' && <>{onDetails && <button className="outline-button" onClick={onDetails}>Về chi tiết chuyến</button>}<button className="outline-button" onClick={() => onNavigate?.('results')}>Chọn chuyến khác</button></>}
+    </div></div>
 }
 function Loading({ text }: { text: string }) { return <div className="empty-state loading-state" role="status"><h2>{text}</h2><p>Đang chờ dữ liệu từ dịch vụ.</p></div> }
 
@@ -59,7 +66,7 @@ export function ResultsPage({ state, criteria, onNavigate, onSelectTrip, onPage,
   const data = state.data
   return <section className="page-section"><JourneyProgress current={0} onNavigate={onNavigate}/><button className="back-link" onClick={() => onNavigate('home')}>← Quay lại</button>
     <div className="results-heading"><div><span className="section-kicker">KẾT QUẢ TÌM CHUYẾN</span><h1>Chọn chuyến cho hành trình</h1><p>Ngày lên xe: {criteria.boardingDate} · Giờ Việt Nam</p></div></div>
-    {state.loading ? <Loading text="Đang tìm chuyến"/> : state.error ? <ErrorPanel error={state.error} onRetry={onRetry}/> : data && <>
+    {state.loading ? <Loading text="Đang tìm chuyến"/> : state.error ? <ErrorPanel error={state.error} onRetry={onRetry} onNavigate={onNavigate}/> : data && <>
       <p role="status">{data.totalElements} chuyến phù hợp</p>{data.items.length === 0 && <div className="empty-state"><h2>Không có chuyến phù hợp</h2><p>Hãy thử ngày hoặc điểm lên, xuống khác.</p></div>}
       {data.items.map(trip => <article className="trip-card" key={trip.tripId}><div className="trip-top"><span className="operator-logo"><JourneyIcon name="bus"/></span><div><b>{trip.route.name}</b><small>{trip.vehicleType}</small></div><span className="seat-count">Thông tin chuyến hiện hành</span></div>
         <div className="trip-timing"><div><b>{time(trip.boardingTime)}</b><small>{trip.fromStop.name}</small><small>{fullTime(trip.boardingTime)}</small></div><div className="duration"><span>Giờ lên / xuống</span><div/></div><div className="timing-end"><b>{time(trip.alightingTime)}</b><small>{trip.toStop.name}</small><small>{fullTime(trip.alightingTime)}</small></div><div className="trip-price"><b>{money(trip.fareAmountVnd)}</b><small>đoạn đã chọn</small></div></div>
@@ -75,7 +82,7 @@ export function DetailsPage({ state, onNavigate, onRetry, onOpenSeats }: Navigat
   const name = (id: string) => data?.stops.find(s => s.stop.id === id)?.stop.name ?? id
   const canContinue = data?.bookingEligibility.allowed && segment && segment.fareAmountVnd !== null
   return <section className="page-section"><JourneyProgress current={1} onNavigate={onNavigate}/><button className="back-link" onClick={() => onNavigate('results')}>← Quay lại</button>
-    {state.loading ? <Loading text="Đang tải chi tiết chuyến"/> : state.error ? <ErrorPanel error={state.error} onRetry={onRetry}/> : data && <>
+    {state.loading ? <Loading text="Đang tải chi tiết chuyến"/> : state.error ? <ErrorPanel error={state.error} onRetry={onRetry} onNavigate={onNavigate}/> : data && <>
       <div className="detail-heading"><div><span className="section-kicker">CHI TIẾT CHUYẾN</span><h1>{data.route?.name ?? 'Thông tin tuyến chưa có'}</h1><p>{segment ? `${name(segment.fromStopId)} → ${name(segment.toStopId)}` : 'Chưa xác minh được đoạn đã chọn'}</p></div><span className={canContinue ? 'status-pill' : 'status-pill status-blocked'}>{canContinue ? 'Đang mở bán' : 'Không thể tiếp tục'}</span></div>
       <div className="detail-grid"><div className="detail-main"><article className="panel route-panel"><div className="panel-heading"><h2>Các điểm dừng theo thứ tự</h2><span>{data.status}</span></div>{data.stops.map(s => <div className="route-stop" key={s.stop.id}><span className="stop-marker start-marker"/><div><small>ĐIỂM DỪNG {s.index + 1}</small><b>{s.stop.name}</b><p>Đến: {s.plannedArrivalTime ? fullTime(s.plannedArrivalTime) : 'Chưa có giờ'}<br/>Rời: {s.plannedDepartureTime ? fullTime(s.plannedDepartureTime) : 'Chưa có giờ'}</p></div></div>)}{!data.stops.length && <p>Chưa có dữ liệu điểm dừng.</p>}</article>
         <article className="panel vehicle-panel"><JourneyIcon name="bus"/><div><h2>{data.vehicle?.vehicleType ?? 'Chưa có thông tin xe'}</h2><p>{data.vehicle?.seatLayoutId ? `Sơ đồ: ${data.vehicle.seatLayoutId}` : 'Chưa có sơ đồ ghế'}</p></div></article>
@@ -93,13 +100,17 @@ export function SeatsPage({ selection, onNavigate }: Navigation & { selection: S
   const data = state.data
   const statuses = new Map(data?.seats.map(s => [s.physicalSeatId, s]))
   const decks = [...new Set(data?.layout.seats.map(s => s.deck) ?? [])].sort((a, b) => a - b)
-  const blocked = state.error instanceof JourneyApiError && state.error.status === 409
+  // A rejection the user cannot retry away (409 not bookable/incomplete, 404, 400/422): show the reason
+  // and the way out instead of a seat map. Transient failures keep the map with every seat UNKNOWN.
+  const blocked = state.error !== null && describeError(state.error).action !== 'retry'
+  const soldOut = !!data && !state.stale && !state.error && data.seats.length > 0 && data.seats.every(s => s.status === 'UNAVAILABLE')
   return <section className="page-section"><JourneyProgress current={2} onNavigate={onNavigate}/><button className="back-link" onClick={() => onNavigate('details')}>← Quay lại</button>
     <div className="detail-heading"><div><span className="section-kicker">CHỈ XEM · KHÔNG GIỮ CHỖ</span><h1>Tình trạng ghế theo chặng</h1><p>Trạng thái được xác minh lại định kỳ và khi hết hạn giữ chỗ.</p></div></div>
-    {state.error && <ErrorPanel error={state.error} onRetry={state.refresh}/>}{state.loading && !data && <Loading text="Đang tải tình trạng ghế"/>}
-    {state.stale && <p className="state-message" role="status">Đang xác minh lại. Không có ghế nào được xem là trống từ dữ liệu cũ.</p>}
-    {blocked && <button className="outline-button" onClick={() => onNavigate('details')}>Về chi tiết chuyến</button>}
-    {data && <div className="seat-layout"><div className="panel"><div className="seat-legend"><span><i className="legend-free"/>Còn trống</span><span><i className="legend-taken"/>Không khả dụng</span><span><i className="legend-unknown"/>Chưa xác minh</span></div>
+    {state.error && <ErrorPanel error={state.error} onRetry={state.refresh} onNavigate={onNavigate} onDetails={() => onNavigate('details')}/>}{state.loading && !data && <Loading text="Đang tải tình trạng ghế"/>}
+    {state.stale && !blocked && <p className="state-message" role="status">Đang xác minh lại. Không có ghế nào được xem là trống từ dữ liệu cũ.</p>}
+    {soldOut && <div className="empty-state sold-out-state" role="status"><h2>Đoạn này đã hết ghế trống</h2><p>Tất cả ghế trên đoạn đã chọn đều không khả dụng. Hãy chọn chuyến khác hoặc đổi điểm đón, điểm trả.</p>
+      <div className="error-actions"><button className="outline-button" onClick={() => onNavigate('results')}>Chọn chuyến khác</button><button className="outline-button" onClick={() => onNavigate('home')}>Đổi điểm đón, điểm trả</button></div></div>}
+    {data && !blocked && <div className="seat-layout"><div className="panel"><div className="seat-legend"><span><i className="legend-free"/>Còn trống</span><span><i className="legend-taken"/>Không khả dụng</span><span><i className="legend-unknown"/>Chưa xác minh</span></div>
       {decks.map(deck => { const seats = data.layout.seats.filter(s => s.deck === deck); return <div className="bus-map" key={deck}><h2>Tầng {deck + 1}</h2><div className="seat-grid" style={{ gridTemplateColumns: `repeat(${Math.max(...seats.map(s => s.column)) + 1}, minmax(0, 1fr))` }}>{seats.map(seat => {
         const status = state.stale ? 'UNKNOWN' : statuses.get(seat.physicalSeatId)?.status ?? 'UNKNOWN'
         const label = status === 'FREE' ? 'Còn trống' : status === 'UNAVAILABLE' ? 'Không khả dụng' : 'Chưa xác minh'
