@@ -1,0 +1,12 @@
+{
+  "case": "TC-P07-07",
+  "label": "seat-c2-missing-AC",
+  "request": "GET http://127.0.0.1:8088/api/v1/trips/11111111-1111-4111-8111-111111111111/seat-availability?fromStopId=22222222-2222-4222-8222-222222222222&toStopId=99999999-9999-4999-8999-999999999999",
+  "status": 409,
+  "cacheControl": "no-store",
+  "body": {
+    "code": "ESSENTIAL_DATA_INCOMPLETE",
+    "message": "Chuyến xe thiếu dữ liệu bắt buộc",
+    "fieldErrors": []
+  }
+}

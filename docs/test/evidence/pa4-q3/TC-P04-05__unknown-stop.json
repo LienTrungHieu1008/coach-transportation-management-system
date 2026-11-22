@@ -1,0 +1,17 @@
+{
+  "case": "TC-P04-05",
+  "label": "unknown-stop",
+  "request": "GET http://127.0.0.1:8088/api/v1/trips?fromStopId=12345678-1234-4234-8234-123456789abc&toStopId=33333333-3333-4333-8333-333333333333&boardingDate=2026-11-21",
+  "status": 422,
+  "cacheControl": "no-store",
+  "body": {
+    "fieldErrors": [
+      {
+        "field": "fromStopId",
+        "message": "Select a served Stop."
+      }
+    ],
+    "code": "STOP_NOT_SERVED",
+    "message": "Select a served Stop."
+  }
+}

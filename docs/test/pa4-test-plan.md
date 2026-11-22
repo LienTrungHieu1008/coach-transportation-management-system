@@ -2,7 +2,7 @@
 
 **Task:** Q1 · **Người soạn:** Nguyễn Đức Hiếu (QA) · **Ngày soạn:** 17/11/2026 · **Phiên bản:** 0.1 (bản đầu, chưa được rà soát)
 
-**Trạng thái:** đây là **thiết kế kiểm thử**, chưa thực thi ca nào. Mọi cột Actual/Status trong [ma trận ca](pa4-test-cases.md) đang để trống theo quy ước "chưa chạy không đánh dấu pass". Kết quả thực thi thuộc task Q3 (19–20/11), báo cáo riêng.
+**Trạng thái:** kế hoạch này là phần thiết kế kiểm thử. Q3 đã thực thi đủ 30 ca ngày 20/11/2026 trên `pa4-v1.0` (`6e4f9aa`); kết quả xem [báo cáo kiểm thử](pa4-test-report.md).
 
 ---
 
@@ -16,8 +16,8 @@ Tài liệu đi kèm:
 |---|---|---|
 | Kế hoạch kiểm thử | `docs/test/pa4-test-plan.md` (file này) | Bản đầu 17/11 |
 | Ma trận ca kiểm thử | [`docs/test/pa4-test-cases.md`](pa4-test-cases.md) | Bản đầu 17/11, 30 ca |
-| Ca kiểm thử theo mẫu Moodle | `docs/test/PA4-Group11-test-cases.xlsx` | Đã điền phần thiết kế; Actual/Status/Tester/Date để trống |
-| Báo cáo kiểm thử | chưa tạo | Thuộc Q3, dùng `test-report template-v1.1.xlsx` |
+| Ca kiểm thử theo mẫu Moodle | `docs/test/PA4-Group11-test-cases.xlsx` | Đã điền thiết kế (Q1) và kết quả thực thi 20/11 (Q3) |
+| Báo cáo kiểm thử | [`docs/test/pa4-test-report.md`](pa4-test-report.md), `docs/test/PA4-Group11-test-report.xlsx` | Q3 20/11, theo `test-report template-v1.1.xlsx`; chưa retest |
 
 Mẫu gốc lấy từ gói tài liệu môn học `2627-CQ2024_4/PA4/` (`test-cases template-v1.1.xlsx`, `test-report template-v1.1.xlsx`). Gói này **chưa có mẫu test plan riêng**, nên bố cục dưới đây theo các mục kiểm thử trong bài giảng/IEEE 829. Nếu trợ giảng cung cấp mẫu test plan khác, chuyển nội dung sang đúng mẫu, không viết lại nội dung.
 

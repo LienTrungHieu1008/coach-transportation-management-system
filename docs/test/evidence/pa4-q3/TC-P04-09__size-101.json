@@ -1,0 +1,17 @@
+{
+  "case": "TC-P04-09",
+  "label": "size-101",
+  "request": "GET http://127.0.0.1:8088/api/v1/trips?fromStopId=22222222-2222-4222-8222-222222222222&toStopId=33333333-3333-4333-8333-333333333333&boardingDate=2026-11-21&size=101",
+  "status": 400,
+  "cacheControl": "no-store",
+  "body": {
+    "fieldErrors": [
+      {
+        "field": "size",
+        "message": "Supply one valid value within the allowed range."
+      }
+    ],
+    "code": "INVALID_REQUEST",
+    "message": "Request parameters are invalid."
+  }
+}

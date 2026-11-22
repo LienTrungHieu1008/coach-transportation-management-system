@@ -1,0 +1,17 @@
+{
+  "case": "TC-P04-09",
+  "label": "from-abc",
+  "request": "GET http://127.0.0.1:8088/api/v1/trips?fromStopId=abc&toStopId=33333333-3333-4333-8333-333333333333&boardingDate=2026-11-21",
+  "status": 400,
+  "cacheControl": "no-store",
+  "body": {
+    "fieldErrors": [
+      {
+        "field": "fromStopId",
+        "message": "Supply one valid value within the allowed range."
+      }
+    ],
+    "code": "INVALID_REQUEST",
+    "message": "Request parameters are invalid."
+  }
+}

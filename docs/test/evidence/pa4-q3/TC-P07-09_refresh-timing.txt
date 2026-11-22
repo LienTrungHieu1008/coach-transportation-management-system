@@ -1,0 +1,23 @@
+TC-P07-09 / TC-P07-03 — thời điểm bắt đầu các request GET /seat-availability (Trip ngày, B→C)
+Nguồn: performance.getEntriesByType('resource') trong tab trình duyệt, 20/11/2026 (UTC).
+Hold B2 expiresAt = 2026-11-20T02:26:58.184413Z
+
+02:25:27.375  mở màn ghế
+02:25:42.389  poll +15 s
+02:25:57.379  poll +15 s
+02:26:12.380  poll +15 s
+02:26:27.389  poll +15 s
+02:26:42.387  poll +15 s
+02:26:57.380  poll +15 s
+02:26:58.180  refresh tại expiry (response serverTime 02:26:58.187194Z, B2 = FREE, expiresAt null)
+02:27:12.380  poll
+02:27:27.380  poll
+02:27:42.380  poll
+02:27:57.380  poll
+02:28:12.377  poll
+02:28:27.382  poll  (sau đó tab bị ẩn: mở tab khác ở foreground)
+--- không có request nào khi tab ẩn (~34 s) ---
+02:29:01.406  quay lại tab (visible) -> gọi ngay
+
+Bước 3 (response cũ về sau response mới) không tái hiện được ở runtime vì không có cách làm chậm
+một request riêng lẻ mà không sửa source; xem remark trong báo cáo.
