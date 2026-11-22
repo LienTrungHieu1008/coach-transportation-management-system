@@ -1,10 +1,13 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import { availability, details, page, response, stops, trip } from './test/journeyFixtures'
 
 const fetcher = vi.fn()
 beforeEach(() => {
+  // Keep the browser date aligned with the fixed journey fixtures.
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date(details.serverTime))
   fetcher.mockReset().mockImplementation(async (input: string) => {
     const url = new URL(input, 'http://localhost')
     if (url.pathname === '/api/health') return response({ status: 'UP' })
@@ -15,6 +18,7 @@ beforeEach(() => {
   })
   vi.stubGlobal('fetch', fetcher)
 })
+afterEach(() => vi.useRealTimers())
 async function search() {
   await within(screen.getByLabelText('Điểm đón')).findByRole('option', { name: 'Demo Stop C' })
   fireEvent.change(screen.getByLabelText('Điểm đón'), { target: { value: stops[0].id } })
@@ -68,6 +72,78 @@ describe('public journey connected to API', () => {
     await screen.findByRole('alert')
     fireEvent.click(screen.getByRole('button', { name: 'Thử lại' }))
     await screen.findByRole('button', { name: /Xem chi tiết/ })
+  })
+  it('B01: shows a Vietnamese criteria error by code, not the server text, and returns to the form', async () => {
+    const base = fetcher.getMockImplementation()!
+    fetcher.mockImplementation(async (input: string) => input.includes('/trips?')
+      ? response({ code: 'INVALID_SEGMENT', message: 'Boarding Stop must precede alighting Stop.', fieldErrors: [{ field: 'toStopId', message: 'Boarding Stop must precede alighting Stop.' }] }, 422)
+      : base(input))
+    render(<App />); await search()
+    const alert = await screen.findByRole('alert')
+    expect(within(alert).getByRole('heading', { name: 'Đoạn đường chưa hợp lệ' })).toBeTruthy()
+    expect(alert.textContent).not.toContain('Boarding Stop')
+    expect(within(alert).queryByRole('button', { name: 'Thử lại' })).toBeNull()
+    fireEvent.click(within(alert).getByRole('button', { name: 'Sửa tiêu chí tìm kiếm' }))
+    expect(screen.getByLabelText<HTMLSelectElement>('Điểm đón').value).toBe(stops[0].id)
+    expect(screen.getByLabelText<HTMLSelectElement>('Điểm trả').value).toBe(stops[1].id)
+  })
+  it('B01: names invalid fields once in Vietnamese', async () => {
+    const base = fetcher.getMockImplementation()!
+    fetcher.mockImplementation(async (input: string) => input.includes('/trips?')
+      ? response({ code: 'INVALID_REQUEST', message: 'Request parameters are invalid.', fieldErrors: [{ field: 'boardingDate', message: 'Supply one valid value.' }, { field: 'boardingDate', message: 'Supply one valid value.' }] }, 400)
+      : base(input))
+    render(<App />); await search()
+    const alert = await screen.findByRole('alert')
+    expect(within(alert).getByText('Hãy kiểm tra lại ngày lên xe.')).toBeTruthy()
+    expect(alert.textContent).not.toMatch(/Request parameters|Supply one/)
+  })
+  it('B01: a missing Trip offers the way back to search', async () => {
+    const base = fetcher.getMockImplementation()!
+    fetcher.mockImplementation(async (input: string) => input.includes(`/trips/${trip.tripId}`)
+      ? response({ code: 'TRIP_NOT_FOUND', message: 'Không tìm thấy chuyến xe', fieldErrors: [] }, 404) : base(input))
+    render(<App />); await search()
+    fireEvent.click(await screen.findByRole('button', { name: /Xem chi tiết/ }))
+    const alert = await screen.findByRole('alert')
+    expect(within(alert).getByRole('heading', { name: 'Chuyến không còn khả dụng' })).toBeTruthy()
+    fireEvent.click(within(alert).getByRole('button', { name: 'Về trang tìm chuyến' }))
+    expect(screen.getByLabelText('Điểm đón')).toBeTruthy()
+  })
+  it('B02: a 409 on seats hides the seat map and offers details or another trip', async () => {
+    const base = fetcher.getMockImplementation()!
+    fetcher.mockImplementation(async (input: string) => input.includes('/seat-availability')
+      ? response({ code: 'TRIP_NOT_BOOKABLE', message: 'Chuyến xe đã đóng bán', fieldErrors: [] }, 409) : base(input))
+    render(<App />); await openDetails()
+    fireEvent.click(screen.getByRole('button', { name: /Xem tình trạng ghế/ }))
+    const alert = await screen.findByRole('alert')
+    expect(within(alert).getByRole('heading', { name: 'Chuyến không còn mở bán' })).toBeTruthy()
+    expect(screen.queryByLabelText(/^Ghế /)).toBeNull()
+    expect(screen.queryByText(/Đang xác minh lại/)).toBeNull()
+    expect(within(alert).queryByRole('button', { name: 'Thử lại' })).toBeNull()
+    expect(within(alert).getByRole('button', { name: 'Về chi tiết chuyến' })).toBeTruthy()
+    fireEvent.click(within(alert).getByRole('button', { name: 'Chọn chuyến khác' }))
+    await screen.findByRole('button', { name: /Xem chi tiết/ })
+  })
+  it('B03: all seats unavailable suggests another trip or segment', async () => {
+    const base = fetcher.getMockImplementation()!
+    const full = { ...availability, seats: availability.seats.map(s => ({ ...s, status: 'UNAVAILABLE' as const, expiresAt: null })) }
+    fetcher.mockImplementation(async (input: string) => input.includes('/seat-availability') ? response(full) : base(input))
+    render(<App />); await openDetails()
+    fireEvent.click(screen.getByRole('button', { name: /Xem tình trạng ghế/ }))
+    await screen.findByRole('heading', { name: 'Đoạn này đã hết ghế trống' })
+    expect(screen.queryByLabelText(/: Còn trống$/)).toBeNull()
+    expect(screen.getByRole('button', { name: 'Chọn chuyến khác' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Đổi điểm đón, điểm trả' }))
+    expect(screen.getByLabelText<HTMLSelectElement>('Điểm đón').value).toBe(stops[0].id)
+  })
+  it('keeps the retryable seat state for a transient 503', async () => {
+    const base = fetcher.getMockImplementation()!
+    fetcher.mockImplementation(async (input: string) => input.includes('/seat-availability')
+      ? response({ code: 'AVAILABILITY_UNAVAILABLE', message: 'Không thể xác minh', fieldErrors: [] }, 503) : base(input))
+    render(<App />); await openDetails()
+    fireEvent.click(screen.getByRole('button', { name: /Xem tình trạng ghế/ }))
+    const alert = await screen.findByRole('alert')
+    expect(within(alert).getByText('Chưa xác minh được tình trạng ghế. Hãy thử lại sau ít phút.')).toBeTruthy()
+    expect(within(alert).getByRole('button', { name: 'Thử lại' })).toBeTruthy()
   })
   it('preserves metadata and renders a second search page', async () => {
     const base = fetcher.getMockImplementation()!
