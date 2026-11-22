@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { isAbort, journeyApi } from '../../shared/api/journey'
+import { isAbort, journeyApi, JourneyApiError } from '../../shared/api/journey'
 import type { SeatAvailability, SegmentSelection } from '../../shared/api/journeyTypes'
 
 export type SeatSelection = SegmentSelection & { tripId: string }
@@ -42,7 +42,10 @@ export function useSeatAvailability(selection: SeatSelection | null) {
           .map(t => t - server - (performance.now() - started))
         const next = Math.min(...until)
         const stale = next <= 0
-        setState({ key, data, loading: false, stale, error: stale ? new Error('Dữ liệu ghế đã quá hạn xác minh. Hãy tải lại.') : null })
+        setState(old => ({
+          key, data: stale ? old.data : data, loading: false, stale,
+          error: stale ? new Error('Dữ liệu ghế đã quá hạn xác minh. Hãy tải lại.') : null,
+        }))
         if (!stale) boundary = setTimeout(() => {
           if (!active) return
           setState(old => ({ ...old, stale: true }))
@@ -51,7 +54,12 @@ export function useSeatAvailability(selection: SeatSelection | null) {
       } catch (error) {
         if (active && requestActive && !isAbort(error)) {
           clearTimeout(boundary)
-          setState(old => ({ ...old, loading: false, stale: true, error: error instanceof Error ? error : new Error('Không thể tải ghế. Hãy thử lại.') }))
+          // A 409 invalidates the cached map. Later failures have no map to restore.
+          const rejected = error instanceof JourneyApiError && error.status === 409
+          setState(old => ({
+            ...old, data: rejected ? null : old.data, loading: false, stale: true,
+            error: error instanceof Error ? error : new Error('Không thể tải ghế. Hãy thử lại.'),
+          }))
         }
       } finally {
         if (requestActive) {

@@ -1,10 +1,13 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 import { availability, details, page, response, stops, trip } from './test/journeyFixtures'
 
 const fetcher = vi.fn()
 beforeEach(() => {
+  // Keep the browser date aligned with the fixed journey fixtures.
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date(details.serverTime))
   fetcher.mockReset().mockImplementation(async (input: string) => {
     const url = new URL(input, 'http://localhost')
     if (url.pathname === '/api/health') return response({ status: 'UP' })
@@ -15,6 +18,7 @@ beforeEach(() => {
   })
   vi.stubGlobal('fetch', fetcher)
 })
+afterEach(() => vi.useRealTimers())
 async function search() {
   await within(screen.getByLabelText('Điểm đón')).findByRole('option', { name: 'Demo Stop C' })
   fireEvent.change(screen.getByLabelText('Điểm đón'), { target: { value: stops[0].id } })
