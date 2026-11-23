@@ -68,6 +68,13 @@ Các thay đổi backend/FE cùng chạm build, dependency, CI hoặc security n
 
 Khi bàn giao, gửi **link PR/commit + cách chạy + input/expected + điều còn thiếu**, không chỉ nhắn “xong rồi”. Người nhận thử lại và phản hồi cụ thể nếu sai contract.
 
+### Giao việc cho agent
+
+- Giao mã task/UC, nhánh hoặc đường dẫn worktree, phạm vi file được sửa, tiêu chí nghiệm thu và lệnh kiểm tra. Agent xác nhận thư mục, nhánh và `git status` trước khi chỉnh.
+- Dùng phạm vi file và reviewer ở bảng sở hữu phía trên. Khi cần thay đổi phần của người khác, báo owner đúng điểm ghép và thống nhất contract trước. Dùng OpenAPI cho FE–BE và TripQueryPort cho Trip–Booking.
+- Một nhánh cho một đầu ra cần review. Dùng worktree riêng khi chạy nhiều task cùng lúc trên một máy. Giữ các sửa đổi đang có và ghi rõ thay đổi, kết quả kiểm tra, phần chưa kiểm chứng khi bàn giao.
+- Mở Draft khi cần CI hoặc góp ý sớm. Góp ý và lỗi CI được sửa trên cùng nhánh để cập nhật PR hiện tại. Tách PR khi có đầu ra bàn giao độc lập hoặc cần lên trước để mở đường cho task khác.
+
 ### Làm song song, merge theo dependency
 
 1. **Bắt đầu cùng lúc:** Trung Hiếu I1; Phương chuẩn bị P1/P3; Huy unit tests/logic H1; Hoàng prototype/UI theo examples; Đức Hiếu Q1. Không phải cả nhóm ngồi chờ V2 mới bắt đầu.

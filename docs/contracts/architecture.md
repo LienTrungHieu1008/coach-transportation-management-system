@@ -16,11 +16,11 @@ Repo có `src/frontend/` (React/TypeScript/Vite/Tailwind), `src/backend/` (Java 
 
 Node 24.19.0 theo `.nvmrc`; Maven Wrapper 3.3.4 tải Maven 3.10.0. PostgreSQL major 16 thống nhất giữa `compose.yaml`, `compose.test.yaml` và CI. Các lựa chọn version ngoài Java là quyết định hiện thực của bộ khung, không phải tất cả đã được SAD chỉ định.
 
-Base package `vn.edu.team11.coach`. Dành tên module `identity`, `trip`, `booking`, `ai`; hiện có security/CSRF và prerequisite Account schema V2 thuộc `identity`. Không tạo entity/service/port nghiệp vụ rỗng để giả có đủ module. Theo SAD, Trip & Operations phục vụ truy vấn công khai P04/P05; ownership/quyền được hiện thực cùng UC tương ứng.
+Base package `vn.edu.team11.coach`. `identity` có security/CSRF và Account V2; `trip` phục vụ P04/P05; `booking` phục vụ P07 và dọn hold hết hạn. `ai` là module dự kiến. Không tạo entity/service/port nghiệp vụ rỗng để giả có đủ module. Ownership/quyền được hiện thực cùng UC tương ứng.
 
 Compose local dùng Nginx phục vụ FE và proxy `/api/` sang backend, chỉ công bố web trên loopback 8088. Vite dev proxy tới backend 8080; `compose.dev.yaml` mở port loopback riêng cho phát triển. Đây là HTTP local; chưa có deployment HTTPS.
 
-Flyway V1 tạo bảng Spring Session JDBC từ schema PostgreSQL upstream; session mặc định 30 phút, HttpOnly/SameSite=Lax. I1 thêm V2 `identity_account(account_id UUID)` làm prerequisite FK Booking, không seed account hoặc thêm login. Xem `docs/contracts/identity-account.md` cho constraints/fixture; còn chờ review/merge I1. Chưa có login hoặc logic timeout theo role Staff/Admin 15 phút. Health/CSRF là API kỹ thuật; chưa có UC nghiệp vụ, Gemini hoặc payment gateway. Xem `docs/development.md` và báo cáo kiểm chứng cho kết quả đã chạy.
+Flyway V1 tạo bảng Spring Session JDBC từ schema PostgreSQL upstream; session mặc định 30 phút, HttpOnly/SameSite=Lax. V2 tạo `identity_account(account_id UUID)` làm prerequisite FK Booking; fixture Account được nạp riêng khi demo/test. Xem [Account V2](identity-account.md). Chưa có login, timeout theo role Staff/Admin 15 phút, Gemini hoặc payment gateway. Xem [báo cáo Q3](../test/pa4-test-report.md) để biết UC và môi trường đã kiểm thử.
 
 ## Quy tắc module khi hiện thực
 
@@ -37,4 +37,4 @@ Trong backend, mỗi module có `api` (HTTP controller/DTO), `application` (đi�
 Frontend chia theo feature; API client, session/CSRF và ánh xạ lỗi dùng chung. Không lặp fetch/axios và xử lý xác thực ở từng màn hình; không thêm state library/UI library thứ hai khi chưa thống nhất.
 
 ## Thực thi tự động và review
-CI kiểm tra file đầu vào rồi chạy FE lint/typecheck/Vitest/build và BE Maven verify với PostgreSQL. Failsafe được gắn integration-test/verify; test nền tảng chưa thay thế test nghiệp vụ PA4. Khi hiện thực các module, bổ sung ArchUnit kiểm tra module/layer, lint hạn chế import ở FE và test nghiệp vụ; chưa có các kiểm tra đó thì review bằng tay, không ghi là đã tự động chặn. Workflow đã chạy thành công trên GitHub cho baseline `efa1d0f`, xem `docs/management/baseline-publication.md`; required gate trong branch protection chưa được cấu hình.
+CI kiểm tra file đầu vào rồi chạy FE lint/typecheck/Vitest/build và BE Maven verify với PostgreSQL. Failsafe chạy integration tests trong Maven verify. Ranh giới module và import cần được rà trong PR. `main` yêu cầu PR, approval và check `team11-ci-gate` qua [ruleset Protect main](https://github.com/LienTrungHieu1008/coach-transportation-management-system/rules/27619430).
