@@ -4,12 +4,16 @@
 
 ## Đọc theo task
 - Luôn đọc `docs/contracts/architecture.md`, `docs/contracts/data-and-api.md` và `CONTRIBUTING.md`.
-- Đọc `SETUP_CI.md`, `docs/development.md` và `docs/test/foundation-verification.md` khi sửa build/CI hoặc tiếp nhận bộ khung. Có FE/BE nền tảng tại `src/`, chưa có UC nghiệp vụ; không báo đã hoàn thành PA4 chỉ vì health/build chạy được.
+- Đọc `SETUP_CI.md` và `docs/development.md` khi sửa build, CI hoặc môi trường chạy. `docs/test/foundation-verification.md` ghi kết quả của bộ khung ban đầu.
 - Tài liệu gốc và bản trích theo trang nằm trong `docs/references.md`. Đọc `pa/PA4/SCOPE.md` khi lập phạm vi PA4; người giao việc đã chốt P04/P05/P07 ngày 12/11/2026, xác nhận cách chấm UC chính với TA vẫn chưa có.
 - Đọc UC/BR liên quan và implementation hiện có. Nếu chưa có tài liệu UC trong repo, yêu cầu người giao task cung cấp; không tự đoán nghiệp vụ.
-- Chạy `git status` trước khi sửa; giữ nguyên thay đổi của người khác.
+- Xác nhận worktree, nhánh và `git status --short --branch` trước khi sửa; giữ nguyên thay đổi của người khác.
+
+Luồng PA4 đã ghép P04/P05/P07 qua bốn GET chỉ đọc. Xem [báo cáo Q3](docs/test/pa4-test-report.md) để biết build đã kiểm thử và giới hạn. Health/build chỉ xác nhận môi trường và khả năng build; dùng kết quả theo từng ca để báo tiến độ kiểm thử chức năng.
 
 ## Trước khi code
+Với task PA4, đọc [phân công và phối hợp](pa/PA4/TASKS.md#giao-việc-cho-agent) để xác định nhánh, phạm vi file, owner và reviewer trước khi sửa.
+
 Nêu UC/task, tiêu chí nghiệm thu, file/module dự kiến sửa, contract bị ảnh hưởng và cách kiểm tra. Task thông thường tiếp tục trong phạm vi đã giao; nếu phát hiện cần đổi contract, báo người phụ trách trước khi sửa các bên liên quan.
 
 ## Giới hạn
@@ -27,7 +31,7 @@ Liệt kê thay đổi, contract/migration/dependency ảnh hưởng, lệnh th�
 
 ## Kiểm tra
 - Source: `src/frontend/`, `src/backend/`; không tạo scripts giả hoặc file giữ chỗ để vượt CI.
-- FE: Node theo `.nvmrc`; trong `src/frontend/`: `npm ci`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` (PowerShell có thể dùng `npm.cmd`).
+- FE: Node theo `src/frontend/.nvmrc`; trong `src/frontend/`: `npm ci`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` (PowerShell có thể dùng `npm.cmd`). Test dùng ngày giờ cố định trong fixture cần kiểm soát đồng hồ test để kết quả không phụ thuộc ngày chạy.
 - BE: Java 21 + PostgreSQL 16 test riêng; trong `src/backend/`: `./mvnw -B -ntp verify -DfailIfNoTests=true` (Windows: `.\mvnw.cmd -B -ntp verify -DfailIfNoTests=true`). Surefire chạy unit tests, Failsafe chạy `*IT`; không trỏ DB test vào dữ liệu thật.
 - Nếu host chưa có JDK: từ gốc repo dùng `docker compose -f compose.test.yaml run --rm backend-test`, sau đó `docker compose -f compose.test.yaml down`. Xem `docs/development.md` cho các chế độ local/dev và giới hạn session/auth hiện tại.
 - Thiếu source, wrapper, test, công cụ hoặc môi trường phải báo là chưa kiểm chứng/lỗi đầu vào; không dùng `--if-present`, skip test hoặc điều kiện bỏ job để có CI xanh.

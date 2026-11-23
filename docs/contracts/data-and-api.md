@@ -1,6 +1,6 @@
 # Contract dữ liệu, API và nghiệp vụ
 
-Nguồn: bộ guardrails/handoff và tài liệu gốc trong `docs/references.md`. Đã đọc các phần nền tảng liên quan bộ khung, chưa kiểm toán toàn bộ UC/BR. Repo có health/CSRF và test nền tảng; chưa có API nghiệp vụ hoặc test chứng minh các quy tắc Booking/Payment dưới đây.
+Nguồn: bộ guardrails/handoff và tài liệu gốc trong `docs/references.md`. PA4 đã có luồng đọc P04/P05/P07. Các quy tắc Booking/Payment dưới đây mô tả thiết kế cho cả các UC triển khai sau PA4.
 
 ## Baseline từ SAD/UC
 - ID nghiệp vụ UUID; khóa JSON camelCase.
@@ -20,7 +20,7 @@ Nguồn: bộ guardrails/handoff và tài liệu gốc trong `docs/references.md
 - Đối chiếu UC gốc cho mọi cutoff/trạng thái/nhánh lỗi; danh sách này không thay thế đặc tả.
 
 ## API mới: thống nhất trước khi hai phía code
-Người giao việc đã chốt UC-P04/P05/P07 và cấu trúc bốn GET công khai ngày 12/11/2026; ngày 14/11 leader duyệt toàn bộ [C1](../../pa/PA4/C1_DECISIONS.md) để giao việc. Dùng [OpenAPI 0.1](openapi.yaml), [quyết định API](pa4-api-decisions.md) và [TripQueryPort](trip-query-port.md) làm contract triển khai, không tự đổi DTO giữa các nhánh. Chưa ghi approval của các chủ module khi chưa có phản hồi. Runtime hiện chỉ có `GET /api/health` và `GET /api/session/csrf` (xem `docs/development.md`); chưa hiện thực API nghiệp vụ.
+Người giao việc đã chốt UC-P04/P05/P07 và cấu trúc bốn GET công khai ngày 12/11/2026. Ngày 14/11 leader duyệt toàn bộ [C1](../../pa/PA4/C1_DECISIONS.md) để giao việc. Dùng [OpenAPI 0.1](openapi.yaml), [quyết định API](pa4-api-decisions.md) và [TripQueryPort](trip-query-port.md) làm contract triển khai, không tự đổi DTO giữa các nhánh. Bốn GET đã được tích hợp trong bản demo PA4. Xem [báo cáo Q3](../test/pa4-test-report.md) để biết ca kiểm thử, phiên bản và kết quả.
 
 Mỗi endpoint phải có: UC/BR nguồn, method/path, role/ownership, request và validation, response ví dụ, status/lỗi, side effect, tính lặp an toàn/concurrency khi cần. Quy định rõ missing/null, enum, paging, thời gian và tiền.
 
