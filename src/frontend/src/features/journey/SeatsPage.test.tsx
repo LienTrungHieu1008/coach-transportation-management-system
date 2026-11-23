@@ -55,4 +55,11 @@ describe('B02: seat page after a non-retryable rejection', () => {
     expect(seatImages()).toHaveLength(2)
     expect(screen.queryByRole('alert')).toBeNull()
   })
+  it('does not show the stale-data notice when initial load fails before any map was loaded', async () => {
+    vi.spyOn(journeyApi, 'getSeatAvailability')
+      .mockRejectedValueOnce(new JourneyApiError('Chưa xác minh được ghế', 503, { code: 'AVAILABILITY_UNAVAILABLE', message: 'Unavailable', fieldErrors: [] }))
+    render(<SeatsPage selection={selection} onNavigate={() => {}} />); await flush()
+    expect(screen.getByRole('alert')).toBeTruthy()
+    expect(screen.queryByText(/Đang xác minh lại/)).toBeNull()
+  })
 })

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { isAbort, journeyApi, JourneyApiError } from '../../shared/api/journey'
+import { isAbort, journeyApi } from '../../shared/api/journey'
 import type { SeatAvailability, SegmentSelection } from '../../shared/api/journeyTypes'
+import { describeError } from './journeyErrors'
 
 export type SeatSelection = SegmentSelection & { tripId: string }
 type SeatState = { key: string; data: SeatAvailability | null; loading: boolean; error: Error | null; stale: boolean }
@@ -16,7 +17,6 @@ export function useSeatAvailability(selection: SeatSelection | null) {
     let controller: AbortController | null = null
     let boundary: ReturnType<typeof setTimeout> | undefined
     let timeout: ReturnType<typeof setTimeout> | undefined
-    setState({ ...blank(key), loading: true })
     async function refresh() {
       if (!active) return
       if (pending) { queued = true; return }
@@ -26,7 +26,7 @@ export function useSeatAvailability(selection: SeatSelection | null) {
       controller = new AbortController()
       // Keep the last error until this request settles: clearing it here would re-show the previous
       // seat map during every poll after a 409 (B02). Success clears it; a failure replaces it.
-      setState(old => ({ ...old, loading: true }))
+      setState(old => (old.key === key ? { ...old, loading: true } : { ...blank(key), loading: true }))
       timeout = setTimeout(() => {
         if (!active || !requestActive) return
         requestActive = false; pending = false; queued = false; controller?.abort()
@@ -54,11 +54,12 @@ export function useSeatAvailability(selection: SeatSelection | null) {
       } catch (error) {
         if (active && requestActive && !isAbort(error)) {
           clearTimeout(boundary)
-          // A 409 invalidates the cached map. Later failures have no map to restore.
-          const rejected = error instanceof JourneyApiError && error.status === 409
+          const normalized = error instanceof Error ? error : new Error('Không thể tải ghế. Hãy thử lại.')
+          // Any non-retryable rejection (409, 404, 400, 422) invalidates the cached map.
+          const rejected = describeError(normalized).action !== 'retry'
           setState(old => ({
             ...old, data: rejected ? null : old.data, loading: false, stale: true,
-            error: error instanceof Error ? error : new Error('Không thể tải ghế. Hãy thử lại.'),
+            error: normalized,
           }))
         }
       } finally {
@@ -83,6 +84,6 @@ export function useSeatAvailability(selection: SeatSelection | null) {
     }
   }, [key, tripId, fromStopId, toStopId])
   // Never render a preceding selection during the render before effect cleanup/setup.
-  const current = state.key === key ? state : blank(key)
+  const current = state.key === key ? state : { ...blank(key), loading: Boolean(key) }
   return { ...current, refresh: () => refreshRef.current() }
 }
