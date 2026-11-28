@@ -1,0 +1,15 @@
+package vn.edu.team11.coach.ai.domain;
+
+public enum FallbackReason {
+    TIMEOUT,
+    LIMIT_REACHED,
+    LOGIN_REQUIRED,
+    BOOKING_INACCESSIBLE,
+    NO_RESULT,
+    INVALID_CRITERIA,
+    UNSUPPORTED_LANGUAGE,
+    UNSAFE_INPUT,
+    ACTION_NOT_ALLOWED,
+    POLICY_UNKNOWN,
+    SERVICE_UNAVAILABLE
+}

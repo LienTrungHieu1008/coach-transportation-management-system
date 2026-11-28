@@ -171,11 +171,11 @@ export function HomePage({ criteria, setCriteria, catalogue, onSubmit, onRetry }
               <div className="hero-copy">
                 <p className="hero-kicker">
                   <span className="kicker-dot" aria-hidden="true" />
-                  TÌM CHUYẾN DỄ DÀNG · SẴN SÀNG VI VU
+                  Tìm chuyến dễ dàng · Sẵn sàng vi vu
                 </p>
                 <h1>
-                  Mỗi chuyến đi,<br />
-                  <em>một niềm vui</em>
+                  Tra cứu chuyến xe<br />
+                  <em>và giá chặng</em>
                 </h1>
                 <p className="hero-lead">
                   Chọn điểm đón, điểm trả và ngày lên xe để tìm hành trình phù hợp với bạn.
