@@ -31,4 +31,23 @@ describe('describeError', () => {
       .toEqual({ title: 'Không thể tải dữ liệu', message: 'Không thể tải dữ liệu chuyến xe.', action: 'retry' })
     expect(describeError(new Error('Dịch vụ phản hồi quá lâu. Hãy thử lại.')).message).toBe('Dịch vụ phản hồi quá lâu. Hãy thử lại.')
   })
+  it('maps browser TypeError network failures to a Vietnamese retry message', () => {
+    const view = describeError(new TypeError('Failed to fetch'))
+    expect(view).toEqual({ title: 'Không thể tải dữ liệu', message: 'Không thể kết nối dịch vụ. Hãy thử lại.', action: 'retry' })
+    expect(view.message).not.toContain('Failed to fetch')
+  })
+  it('omits unmapped technical field names in INVALID_REQUEST', () => {
+    const withUnknown = new JourneyApiError('bad', 400, {
+      code: 'INVALID_REQUEST',
+      message: 'bad',
+      fieldErrors: [{ field: 'unknownParam', message: 'bad' }, { field: 'boardingDate', message: 'bad' }],
+    })
+    expect(describeError(withUnknown).message).toBe('Hãy kiểm tra lại ngày lên xe.')
+    const onlyUnknown = new JourneyApiError('bad', 400, {
+      code: 'INVALID_REQUEST',
+      message: 'bad',
+      fieldErrors: [{ field: 'unknownParam', message: 'bad' }],
+    })
+    expect(describeError(onlyUnknown).message).toBe('Hãy kiểm tra lại thông tin tra cứu.')
+  })
 })

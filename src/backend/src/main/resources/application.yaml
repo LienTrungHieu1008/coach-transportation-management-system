@@ -43,3 +43,15 @@ management:
     health:
       show-details: never
       show-components: never
+
+ai:
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-2.5-flash}
+    base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
+    timeout: ${GEMINI_TIMEOUT:PT10S}
+  quota:
+    per-minute: ${AI_QUOTA_PER_MINUTE:5}
+    daily-demo: ${AI_QUOTA_DAILY_DEMO:200}
+  support:
+    contact-channel: ${SUPPORT_CONTACT_CHANNEL:}

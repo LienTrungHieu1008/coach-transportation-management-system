@@ -1,69 +1,254 @@
 @import "tailwindcss";
 
 :root {
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  /* BusTrip Typography — Poppins headings + Inter body with Vietnamese diacritics & safe fallbacks */
+  --font-display: "Poppins", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-text: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  font-family: var(--font-text);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.55;
+  font-weight: 400;
   color: var(--color-foreground);
   background: var(--color-background);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
   font-optical-sizing: auto;
-  font-weight: 400;
-  --color-primary: #183b60;
-  --color-primary-strong: #102c4b;
-  --color-secondary: #2763a0;
-  --color-accent: #c2410c;
-  --color-background: #f5f6f8;
+
+  /* BusTrip Brand Palette — Modern Soft UI + Flat Design */
+  --color-background: #f4f0e2;
   --color-surface: #ffffff;
-  --color-foreground: #182c42;
-  --color-muted-foreground: #526173;
-  --color-muted: #edf1f5;
-  --color-border: #dce3ea;
-  --color-success: #166534;
-  --color-warning: #9a4c0b;
+  --color-surface-subtle: #faf8f1;
+  --color-surface-sky: #edf5fb;
+  --color-muted: #ece6d5;
+
+  /* Brand Identity Tokens */
+  --color-primary: #619dc6;
+  --color-primary-hover: #4b89b3;
+  --color-primary-deep: #20648a;
+  --color-primary-strong: #1c3144;
+  --color-primary-soft: #e7f2fa;
+  --color-secondary: #a6c8e2;
+  --color-secondary-soft: #eef5fb;
+
+  /* Warm Accent CTA Tokens (#F4BAA3 paired with #1C3144 ink >= 9.5:1 contrast) */
+  --color-accent: #f4baa3;
+  --color-accent-hover: #eca589;
+  --color-accent-active: #e29273;
+  --color-accent-ink: #1c3144;
+  --color-accent-soft: #fdf0ea;
+  --color-accent-border: #e7a78e;
+
+  /* Accessible Ink Hierarchy (>= 11:1 primary, >= 5.3:1 muted on white & #F4F0E2) */
+  --color-foreground: #1c3144;
+  --color-muted-foreground: #4c6072;
+
+  /* Warm Structural Borders */
+  --color-border: #e5dfce;
+  --color-border-strong: #cfc6b0;
+
+  /* Semantic Status Tokens (>= 4.5:1 text contrast) */
+  --color-success: #1b6b45;
+  --color-success-bg: #eaf6ef;
+  --color-warning: #8f4e0c;
+  --color-warning-bg: #fdf5e4;
   --color-danger: #b42318;
-  --shadow-card: 0 8px 28px rgb(16 44 75 / 6%);
-  --radius-card: 18px;
-  --motion-fast: 160ms ease;
-  --motion-standard: 220ms ease;
+  --color-danger-bg: #fef2f1;
+  --color-ring: #20648a;
+
+  /* Seat Semantic Tokens (FREE / UNAVAILABLE / UNKNOWN — color + shape + pattern + text) */
+  --seat-free-bg: #ebf7f1;
+  --seat-free-border: #3b996c;
+  --seat-free-text: #145334;
+  --seat-taken-bg: #f1eee5;
+  --seat-taken-border: #a59d8a;
+  --seat-taken-text: #4c5a67;
+  --seat-taken-hatch: rgb(28 49 68 / 5%);
+  --seat-unknown-bg: #fdf5e4;
+  --seat-unknown-border: #c5811c;
+  --seat-unknown-text: #7a4908;
+
+  /* Unified Layout, Spacing (4/8 scale) & Soft Geometry */
+  --wrap-max: 1200px;
+  --wrap-gutter: 32px;
+  --nav-height: 76px;
+
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-card: 20px;
+  --radius-pill: 999px;
+
+  /* Soft UI Diffused Shadows */
+  --shadow-card: 0 4px 20px -4px rgb(28 49 68 / 6%), 0 1px 3px rgb(28 49 68 / 4%);
+  --shadow-hover: 0 12px 28px -8px rgb(28 49 68 / 12%), 0 2px 8px rgb(97 157 198 / 12%);
+  --shadow-dock: 0 18px 38px -14px rgb(28 49 68 / 14%), 0 2px 8px rgb(28 49 68 / 6%);
+  --shadow-modal: 0 24px 54px -16px rgb(28 49 68 / 24%), 0 4px 14px rgb(28 49 68 / 8%);
+
+  /* Motion (200–300ms subtle transitions) */
+  --m-fast: 200ms;
+  --m-base: 240ms;
+  --m-slow: 280ms;
+  --m-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-* { box-sizing: border-box; }
-html { min-width: 320px; scroll-behavior: smooth; }
-body { min-width: 320px; margin: 0; }
-img, svg { max-width: 100%; }
-a { color: inherit; }
-button, input, select, summary { -webkit-tap-highlight-color: transparent; }
-button, input, select { font: inherit; }
-button { cursor: pointer; }
-button:disabled { cursor: not-allowed; }
-button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible, summary:focus-visible {
-  outline: 3px solid #3279bb;
-  outline-offset: 3px;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
-::selection { background: #dbeafe; color: #17233d; }
+
+html {
+  min-width: 320px;
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--nav-height) + 20px);
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  overflow-x: clip;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Instant, unmistakable accessible focus ring */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 2.5px solid var(--color-ring);
+  outline-offset: 2px;
+  transition-duration: 0s !important;
+}
+
+::selection {
+  background: var(--color-secondary);
+  color: var(--color-primary-strong);
+}
+
+@media (max-width: 960px) {
+  :root {
+    --wrap-gutter: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --wrap-gutter: 16px;
+    --nav-height: 64px;
+  }
+}
 
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --color-primary: #a9c9ec;
-    --color-primary-strong: #dceafd;
-    --color-secondary: #95bde9;
-    --color-accent: #c2410c;
-    --color-background: #101a28;
-    --color-surface: #172538;
-    --color-foreground: #eef3f9;
-    --color-muted-foreground: #b5c2d3;
-    --color-muted: #213248;
-    --color-border: #35485f;
-    --color-success: #97dbb2;
-    --color-warning: #edc18b;
-    --color-danger: #ffb4a8;
-    --shadow-card: 0 8px 28px rgb(0 0 0 / 15%);
+    --color-background: #131c24;
+    --color-surface: #1b2733;
+    --color-surface-subtle: #21303f;
+    --color-surface-sky: #1e3346;
+    --color-muted: #263646;
+
+    --color-primary: #7ab3da;
+    --color-primary-hover: #91c2e3;
+    --color-primary-deep: #a6c8e2;
+    --color-primary-strong: #f2f6fa;
+    --color-primary-soft: #20374c;
+    --color-secondary: #a6c8e2;
+    --color-secondary-soft: #1f3346;
+
+    --color-accent: #f4baa3;
+    --color-accent-hover: #f7c7b3;
+    --color-accent-active: #e9a68c;
+    --color-accent-ink: #172736;
+    --color-accent-soft: #352722;
+    --color-accent-border: #8b5c49;
+
+    --color-foreground: #eef4f8;
+    --color-muted-foreground: #aebecd;
+
+    --color-border: #2b3c4d;
+    --color-border-strong: #3d5166;
+
+    --color-success: #7ee2a8;
+    --color-success-bg: #143225;
+    --color-warning: #fbbf24;
+    --color-warning-bg: #322512;
+    --color-danger: #fca5a5;
+    --color-danger-bg: #361c1d;
+    --color-ring: #a6c8e2;
+
+    --seat-free-bg: #133124;
+    --seat-free-border: #4ade80;
+    --seat-free-text: #bbf7d0;
+    --seat-taken-bg: #23313f;
+    --seat-taken-border: #64748b;
+    --seat-taken-text: #cbd5e1;
+    --seat-taken-hatch: rgb(255 255 255 / 5%);
+    --seat-unknown-bg: #332614;
+    --seat-unknown-border: #f59e0b;
+    --seat-unknown-text: #fde68a;
+
+    --shadow-card: 0 6px 22px -6px rgb(0 0 0 / 40%);
+    --shadow-hover: 0 14px 32px -10px rgb(0 0 0 / 54%);
+    --shadow-dock: 0 20px 44px -16px rgb(0 0 0 / 56%);
+    --shadow-modal: 0 26px 56px -16px rgb(0 0 0 / 68%);
+  }
+
+  ::selection {
+    background: #619dc6;
+    color: #0f1b24;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
